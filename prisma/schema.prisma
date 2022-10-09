@@ -2,14 +2,51 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+    provider             = "mysql"
+    url                  = env("DATABASE_URL")
+    referentialIntegrity = "prisma"
 }
 
-model Example {
-    id String @id @default(cuid())
+model Invoice {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    name      String
+    dueDate   DateTime
+    currency  String
+
+    orders   OrderItem[]
+    customer Customer?
+}
+
+model OrderItem {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    amount    Int
+    quantity  Int      @default(1)
+
+    invoice   Invoice @relation(fields: [invoiceId], references: [id])
+    invoiceId String
+}
+
+model Customer {
+    id        String   @id @default(cuid())
+    name      String
+    address   String
+    createdAt DateTime @default(now())
+    invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+    invoiceId String   @unique
+    contact   Contact?
+}
+
+model Contact {
+    id          String   @id @default(cuid())
+    email       String
+    phoneNumber Int
+    customer    Customer @relation(fields: [customerId], references: [id])
+    customerId  String   @unique
 }
