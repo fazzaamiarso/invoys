@@ -12,12 +12,21 @@ datasource db {
     referentialIntegrity = "prisma"
 }
 
+enum InvoiceStatus {
+    PENDING
+    PAID
+    REJECTED
+    OVERDUE
+}
+
 model Invoice {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
+    id        String        @id @default(cuid())
+    createdAt DateTime      @default(now())
     name      String
     dueDate   DateTime
+    notes     String?       @db.Text
     currency  String
+    status    InvoiceStatus @default(PENDING)
 
     orders   OrderItem[]
     customer Customer?
@@ -26,6 +35,7 @@ model Invoice {
 model OrderItem {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
+    name      String
     amount    Int
     quantity  Int      @default(1)
 

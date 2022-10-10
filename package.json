@@ -17,6 +17,7 @@
     "@heroicons/react": "^2.0.12",
     "@prisma/client": "^4.4.0",
     "@tanstack/react-query": "^4.10.0",
+    "@tanstack/react-table": "^8.5.15",
     "@trpc/client": "10.0.0-proxy-beta.15",
     "@trpc/next": "10.0.0-proxy-beta.15",
     "@trpc/react": "10.0.0-proxy-beta.15",
