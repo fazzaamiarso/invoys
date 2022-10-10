@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { Dialog } from '@headlessui/react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import {
   ColumnDef,
   createColumnHelper,
@@ -13,6 +13,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { OrderItem } from '@prisma/client';
+import { trpc } from '@utils/trpc';
+import clsx from 'clsx';
 
 const Home: NextPage = () => {
   const [open, setOpen] = useState(true);
@@ -51,7 +53,8 @@ const Home: NextPage = () => {
 export default Home;
 
 declare module '@tanstack/react-table' {
-  interface TableMeta {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface TableMeta<TData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
     removeRow: (rowIndex: number) => void;
   }
@@ -111,12 +114,19 @@ const columns = [
   }),
 ];
 
+type FieldValues = {
+  name: string;
+  dueDate: Date;
+  notes?: string;
+  currency: string;
+};
+
 type DrawerProps = {
   onClose: () => void;
   isOpen: boolean;
 };
 const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm<FieldValues>();
 
   const [data, setData] = useState<OrderItem[]>([
     {
@@ -128,6 +138,13 @@ const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
       invoiceId: '1',
     },
   ]);
+
+  const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
+    // const mutation = trpc.invoice.create.useMutation();
+    // mutation.mutate({ ...fieldValues, recipientId: '1', orders: data });
+    console.table(fieldValues);
+    console.log(data);
+  };
 
   const totalAmount = data.reduce(
     (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
@@ -155,6 +172,7 @@ const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
         );
       },
       removeRow: rowIndex => {
+        if (data.length <= 1) return;
         setData(old => old.filter((_, index) => index !== rowIndex));
       },
     },
@@ -162,7 +180,7 @@ const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-      <Dialog.Panel className="fixed shadow-sm right-0 inset-y-0 bg-white">
+      <Dialog.Panel className="fixed shadow-sm right-0 inset-y-0 bg-white overflow-y-auto">
         <div className="relative p-6 w-[500px]">
           <div>
             <button className="h-6 aspect-square" onClick={onClose}>
@@ -172,7 +190,7 @@ const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
           <Dialog.Title className="font-bold text-xl">
             Create Invoice
           </Dialog.Title>
-          <form onSubmit={handleSubmit(() => '')} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <div className="flex flex-col gap-2">
               <label htmlFor="name">Project/description</label>
               <input type="text" {...register('name')} id="name" />
@@ -193,14 +211,16 @@ const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
             <div className="w-full">
               <table className="w-full">
                 <thead className="">
-                  {table.getFlatHeaders().map(header => (
-                    <th key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))}
+                  <tr>
+                    {table.getFlatHeaders().map(header => (
+                      <th key={header.id}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {table.getRowModel().rows.map(row => {
