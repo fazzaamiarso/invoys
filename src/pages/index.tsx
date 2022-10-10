@@ -1,8 +1,14 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { Dialog } from '@headlessui/react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const Home: NextPage = () => {
+  const [open, setOpen] = useState(true);
+
   return (
     <>
       <Head>
@@ -13,6 +19,12 @@ const Home: NextPage = () => {
         <NavigationPane />
         <section className="basis-[85%]">
           <header className="flex w-full px-12 py-4 border-b-2 border-b-gray-400">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="rounded-md px-4 py-1 bg-pink-500 text-white font-semibold flex items-center justify-center gap-2">
+              <PlusIcon className="h-5 aspect-square" /> New Invoice
+            </button>
             <div className="ml-auto flex items-center gap-4">
               <div className="font-semibold">Gojo Satoru</div>
               <div className="aspect-square w-10 rounded-full bg-pink-500" />
@@ -22,12 +34,59 @@ const Home: NextPage = () => {
             <h2 className="text-3xl font-bold">Dashboard</h2>
           </div>
         </section>
+        <NewInvoiceDrawer onClose={() => setOpen(false)} isOpen={open} />
       </main>
     </>
   );
 };
 
 export default Home;
+
+type DrawerProps = {
+  onClose: () => void;
+  isOpen: boolean;
+};
+const NewInvoiceDrawer = ({ onClose, isOpen }: DrawerProps) => {
+  const { register, handleSubmit } = useForm();
+  return (
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      <Dialog.Panel className="fixed shadow-sm right-0 inset-y-0 bg-white">
+        <div className="relative p-6 w-96">
+          <div>
+            <button className="h-6 aspect-square" onClick={onClose}>
+              <XMarkIcon />
+            </button>
+          </div>
+          <Dialog.Title className="font-bold text-xl">
+            Create Invoice
+          </Dialog.Title>
+          <form onSubmit={handleSubmit(() => '')} className="space-y-6">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="name">Order Name</label>
+              <input type="text" {...register('name')} id="name" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="currency">Currency</label>
+              <input type="text" {...register('currency')} id="currency" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="customer">Recipient</label>
+              <input type="text" {...register('customer')} id="customer" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="dueDate">Due Date</label>
+              <input type="date" {...register('dueDate')} id="dueDate" />
+            </div>
+            <button className="rounded-md px-4 py-2 bg-pink-500 text-white font-semibold flex items-center justify-center">
+              Create Invoice
+            </button>
+          </form>
+        </div>
+      </Dialog.Panel>
+    </Dialog>
+  );
+};
 
 const navigations = [
   { name: 'Dashboard', href: '/' },
