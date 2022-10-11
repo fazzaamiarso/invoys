@@ -17,13 +17,13 @@ const Drawer = ({
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
       <Dialog.Panel className="fixed shadow-sm right-0 inset-y-0 bg-white overflow-y-auto">
-        <div className="relative p-6 w-[500px]">
-          <div>
+        <div className="relative p-6 w-[500px] space-y-6">
+          <div className="flex items-center justify-between">
+            <Dialog.Title className="font-bold text-lg">{title}</Dialog.Title>
             <button className="h-6 aspect-square" onClick={onClose}>
               <XMarkIcon />
             </button>
           </div>
-          <Dialog.Title className="font-bold text-xl">{title}</Dialog.Title>
           {children}
         </div>
       </Dialog.Panel>

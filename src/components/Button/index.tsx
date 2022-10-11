@@ -13,14 +13,17 @@ type ButtonProps = PropsWithChildren<{
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'secondary' | 'outline';
   Icon?: HeroIconProps;
+  disabled?: boolean;
+  onClick?: () => void;
 }>;
 
-const Button = ({ type, children, variant, Icon }: ButtonProps) => {
+const Button = ({ type, children, variant, Icon, onClick }: ButtonProps) => {
   return (
     <button
       type={type ?? 'button'}
+      onClick={onClick}
       className={clsx(
-        'px-4 py-2 rounded-md',
+        'px-4 py-2 rounded-md font-semibold',
         Icon ? 'flex items-center gap-2' : '',
         variant ? v[variant] : v.primary
       )}>

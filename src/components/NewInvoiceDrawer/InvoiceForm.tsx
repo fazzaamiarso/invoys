@@ -1,3 +1,6 @@
+import Button from '@components/Button';
+import TextArea from '@components/Form/TextArea';
+import TextInput from '@components/Form/TextInput';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import { OrderItem } from '@prisma/client';
 import {
@@ -115,10 +118,8 @@ const InvoiceForm = () => {
           })
         );
       },
-      removeRow: rowIndex => {
-        if (data.length <= 1) return;
-        setData(old => old.filter((_, index) => index !== rowIndex));
-      },
+      removeRow: rowIndex =>
+        setData(old => old.filter((_, index) => index !== rowIndex)),
     },
   });
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
@@ -135,18 +136,9 @@ const InvoiceForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <label htmlFor="name">Project/description</label>
-        <input type="text" {...register('name')} id="name" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="customer">Recipient</label>
-        <input type="text" {...register('customer')} id="customer" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="dueDate">Due Date</label>
-        <input type="date" {...register('dueDate')} id="dueDate" />
-      </div>
+      <TextInput name="customer" label="Recipient" register={register} />
+      <TextInput name="name" label="Project/Description" register={register} />
+      <TextInput name="dueDate" label="Due on" register={register} />
       {/* TABLE */}
       <div className="w-full">
         <table className="w-full">
@@ -204,17 +196,12 @@ const InvoiceForm = () => {
           <div>Total {totalAmount}</div>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="notes">Additional Notes</label>
-        <textarea {...register('notes')} id="notes" />
-      </div>
+      <TextArea name="notes" label="Additional notes" register={register} />
       <div className="flex items-center justify-between w-full">
         <button type="button" className="text-sm">
           PREVIEW
         </button>
-        <button className="rounded-md px-4 py-2 bg-pink-500 text-white font-semibold flex items-center justify-center">
-          Create Invoice
-        </button>
+        <Button type="submit">Create Invoice</Button>
       </div>
     </form>
   );

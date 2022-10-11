@@ -45,10 +45,10 @@ model OrderItem {
 
 model Customer {
     id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
     name        String
-    address     String
     email       String
     phoneNumber Int
-    createdAt   DateTime  @default(now())
+    address     String?
     invoices    Invoice[]
 }
