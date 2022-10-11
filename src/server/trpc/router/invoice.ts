@@ -14,7 +14,6 @@ export const invoiceRouter = t.router({
         name: z.string(),
         dueDate: z.string(),
         notes: z.string().optional(),
-        currency: z.string(),
         recipientId: z.string(),
         orders: z.array(orderItemSchema),
       })
@@ -25,7 +24,6 @@ export const invoiceRouter = t.router({
           name: input.name,
           dueDate: new Date(input.dueDate),
           notes: input.notes,
-          currency: input.currency,
           customer: { connect: { id: input.recipientId } },
           orders: { createMany: { data: input.orders } },
         },

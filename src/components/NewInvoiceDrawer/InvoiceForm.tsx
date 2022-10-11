@@ -66,8 +66,9 @@ const columns = [
       <button
         type="button"
         onClick={() => cell.table.options.meta?.removeRow(cell.row.index)}
-        disabled={cell.table.getRowModel().rows.length <= 1}>
-        <TrashIcon className="disabled:text-gray-400 h-4" />
+        disabled={cell.table.getRowModel().rows.length <= 1}
+        className="disabled:text-gray-400 ">
+        <TrashIcon className="h-4" />
       </button>
     ),
   }),
@@ -137,10 +138,6 @@ const InvoiceForm = () => {
       <div className="flex flex-col gap-2">
         <label htmlFor="name">Project/description</label>
         <input type="text" {...register('name')} id="name" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="currency">Currency</label>
-        <input type="text" {...register('currency')} id="currency" />
       </div>
       <div className="flex flex-col gap-2">
         <label htmlFor="customer">Recipient</label>

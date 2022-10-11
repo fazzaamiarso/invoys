@@ -25,11 +25,11 @@ model Invoice {
     name      String
     dueDate   DateTime
     notes     String?       @db.Text
-    currency  String
     status    InvoiceStatus @default(PENDING)
 
-    orders   OrderItem[]
-    customer Customer?
+    orders     OrderItem[]
+    customer   Customer    @relation(fields: [customerId], references: [id])
+    customerId String
 }
 
 model OrderItem {
@@ -44,19 +44,11 @@ model OrderItem {
 }
 
 model Customer {
-    id        String   @id @default(cuid())
-    name      String
-    address   String
-    createdAt DateTime @default(now())
-    invoice   Invoice  @relation(fields: [invoiceId], references: [id])
-    invoiceId String   @unique
-    contact   Contact?
-}
-
-model Contact {
-    id          String   @id @default(cuid())
+    id          String    @id @default(cuid())
+    name        String
+    address     String
     email       String
     phoneNumber Int
-    customer    Customer @relation(fields: [customerId], references: [id])
-    customerId  String   @unique
+    createdAt   DateTime  @default(now())
+    invoices    Invoice[]
 }
