@@ -7,8 +7,8 @@ import NewInvoiceDrawer, { invoiceDrawerStateAtom } from './NewInvoiceDrawer';
 const navigations = [
   { name: 'Dashboard', href: '/' },
   { name: 'Clients', href: '/clients' },
-  { name: 'Invoices', href: '/invoices' },
-  { name: 'Settings', href: '/settings' },
+  { name: 'Invoices', href: '/#invoices' },
+  { name: 'Settings', href: '/#settings' },
 ];
 
 const NavigationPane = () => {
@@ -20,7 +20,7 @@ const NavigationPane = () => {
           {navigations.map(nav => {
             return (
               <li key={nav.name} className="">
-                <Link href="#" className="hover:text-blue-500">
+                <Link href={nav.href} className="hover:text-blue-500">
                   {nav.name}
                 </Link>
               </li>

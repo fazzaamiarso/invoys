@@ -1,13 +1,19 @@
 import Layout from '@components/Layout';
+import NewClientDrawer from '@components/NewClientDrawer';
 import { NextPage } from 'next';
+import { useState } from 'react';
 
 const ClientsIndex: NextPage = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   return (
     <Layout>
       <div>
         <div>
           <h2>Clients</h2>
-          <button type="button" className="p-3 rounded-md bg-emerald-400">
+          <button
+            type="button"
+            className="p-3 rounded-md bg-emerald-400"
+            onClick={() => setIsDrawerOpen(true)}>
             + Add Client
           </button>
         </div>
@@ -22,6 +28,10 @@ const ClientsIndex: NextPage = () => {
             </li>
           </ul>
         </section>
+        <NewClientDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+        />
       </div>
     </Layout>
   );
