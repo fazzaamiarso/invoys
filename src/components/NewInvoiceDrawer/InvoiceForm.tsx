@@ -1,8 +1,9 @@
 import Button from '@components/Button';
 import TextArea from '@components/Form/TextArea';
 import TextInput from '@components/Form/TextInput';
-import { TrashIcon } from '@heroicons/react/24/solid';
-import { OrderItem } from '@prisma/client';
+import { Combobox } from '@headlessui/react';
+import { ChevronUpDownIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { Customer, OrderItem } from '@prisma/client';
 import {
   ColumnDef,
   createColumnHelper,
@@ -10,7 +11,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { trpc } from '@utils/trpc';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
 declare module '@tanstack/react-table' {
@@ -88,6 +90,9 @@ type FieldValues = {
 const InvoiceForm = () => {
   const { register, handleSubmit } = useForm<FieldValues>();
 
+  const [selectedRecipient, setSelectedRecipient] = useState<Customer | null>(
+    null
+  );
   const [data, setData] = useState<OrderItem[]>([
     {
       id: '1',
@@ -136,6 +141,10 @@ const InvoiceForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <RecipientCombobox
+        selectedRecipient={selectedRecipient}
+        setSelectedRecipient={setSelectedRecipient}
+      />
       <TextInput name="customer" label="Recipient" register={register} />
       <TextInput name="name" label="Project/Description" register={register} />
       <TextInput name="dueDate" label="Due on" register={register} />
@@ -208,3 +217,79 @@ const InvoiceForm = () => {
 };
 
 export default InvoiceForm;
+
+type ComboboxProps = {
+  selectedRecipient: Customer | null;
+  setSelectedRecipient: Dispatch<SetStateAction<Customer | null>>;
+};
+const RecipientCombobox = ({
+  selectedRecipient,
+  setSelectedRecipient,
+}: ComboboxProps) => {
+  const [query, setQuery] = useState('');
+  const { data: initialClients } = trpc.customer.getAll.useQuery(
+    { limit: 10 },
+    { refetchOnWindowFocus: false }
+  );
+  // const { data: searchedClients } = trpc.customer.getAll.useQuery(
+  //   {
+  //     limit: 10,
+  //     query,
+  //   },
+  //   { refetchOnWindowFocus: false }
+  // );
+
+  useEffect(() => {
+    if (initialClients && initialClients[0]) {
+      setSelectedRecipient(initialClients[0]);
+    }
+  }, [initialClients, setSelectedRecipient]);
+
+  return (
+    <div>
+      <div>
+        <span>Recipient Name :</span> {selectedRecipient?.name}
+      </div>
+      <Combobox
+        as="div"
+        className="relative"
+        value={selectedRecipient ?? (initialClients && initialClients[0]) ?? {}}
+        onChange={setSelectedRecipient}>
+        <div className="relative">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="rec-email">Recipient Email</label>
+            <Combobox.Input
+              type="text"
+              id="rec-email"
+              onChange={event => setQuery(event.target.value)}
+              displayValue={val => selectedRecipient?.email || ''}
+            />
+          </div>
+          <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center pr-2">
+            <ChevronUpDownIcon
+              className="h-5 w-5 text-gray-400"
+              aria-hidden="true"
+            />
+          </Combobox.Button>
+        </div>
+        <Combobox.Options className="absolute w-full left-0 bottom-0 translate-y-[102%] bg-gray-200 p-2">
+          {initialClients &&
+            query === '' &&
+            initialClients.map(c => {
+              return (
+                <Combobox.Option key={c.id} value={c}>
+                  {c.email} - {c.name}
+                </Combobox.Option>
+              );
+            })}
+          {/* {data &&
+            data.map(person => (
+              <Combobox.Option key={person} value={person}>
+                {person}
+              </Combobox.Option>
+            ))} */}
+        </Combobox.Options>
+      </Combobox>
+    </div>
+  );
+};

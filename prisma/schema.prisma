@@ -3,7 +3,7 @@
 
 generator client {
     provider        = "prisma-client-js"
-    previewFeatures = ["referentialIntegrity"]
+    previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -47,8 +47,11 @@ model Customer {
     id          String    @id @default(cuid())
     createdAt   DateTime  @default(now())
     name        String
-    email       String
+    email       String    @unique
     phoneNumber Int
     address     String?
     invoices    Invoice[]
+
+    @@fulltext([email])
+    @@fulltext([email, name])
 }
