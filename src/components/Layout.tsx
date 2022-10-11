@@ -1,7 +1,8 @@
 import { PlusIcon } from '@heroicons/react/24/solid';
+import { useAtom } from 'jotai';
 import Link from 'next/link';
-import { ReactNode, useState } from 'react';
-import NewInvoiceDrawer from './NewInvoiceDrawer';
+import { ReactNode } from 'react';
+import NewInvoiceDrawer, { invoiceDrawerStateAtom } from './NewInvoiceDrawer';
 
 const navigations = [
   { name: 'Dashboard', href: '/' },
@@ -32,7 +33,8 @@ const NavigationPane = () => {
 };
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const [open, setOpen] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setDrawerOpen] = useAtom(invoiceDrawerStateAtom);
 
   return (
     <main className="w-screen min-h-screen flex">
@@ -41,7 +43,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <header className="flex w-full px-12 py-4 border-b-2 border-b-gray-400">
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => setDrawerOpen(true)}
             className="rounded-md px-4 py-1 bg-pink-500 text-white font-semibold flex items-center justify-center gap-2">
             <PlusIcon className="h-5 aspect-square" /> New Invoice
           </button>
@@ -52,7 +54,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         </header>
         {children}
       </section>
-      <NewInvoiceDrawer onClose={() => setOpen(false)} isOpen={open} />
+      <NewInvoiceDrawer />
     </main>
   );
 };
