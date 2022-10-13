@@ -31,14 +31,14 @@
   @apply w-14;
 }
 
-.order-table thead td:nth-child(2) {
+.order-table tbody td:nth-child(2) {
   @apply w-14;
 }
 .order-table thead th:nth-child(3) {
   @apply w-24;
 }
 
-.order-table thead td:nth-child(3) {
+.order-table tbody td:nth-child(3) {
   @apply w-24;
 }
 
@@ -46,6 +46,6 @@
   @apply w-24;
 }
 
-.order-table thead td:nth-child(4) {
-  @apply w-24;
+.order-table tbody td:nth-child(4) {
+  @apply w-24 ;
 }

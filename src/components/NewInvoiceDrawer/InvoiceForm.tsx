@@ -69,6 +69,7 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         name="name"
         label="Project / Description"
         register={register}
+        required
       />
       <div className="flex gap-8 w-full">
         <TextInput
@@ -76,12 +77,14 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
           label="Issued on"
           type="date"
           register={register}
+          required
         />
         <TextInput
           name="dueDate"
           label="Due on"
           type="date"
           register={register}
+          required
         />
       </div>
       <div className="w-full">
@@ -94,12 +97,9 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
               setData(prevData => [
                 ...prevData,
                 {
-                  id: '',
                   name: '',
                   amount: 0,
                   quantity: 0,
-                  createdAt: new Date(),
-                  invoiceId: '1',
                 },
               ])
             }>

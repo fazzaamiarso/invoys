@@ -43,6 +43,7 @@ const defaultColumn: Partial<ColumnDef<InvoiceOrderInput[0]>> = {
         onChange={e => setValue(e.target.value)}
         onBlur={onBlur}
         autoComplete="off"
+        required
         className="w-full rounded-sm border-gray-300 text-sm text-gray-700"
       />
     );
@@ -62,7 +63,7 @@ const columns = [
   }),
   columnHelper.accessor(row => `${row.amount * row.quantity}`, {
     header: 'total',
-    cell: data => <span className="text-sm">{data.getValue()}</span>,
+    cell: data => data.getValue(),
   }),
   columnHelper.display({
     id: 'actions',
@@ -118,7 +119,7 @@ const OrderTable = ({ orderData, setOrderData }: OrderTableProps) => {
             <th
               key={header.id}
               scope="col"
-              className="text-sm text-gray-500 font-semibold">
+              className="text-sm text-gray-500 !font-semibold">
               {flexRender(header.column.columnDef.header, header.getContext())}
             </th>
           ))}
@@ -130,7 +131,7 @@ const OrderTable = ({ orderData, setOrderData }: OrderTableProps) => {
             <tr key={row.id} className="">
               {row.getVisibleCells().map(cell => {
                 return (
-                  <td key={cell.id} className="">
+                  <td key={cell.id} className="text-sm">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 );
