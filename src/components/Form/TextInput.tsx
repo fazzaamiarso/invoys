@@ -15,8 +15,8 @@ const TextInput = <T extends FieldValues>({
   type,
   required = false,
 }: InputProps<T>) => (
-  <div className="flex flex-col gap-2 mb-2 ">
-    <label htmlFor={name} className="text-sm">
+  <div className="flex flex-col gap-2 mb-2 w-full">
+    <label htmlFor={name} className="text-sm text-gray-500 font-semibold">
       {label}
     </label>
     <input
@@ -25,7 +25,7 @@ const TextInput = <T extends FieldValues>({
       {...register(name, { required })}
       id={name}
       name={name}
-      className="rounded-md text-sm border-gray-400"
+      className="rounded-sm text-sm text-gray-700 border-gray-300"
     />
   </div>
 );

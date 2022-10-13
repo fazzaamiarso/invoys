@@ -16,15 +16,15 @@
 }
 
 .order-table td {
-  @apply w-10 pr-2 py-2;
+  @apply w-10 pr-4 py-2;
 }
  
 .order-table thead th:first-child {
-  @apply w-44;
+  @apply w-56;
 }
 
 .order-table thead td:first-child {
-  @apply w-44;
+  @apply w-56;
 }
 
 .order-table thead th:nth-child(2) {
@@ -35,11 +35,11 @@
   @apply w-14;
 }
 .order-table thead th:nth-child(3) {
-  @apply w-20;
+  @apply w-24;
 }
 
 .order-table thead td:nth-child(3) {
-  @apply w-20;
+  @apply w-24;
 }
 
 .order-table thead th:nth-child(4) {

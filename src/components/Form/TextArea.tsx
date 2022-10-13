@@ -14,7 +14,7 @@ const TextArea = <T extends FieldValues>({
   required = false,
 }: TextAreaProps<T>) => (
   <div className="flex flex-col gap-2 mb-2">
-    <label htmlFor={name} className="text-sm">
+    <label htmlFor={name} className="text-sm text-gray-500 font-semibold">
       {label}
     </label>
     <textarea
@@ -22,7 +22,7 @@ const TextArea = <T extends FieldValues>({
       {...register(name, { required })}
       id={name}
       name={name}
-      className="rounded-md resize-y text-sm border-gray-400"
+      className="rounded-sm resize-y text-sm  text-gray-700 border-gray-300"
     />
   </div>
 );

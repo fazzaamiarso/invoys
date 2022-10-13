@@ -2,88 +2,14 @@ import Button from '@components/Button';
 import TextArea from '@components/Form/TextArea';
 import TextInput from '@components/Form/TextInput';
 import { Combobox } from '@headlessui/react';
-import { ChevronUpDownIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Customer, OrderItem } from '@prisma/client';
-import {
-  ColumnDef,
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
-import { trpc } from '@utils/trpc';
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { Customer } from '@prisma/client';
+import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import s from './tables.module.css';
-
-declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
-    removeRow: (rowIndex: number) => void;
-  }
-}
-
-const defaultColumn: Partial<ColumnDef<OrderItem>> = {
-  cell: ({ getValue, row: { index }, column: { id }, table }) => {
-    const initialValue = getValue();
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, setValue] = useState(initialValue);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const initialType = useRef(typeof value);
-
-    const onBlur = () => {
-      table.options.meta?.updateData(index, id, value);
-    };
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return (
-      <input
-        type={initialType.current === 'string' ? 'text' : 'number'}
-        value={value as string}
-        onChange={e => setValue(e.target.value)}
-        onBlur={onBlur}
-        autoComplete="off"
-        className="w-full rounded-md border-gray-400 text-sm"
-      />
-    );
-  },
-};
-
-const columnHelper = createColumnHelper<OrderItem>();
-const columns = [
-  columnHelper.accessor('name', {
-    header: 'Item',
-  }),
-  columnHelper.accessor('quantity', {
-    header: 'qty',
-  }),
-  columnHelper.accessor('amount', {
-    header: 'price',
-  }),
-  columnHelper.accessor(row => `${row.amount * row.quantity}`, {
-    header: 'total',
-    cell: data => <span>{data.getValue()}</span>,
-  }),
-  columnHelper.display({
-    id: 'actions',
-    cell: cell => (
-      <button
-        type="button"
-        onClick={() => cell.table.options.meta?.removeRow(cell.row.index)}
-        disabled={cell.table.getRowModel().rows.length <= 1}
-        className="disabled:text-gray-400 ">
-        <TrashIcon className="h-4" />
-      </button>
-    ),
-  }),
-];
+import OrderTable from './OrderTable';
 
 type FieldValues = {
   name: string;
@@ -92,6 +18,9 @@ type FieldValues = {
   notes?: string;
   customer: string;
 };
+
+export type InvoiceOrderInput =
+  InferProcedures['invoice']['create']['input']['orders'];
 
 const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
@@ -108,40 +37,14 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const [selectedRecipient, setSelectedRecipient] = useState<Customer | null>(
     null
   );
-  const [data, setData] = useState<OrderItem[]>([
+  const [data, setData] = useState<InvoiceOrderInput>([
     {
-      id: '1',
       name: 'Landing page',
       amount: 750,
       quantity: 3,
-      createdAt: new Date(),
-      invoiceId: '1',
     },
   ]);
-  const table = useReactTable({
-    columns,
-    data,
-    defaultColumn,
-    getCoreRowModel: getCoreRowModel(),
-    meta: {
-      updateData: (rowIndex, columnId, value) => {
-        setData(old =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                ...old[rowIndex]!,
-                [columnId]: value,
-              };
-            }
-            return row;
-          })
-        );
-      },
-      removeRow: rowIndex =>
-        setData(old => old.filter((_, index) => index !== rowIndex)),
-    },
-  });
+
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
     if (!selectedRecipient?.id) return;
     mutation.mutate({
@@ -167,7 +70,7 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         label="Project / Description"
         register={register}
       />
-      <div className="flex gap-6">
+      <div className="flex gap-8 w-full">
         <TextInput
           name="issueDate"
           label="Issued on"
@@ -181,49 +84,12 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
           register={register}
         />
       </div>
-      {/* TABLE */}
       <div className="w-full">
-        <table
-          className={clsx(
-            s['order-table'],
-            'w-full table-fixed border-collapse'
-          )}>
-          <thead className="">
-            <tr className="">
-              {table.getFlatHeaders().map(header => (
-                <th key={header.id} scope="col" className="">
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="">
-            {table.getRowModel().rows.map(row => {
-              return (
-                <tr key={row.id} className="">
-                  {row.getVisibleCells().map(cell => {
-                    return (
-                      <td key={cell.id} className="">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {/* TABLE END */}
-        <div className="w-full flex justify-between items-center">
+        <OrderTable orderData={data} setOrderData={setData} />
+        <div className="w-full flex justify-between items-center pt-2">
           <button
             type="button"
-            className="text-blue-500"
+            className="text-blue-500 text-xs font-semibold"
             onClick={() =>
               setData(prevData => [
                 ...prevData,
@@ -237,13 +103,16 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
                 },
               ])
             }>
-            + add item
+            + ADD ITEM
           </button>
-          <div>Total {totalAmount}</div>
+          <div className="space-x-2">
+            <span className="text-sm">Total</span>
+            <span className="font-semibold text-lg">${totalAmount}</span>
+          </div>
         </div>
       </div>
       <TextArea name="notes" label="Additional notes" register={register} />
-      <div className="flex items-center justify-between w-full">
+      <div className="flex items-center justify-between w-full border-t-[1px] border-t-gray-300 py-4">
         <button type="button" className="text-sm">
           PREVIEW
         </button>
@@ -282,59 +151,73 @@ const RecipientCombobox = ({
         className="relative"
         value={selectedRecipient ?? (initialClients && initialClients[0]) ?? {}}
         onChange={setSelectedRecipient}>
-        <div className="rounded-md bg-blue-100 space-y-4 p-4">
-          <div className="text-sm">
-            <span>Recipient Name :</span> {selectedRecipient?.name}
-          </div>
-          <div className="relative flex flex-col gap-2">
-            <label htmlFor="rec-email" className="text-sm">
-              Recipient Email
-            </label>
-            <Combobox.Input
-              type="text"
-              id="rec-email"
-              autoComplete="off"
-              onChange={event => setQuery(event.target.value)}
-              displayValue={val =>
-                selectedRecipient?.email ??
-                (initialClients && initialClients[0]?.email) ??
-                ''
-              }
-              className="rounded-md text-sm "
-            />
-            <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center pr-2">
-              <ChevronUpDownIcon
-                className="h-5 w-5 text-gray-400"
-                aria-hidden="true"
+        <div className="rounded-md bg-blue-50 ring-1 ring-blue-200 space-y-4 p-4">
+          <div className="relative w-full">
+            <div className="relative flex flex-col gap-2">
+              <label
+                htmlFor="rec-email"
+                className="text-gray-600 font-semibold">
+                Recipient Email
+              </label>
+              <Combobox.Input
+                type="text"
+                id="rec-email"
+                autoComplete="off"
+                onChange={event => setQuery(event.target.value)}
+                displayValue={_ =>
+                  selectedRecipient?.email ??
+                  (initialClients && initialClients[0]?.email) ??
+                  ''
+                }
+                className="rounded-sm text-sm border-gray-300 text-gray-700"
               />
-            </Combobox.Button>
+              <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center px-3">
+                <ChevronDownIcon
+                  className="h-5 aspect-square text-gray-400"
+                  aria-hidden="true"
+                />
+              </Combobox.Button>
+            </div>
+            <Combobox.Options className="absolute z-20 w-full rounded-md left-0 py-1 -bottom-1 translate-y-[100%] bg-white shadow-md">
+              {initialClients &&
+                query === '' &&
+                initialClients.map(c => <EmailOption key={c.id} client={c} />)}
+              {initialClients &&
+                query &&
+                initialClients.map(c => <EmailOption key={c.id} client={c} />)}
+              {isLoading && (
+                <div className="text-sm p-2">Searching clients...</div>
+              )}
+              {!isLoading && query && !initialClients?.length && (
+                <div className="text-sm p-2">No Clients Found</div>
+              )}
+            </Combobox.Options>
           </div>
         </div>
-        <Combobox.Options className="absolute z-20 w-full left-0 bottom-0 translate-y-[102%] bg-gray-200 p-2">
-          {initialClients &&
-            query === '' &&
-            initialClients.map(c => {
-              return (
-                <Combobox.Option key={c.id} value={c}>
-                  {c.email} - {c.name}
-                </Combobox.Option>
-              );
-            })}
-          {initialClients &&
-            query &&
-            initialClients.map(c => {
-              return (
-                <Combobox.Option key={c.id} value={c}>
-                  {c.email} - {c.name}
-                </Combobox.Option>
-              );
-            })}
-          {isLoading && <span className="text-sm">Loading...</span>}
-          {!isLoading && query && !initialClients?.length && (
-            <span className="text-sm">No Clients Found</span>
-          )}
-        </Combobox.Options>
       </Combobox>
     </div>
+  );
+};
+
+type OptionProps = {
+  client: Customer;
+};
+const EmailOption = ({ client }: OptionProps) => {
+  return (
+    <Combobox.Option key={client.id} value={client} className="w-full text-sm">
+      {({ active, selected }) => {
+        return (
+          <div className={clsx('w-full py-2', active && 'bg-pink-100')}>
+            <div className="flex items-center px-2">
+              {!selected && (
+                <div className="h-4 pr-2 bg-transparent aspect-square" />
+              )}
+              {selected && <CheckIcon className="h-4 pr-2" />} {client.email} (
+              {client.name})
+            </div>
+          </div>
+        );
+      }}
+    </Combobox.Option>
   );
 };

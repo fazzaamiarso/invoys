@@ -12,13 +12,16 @@ export const customerRouter = t.router({
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      const clients = await ctx.prisma.customer.findMany({
-        take: input?.limit,
-        where: {
-          email: { search: `+${input?.query}` },
-        },
-      });
-      return clients;
+      if (!input?.limit || !input.query) {
+        return await ctx.prisma.customer.findMany();
+      } else {
+        return await ctx.prisma.customer.findMany({
+          take: input?.limit ?? 10,
+          where: {
+            email: { search: `+${input?.query}` },
+          },
+        });
+      }
     }),
   getSingle: t.procedure
     .input(z.object({ customerId: z.string() }))
