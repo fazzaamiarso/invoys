@@ -11,7 +11,7 @@ type HeroIconProps = (
 
 type ButtonProps = PropsWithChildren<{
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   Icon?: HeroIconProps;
   disabled?: boolean;
   onClick?: () => void;

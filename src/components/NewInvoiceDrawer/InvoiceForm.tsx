@@ -50,7 +50,7 @@ const defaultColumn: Partial<ColumnDef<OrderItem>> = {
         onChange={e => setValue(e.target.value)}
         onBlur={onBlur}
         autoComplete="off"
-        className="w-full rounded-md border-gray-400"
+        className="w-full rounded-md border-gray-400 text-sm"
       />
     );
   },

@@ -1,6 +1,10 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowDownTrayIcon,
+  ArrowLeftIcon,
+  EyeIcon,
+} from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
 import { useRouter } from 'next/router';
 
@@ -17,11 +21,18 @@ const InvoiceDetail = () => {
 
   return (
     <Layout>
-      <div className="flex items-center px-4 pt-6">
-        <button className="text-sm flex items-center">Invoices </button>
-        <span className="text-sm font-semibold">{` < ${invoiceId}`}</span>
+      <div className="flex justify-between items-center px-8 pt-6">
+        <button
+          className="text-sm flex font-semibold items-center gap-2"
+          onClick={() => router.replace('/invoices')}>
+          <ArrowLeftIcon className="h-3" /> Back to invoices
+        </button>
+        <div className="space-x-4">
+          <Button variant="outline">Edit</Button>
+          <Button variant="danger">Delete</Button>
+        </div>
       </div>
-      <section className="w-full flex gap-4 py-6">
+      <section className="px-8 flex gap-4 py-6 ">
         {/* LEFT SECTION */}
         <div className="basis-2/3 p-4 ">
           <div className="bg-[#f4f9fa] p-4 rounded-md">
@@ -82,26 +93,58 @@ const InvoiceDetail = () => {
                   </div>
                 </div>
               </div>
+              <div className="">
+                <h4 className="text-sm font-semibold">Additional notes</h4>
+                <p className="text-sm">{invoiceDetail?.notes}</p>
+              </div>
             </div>
           </div>
         </div>
         {/* LEFT SECTION END */}
         {/* RIGHT SECTION */}
-        <div className="">
-          <div className="">
-            <h3 className="font-semibold">{invoiceDetail?.customer.name}</h3>
+        <div className="py-6 basis-1/3 space-y-6">
+          <div className=" rounded-md ring-1 ring-gray-200 p-4 flex justify-between">
+            <span className="text-xl font-bold">
+              $
+              {invoiceDetail?.orders.reduce(
+                (acc, curr) => acc + curr.amount * curr.quantity,
+                0
+              )}
+            </span>
+            <span>{invoiceDetail?.status.toLowerCase()}</span>
+          </div>
+          <div className="p-4 rounded-md ring-1 ring-gray-200">
+            <h3 className="font-semibold">Clients detail</h3>
+            <p className="text-sm">{invoiceDetail?.customer.name}</p>
             <p className="text-sm">{invoiceDetail?.customer.email}</p>
-            <address>{invoiceDetail?.customer.address}</address>
+            <address className="text-sm">
+              {invoiceDetail?.customer.address}
+            </address>
           </div>
-          <div>
-            Amount:{' '}
-            {invoiceDetail?.orders.reduce(
-              (acc, curr) => acc + curr.amount * curr.quantity,
-              0
-            )}
+          <div className="p-4 rounded-md ring-1 ring-gray-200">
+            <h3 className="font-semibold">Projects detail</h3>
+            <p className="text-sm">Admin 1</p>
+            <p className="text-sm">{invoiceDetail?.name}</p>
+            <p className="text-sm">{invoiceDetail?.dueDate.toDateString()}</p>
+            <div className="bg-gray-200 w-full h-px my-2" />
+            <div>
+              <h3>Project log</h3>
+              <ul>
+                <li className="text-sm">Invoice issued</li>
+                <li className="text-sm">Due date prolonged</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <Button variant="primary">Send Invoice</Button>
+          <div className="space-y-6">
+            <div className="space-x-4 flex">
+              <Button Icon={EyeIcon} variant="outline">
+                Preview
+              </Button>
+              <Button Icon={ArrowDownTrayIcon} variant="outline">
+                Download PDF
+              </Button>
+            </div>
+            <Button variant="primary">Send Invoice to Email</Button>
           </div>
         </div>
         {/* RIGHT SECTION */}

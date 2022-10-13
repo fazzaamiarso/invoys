@@ -1,3 +1,15 @@
+/* .default {
+    @apply 
+} */
+
 .primary {
     @apply bg-pink-500 text-white hover:bg-pink-400 transition-all;
+}
+
+.outline {
+    @apply bg-transparent ring-1 ring-gray-300 text-gray-500 ring-inset  hover:ring-gray-200 hover:text-gray-400 transition-all;
+}
+
+.danger {
+    @apply bg-red-600 text-white hover:bg-red-500 transition-all
 }

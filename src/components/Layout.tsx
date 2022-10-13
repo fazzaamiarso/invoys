@@ -14,7 +14,7 @@ const navigations = [
 
 const NavigationPane = () => {
   return (
-    <div className="p-4 space-y-12 h-screen border-r-gray-400 border-2 grow">
+    <div className="p-4 space-y-12 h-screen border-r-gray-300 border-[1px] grow">
       <h1 className="text-xl font-bold">LOGO</h1>
       <nav className="">
         <ul className="space-y-8">
@@ -41,7 +41,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <main className="w-screen min-h-screen flex">
       <NavigationPane />
       <section className="basis-[85%]">
-        <header className="flex w-full px-12 py-4 border-b-2 border-b-gray-400">
+        <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
           <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
             New Invoice
           </Button>
