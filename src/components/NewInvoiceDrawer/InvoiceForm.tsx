@@ -14,14 +14,7 @@ import {
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import s from './tables.module.css';
 
@@ -57,7 +50,6 @@ const defaultColumn: Partial<ColumnDef<OrderItem>> = {
         onChange={e => setValue(e.target.value)}
         onBlur={onBlur}
         autoComplete="off"
-        // className={clsx('rounded-md w-20 text-sm border-gray-400')}
         className="w-full rounded-md border-gray-400"
       />
     );
@@ -157,8 +149,6 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
       recipientId: selectedRecipient.id,
       orders: data,
     });
-    // console.table(fieldValues);
-    // console.log(data);
   };
 
   const totalAmount = data.reduce(
