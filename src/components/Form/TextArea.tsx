@@ -14,13 +14,15 @@ const TextArea = <T extends FieldValues>({
   required = false,
 }: TextAreaProps<T>) => (
   <div className="flex flex-col gap-2 mb-2">
-    <label htmlFor={name}>{label}</label>
+    <label htmlFor={name} className="text-sm">
+      {label}
+    </label>
     <textarea
       autoComplete="off"
       {...register(name, { required })}
       id={name}
       name={name}
-      className="rounded-md resize-y"
+      className="rounded-md resize-y text-sm border-gray-400"
     />
   </div>
 );

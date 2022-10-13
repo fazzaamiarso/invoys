@@ -4,16 +4,18 @@ import { t } from '../trpc';
 export const customerRouter = t.router({
   getAll: t.procedure
     .input(
-      z.object({
-        limit: z.number().optional(),
-        query: z.string().optional(),
-      })
+      z
+        .object({
+          limit: z.number().optional(),
+          query: z.string().optional(),
+        })
+        .optional()
     )
     .query(async ({ ctx, input }) => {
       const clients = await ctx.prisma.customer.findMany({
-        take: input.limit,
+        take: input?.limit,
         where: {
-          email: { search: input.query },
+          email: { search: input?.query },
         },
       });
       return clients;

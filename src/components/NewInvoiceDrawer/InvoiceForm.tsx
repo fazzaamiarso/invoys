@@ -12,8 +12,17 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { trpc } from '@utils/trpc';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import clsx from 'clsx';
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import s from './tables.module.css';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,6 +37,8 @@ const defaultColumn: Partial<ColumnDef<OrderItem>> = {
     const initialValue = getValue();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, setValue] = useState(initialValue);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const initialType = useRef(typeof value);
 
     const onBlur = () => {
       table.options.meta?.updateData(index, id, value);
@@ -40,11 +51,12 @@ const defaultColumn: Partial<ColumnDef<OrderItem>> = {
 
     return (
       <input
-        type={typeof value === 'string' ? 'text' : 'number'}
+        type={initialType.current === 'string' ? 'text' : 'number'}
         value={value as string}
         onChange={e => setValue(e.target.value)}
         onBlur={onBlur}
-        className="w-20"
+        // className={clsx('rounded-md w-20 text-sm border-gray-400')}
+        className="w-full rounded-md border-gray-400"
       />
     );
   },
@@ -82,8 +94,8 @@ const columns = [
 type FieldValues = {
   name: string;
   dueDate: Date;
+  issueDate: Date;
   notes?: string;
-  currency: string;
   customer: string;
 };
 
@@ -129,7 +141,7 @@ const InvoiceForm = () => {
   });
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
     // const mutation = trpc.invoice.create.useMutation();
-    // mutation.mutate({ ...fieldValues, recipientId: '1', orders: data });
+    // mutation.mutate({ ...fieldValues, recipientId: selectedRecipient.id, orders: data });
     console.table(fieldValues);
     console.log(data);
   };
@@ -145,16 +157,36 @@ const InvoiceForm = () => {
         selectedRecipient={selectedRecipient}
         setSelectedRecipient={setSelectedRecipient}
       />
-      <TextInput name="customer" label="Recipient" register={register} />
-      <TextInput name="name" label="Project/Description" register={register} />
-      <TextInput name="dueDate" label="Due on" register={register} />
+      <TextInput
+        name="name"
+        label="Project / Description"
+        register={register}
+      />
+      <div className="flex gap-6">
+        <TextInput
+          name="issueDate"
+          label="Issued on"
+          type="date"
+          register={register}
+        />
+        <TextInput
+          name="dueDate"
+          label="Due on"
+          type="date"
+          register={register}
+        />
+      </div>
       {/* TABLE */}
       <div className="w-full">
-        <table className="w-full">
+        <table
+          className={clsx(
+            s['order-table'],
+            'w-full table-fixed border-collapse'
+          )}>
           <thead className="">
-            <tr>
+            <tr className="">
               {table.getFlatHeaders().map(header => (
-                <th key={header.id}>
+                <th key={header.id} scope="col" className="">
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
@@ -163,13 +195,13 @@ const InvoiceForm = () => {
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="">
             {table.getRowModel().rows.map(row => {
               return (
-                <tr key={row.id}>
+                <tr key={row.id} className="">
                   {row.getVisibleCells().map(cell => {
                     return (
-                      <td key={cell.id}>
+                      <td key={cell.id} className="">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -247,32 +279,35 @@ const RecipientCombobox = ({
 
   return (
     <div>
-      <div>
-        <span>Recipient Name :</span> {selectedRecipient?.name}
-      </div>
       <Combobox
         as="div"
         className="relative"
         value={selectedRecipient ?? (initialClients && initialClients[0]) ?? {}}
         onChange={setSelectedRecipient}>
-        <div className="relative">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="rec-email">Recipient Email</label>
+        <div className="rounded-md bg-blue-100 space-y-4 p-4">
+          <div className="text-sm">
+            <span>Recipient Name :</span> {selectedRecipient?.name}
+          </div>
+          <div className="relative flex flex-col gap-2">
+            <label htmlFor="rec-email" className="text-sm">
+              Recipient Email
+            </label>
             <Combobox.Input
               type="text"
               id="rec-email"
               onChange={event => setQuery(event.target.value)}
               displayValue={val => selectedRecipient?.email || ''}
+              className="rounded-md text-sm "
             />
+            <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center pr-2">
+              <ChevronUpDownIcon
+                className="h-5 w-5 text-gray-400"
+                aria-hidden="true"
+              />
+            </Combobox.Button>
           </div>
-          <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center pr-2">
-            <ChevronUpDownIcon
-              className="h-5 w-5 text-gray-400"
-              aria-hidden="true"
-            />
-          </Combobox.Button>
         </div>
-        <Combobox.Options className="absolute w-full left-0 bottom-0 translate-y-[102%] bg-gray-200 p-2">
+        <Combobox.Options className="absolute z-20 w-full left-0 bottom-0 translate-y-[102%] bg-gray-200 p-2">
           {initialClients &&
             query === '' &&
             initialClients.map(c => {
