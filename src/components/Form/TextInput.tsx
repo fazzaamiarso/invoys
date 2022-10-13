@@ -13,7 +13,7 @@ const TextInput = <T extends FieldValues>({
   register,
   name,
   type,
-  required = false,
+  required = true,
 }: InputProps<T>) => (
   <div className="flex flex-col gap-2 mb-2 w-full">
     <label htmlFor={name} className="text-sm text-gray-500 font-semibold">

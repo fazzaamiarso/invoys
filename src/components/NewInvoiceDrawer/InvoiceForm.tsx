@@ -69,7 +69,6 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         name="name"
         label="Project / Description"
         register={register}
-        required
       />
       <div className="flex gap-8 w-full">
         <TextInput
@@ -77,14 +76,12 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
           label="Issued on"
           type="date"
           register={register}
-          required
         />
         <TextInput
           name="dueDate"
           label="Due on"
           type="date"
           register={register}
-          required
         />
       </div>
       <div className="w-full">
@@ -116,7 +113,12 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         <button type="button" className="text-sm">
           PREVIEW
         </button>
-        <Button type="submit">Create Invoice</Button>
+        <Button
+          type="submit"
+          isLoading={mutation.isLoading}
+          loadingContent="Creating invoice...">
+          Create invoice
+        </Button>
       </div>
     </form>
   );

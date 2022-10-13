@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactNode } from 'react';
 import clsx from 'clsx';
 import v from './variant.module.css';
 
@@ -15,9 +15,19 @@ type ButtonProps = PropsWithChildren<{
   Icon?: HeroIconProps;
   disabled?: boolean;
   onClick?: () => void;
+  isLoading?: boolean;
+  loadingContent?: ReactNode;
 }>;
 
-const Button = ({ type, children, variant, Icon, onClick }: ButtonProps) => {
+const Button = ({
+  type,
+  children,
+  variant,
+  Icon,
+  onClick,
+  isLoading,
+  loadingContent,
+}: ButtonProps) => {
   return (
     <button
       type={type ?? 'button'}
@@ -27,8 +37,9 @@ const Button = ({ type, children, variant, Icon, onClick }: ButtonProps) => {
         Icon ? 'flex items-center gap-2' : '',
         variant ? v[variant] : v.primary
       )}>
-      {Icon && <Icon className="aspect-square h-4" />}
-      {children}
+      {isLoading && loadingContent}
+      {!isLoading && Icon && <Icon className="aspect-square h-4" />}
+      {!isLoading && children}
     </button>
   );
 };

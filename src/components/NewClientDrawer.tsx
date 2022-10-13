@@ -45,7 +45,12 @@ const NewClientDrawer = ({ onClose, isOpen }: Props) => {
           required={false}
           register={register}
         />
-        <Button type="submit">New Client</Button>
+        <Button
+          type="submit"
+          isLoading={mutation.isLoading}
+          loadingContent="Adding client...">
+          New Client
+        </Button>
       </form>
     </Drawer>
   );
