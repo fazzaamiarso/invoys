@@ -8,7 +8,7 @@ const InvoiceDetail = () => {
   return (
     <Layout>
       <div>
-        <h2>{invoiceId}</h2>
+        <h2 className="text-lg font-bold">Invoice Details - {invoiceId}</h2>
       </div>
     </Layout>
   );

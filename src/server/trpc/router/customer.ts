@@ -15,7 +15,7 @@ export const customerRouter = t.router({
       const clients = await ctx.prisma.customer.findMany({
         take: input?.limit,
         where: {
-          email: { search: input?.query },
+          email: { search: `+${input?.query}` },
         },
       });
       return clients;

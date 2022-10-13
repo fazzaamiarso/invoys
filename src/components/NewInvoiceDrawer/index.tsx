@@ -11,7 +11,7 @@ const NewInvoiceDrawer = () => {
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       title="Create Invoice">
-      <InvoiceForm />
+      <InvoiceForm onClose={() => setIsOpen(false)} />
     </Drawer>
   );
 };

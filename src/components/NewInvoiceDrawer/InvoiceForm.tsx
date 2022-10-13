@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-table';
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
+import { useRouter } from 'next/router';
 import {
   Dispatch,
   ReactNode,
@@ -55,6 +56,7 @@ const defaultColumn: Partial<ColumnDef<OrderItem>> = {
         value={value as string}
         onChange={e => setValue(e.target.value)}
         onBlur={onBlur}
+        autoComplete="off"
         // className={clsx('rounded-md w-20 text-sm border-gray-400')}
         className="w-full rounded-md border-gray-400"
       />
@@ -93,14 +95,23 @@ const columns = [
 
 type FieldValues = {
   name: string;
-  dueDate: Date;
-  issueDate: Date;
+  dueDate: string;
+  issueDate: string;
   notes?: string;
   customer: string;
 };
 
-const InvoiceForm = () => {
+const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
+  const router = useRouter();
+  const utils = trpc.useContext();
   const { register, handleSubmit } = useForm<FieldValues>();
+  const mutation = trpc.invoice.create.useMutation({
+    onSuccess: data => {
+      utils.invoice.getAll.invalidate();
+      router.push(`/invoices/${data.id}`);
+      onClose();
+    },
+  });
 
   const [selectedRecipient, setSelectedRecipient] = useState<Customer | null>(
     null
@@ -140,10 +151,14 @@ const InvoiceForm = () => {
     },
   });
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
-    // const mutation = trpc.invoice.create.useMutation();
-    // mutation.mutate({ ...fieldValues, recipientId: selectedRecipient.id, orders: data });
-    console.table(fieldValues);
-    console.log(data);
+    if (!selectedRecipient?.id) return;
+    mutation.mutate({
+      ...fieldValues,
+      recipientId: selectedRecipient.id,
+      orders: data,
+    });
+    // console.table(fieldValues);
+    // console.log(data);
   };
 
   const totalAmount = data.reduce(
@@ -259,17 +274,10 @@ const RecipientCombobox = ({
   setSelectedRecipient,
 }: ComboboxProps) => {
   const [query, setQuery] = useState('');
-  const { data: initialClients } = trpc.customer.getAll.useQuery(
-    { limit: 10 },
+  const { data: initialClients, isLoading } = trpc.customer.getAll.useQuery(
+    { limit: 10, query },
     { refetchOnWindowFocus: false }
   );
-  // const { data: searchedClients } = trpc.customer.getAll.useQuery(
-  //   {
-  //     limit: 10,
-  //     query,
-  //   },
-  //   { refetchOnWindowFocus: false }
-  // );
 
   useEffect(() => {
     if (initialClients && initialClients[0]) {
@@ -295,8 +303,13 @@ const RecipientCombobox = ({
             <Combobox.Input
               type="text"
               id="rec-email"
+              autoComplete="off"
               onChange={event => setQuery(event.target.value)}
-              displayValue={val => selectedRecipient?.email || ''}
+              displayValue={val =>
+                selectedRecipient?.email ??
+                (initialClients && initialClients[0]?.email) ??
+                ''
+              }
               className="rounded-md text-sm "
             />
             <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center pr-2">
@@ -317,12 +330,19 @@ const RecipientCombobox = ({
                 </Combobox.Option>
               );
             })}
-          {/* {data &&
-            data.map(person => (
-              <Combobox.Option key={person} value={person}>
-                {person}
-              </Combobox.Option>
-            ))} */}
+          {initialClients &&
+            query &&
+            initialClients.map(c => {
+              return (
+                <Combobox.Option key={c.id} value={c}>
+                  {c.email} - {c.name}
+                </Combobox.Option>
+              );
+            })}
+          {isLoading && <span className="text-sm">Loading...</span>}
+          {!isLoading && query && !initialClients?.length && (
+            <span className="text-sm">No Clients Found</span>
+          )}
         </Combobox.Options>
       </Combobox>
     </div>

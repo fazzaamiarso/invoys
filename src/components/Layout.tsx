@@ -8,7 +8,7 @@ import NewInvoiceDrawer, { invoiceDrawerStateAtom } from './NewInvoiceDrawer';
 const navigations = [
   { name: 'Dashboard', href: '/' },
   { name: 'Clients', href: '/clients' },
-  { name: 'Invoices', href: '/#invoices' },
+  { name: 'Invoices', href: '/invoices' },
   { name: 'Settings', href: '/#settings' },
 ];
 
