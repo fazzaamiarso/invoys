@@ -25,11 +25,12 @@ export type InvoiceOrderInput =
 const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const utils = trpc.useContext();
-  const { register, handleSubmit } = useForm<FieldValues>();
+  const { register, handleSubmit, reset } = useForm<FieldValues>();
   const mutation = trpc.invoice.create.useMutation({
     onSuccess: data => {
       utils.invoice.getAll.invalidate();
       router.push(`/invoices/${data.id}`);
+      reset();
       onClose();
     },
   });
@@ -135,8 +136,9 @@ const RecipientCombobox = ({
   setSelectedRecipient,
 }: ComboboxProps) => {
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 500);
   const { data: initialClients, isLoading } = trpc.customer.getAll.useQuery(
-    { limit: 10, query },
+    { limit: 10, query: debouncedQuery },
     { refetchOnWindowFocus: false }
   );
 
@@ -222,4 +224,17 @@ const EmailOption = ({ client }: OptionProps) => {
       }}
     </Combobox.Option>
   );
+};
+
+const useDebounce = <T,>(val: T, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(val);
+
+  useEffect(() => {
+    const timerHandler = setTimeout(() => {
+      setDebouncedValue(val);
+    }, delay);
+    return () => clearTimeout(timerHandler);
+  }, [val, delay]);
+
+  return debouncedValue;
 };
