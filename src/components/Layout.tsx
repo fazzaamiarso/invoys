@@ -59,7 +59,7 @@ const Layout = ({
               <div className="aspect-square w-10 rounded-full bg-pink-500" />
             </div>
           </header>
-          {children}
+          <div className="content-layout py-8">{children}</div>
         </section>
         <NewInvoiceDrawer />
       </main>

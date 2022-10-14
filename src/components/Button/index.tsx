@@ -33,7 +33,7 @@ const Button = ({
       type={type ?? 'button'}
       onClick={onClick}
       className={clsx(
-        'px-4 py-2 rounded-md font-semibold',
+        'px-4 py-2 rounded-md font-semibold text-sm',
         Icon ? 'flex items-center gap-2' : '',
         variant ? v[variant] : v.primary
       )}>
