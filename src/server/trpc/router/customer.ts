@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { t } from '../trpc';
 
@@ -38,11 +39,20 @@ export const customerRouter = t.router({
         phoneNumber: z.string(),
         email: z.string(),
         address: z.string().optional(),
+        invoicePrefix: z.string().length(3),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const isPrefixTaken = await ctx.prisma.customer.findUnique({
+        where: { invoicePrefix: input.invoicePrefix },
+      });
+      if (isPrefixTaken)
+        throw new TRPCError({
+          message: 'Prefix is taken',
+          code: 'BAD_REQUEST',
+        });
       const createdClient = await ctx.prisma.customer.create({
-        data: { ...input, phoneNumber: Number(input.phoneNumber) },
+        data: { ...input },
       });
       return createdClient;
     }),

@@ -20,12 +20,13 @@ enum InvoiceStatus {
 }
 
 model Invoice {
-    id        String        @id @default(cuid())
-    createdAt DateTime      @default(now())
-    name      String
-    dueDate   DateTime
-    notes     String?       @db.Text
-    status    InvoiceStatus @default(PENDING)
+    id            String        @id @default(cuid())
+    createdAt     DateTime      @default(now())
+    name          String
+    dueDate       DateTime
+    notes         String?       @db.Text
+    invoiceNumber String
+    status        InvoiceStatus @default(PENDING)
 
     orders     OrderItem[]
     customer   Customer    @relation(fields: [customerId], references: [id])
@@ -44,13 +45,14 @@ model OrderItem {
 }
 
 model Customer {
-    id          String    @id @default(cuid())
-    createdAt   DateTime  @default(now())
-    name        String
-    email       String    @unique
-    phoneNumber Int
-    address     String?
-    invoices    Invoice[]
+    id            String    @id @default(cuid())
+    createdAt     DateTime  @default(now())
+    name          String
+    email         String    @unique
+    phoneNumber   String
+    address       String?
+    invoicePrefix String    @unique
+    invoices      Invoice[]
 
     @@fulltext([email])
     @@fulltext([email, name])

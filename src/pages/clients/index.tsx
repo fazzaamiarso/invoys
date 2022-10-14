@@ -11,7 +11,7 @@ const ClientsIndex: NextPage = () => {
   const { data: clients, isLoading } = trpc.customer.getAll.useQuery();
 
   return (
-    <Layout>
+    <Layout title="Clients">
       <div>
         <div>
           <h2>Clients</h2>

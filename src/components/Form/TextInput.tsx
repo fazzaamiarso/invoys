@@ -25,7 +25,7 @@ const TextInput = <T extends FieldValues>({
       {...register(name, { required })}
       id={name}
       name={name}
-      className="rounded-sm text-sm text-gray-700 border-gray-300"
+      className="rounded-sm text-sm text-gray-700 border-gray-300 w-full"
     />
   </div>
 );

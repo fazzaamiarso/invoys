@@ -1,5 +1,6 @@
 import { PlusIcon } from '@heroicons/react/24/solid';
 import { useAtom } from 'jotai';
+import { NextSeo } from 'next-seo';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import Button from './Button';
@@ -33,27 +34,36 @@ const NavigationPane = () => {
   );
 };
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const Layout = ({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title?: string;
+}) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setDrawerOpen] = useAtom(invoiceDrawerStateAtom);
 
   return (
-    <main className="w-screen min-h-screen flex">
-      <NavigationPane />
-      <section className="basis-[85%]">
-        <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
-          <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
-            New Invoice
-          </Button>
-          <div className="ml-auto flex items-center gap-4">
-            <div className="font-semibold">Gojo Satoru</div>
-            <div className="aspect-square w-10 rounded-full bg-pink-500" />
-          </div>
-        </header>
-        {children}
-      </section>
-      <NewInvoiceDrawer />
-    </main>
+    <>
+      <NextSeo title={title} />
+      <main className="w-screen min-h-screen flex">
+        <NavigationPane />
+        <section className="basis-[85%]">
+          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
+            <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
+              New Invoice
+            </Button>
+            <div className="ml-auto flex items-center gap-4">
+              <div className="font-semibold">Gojo Satoru</div>
+              <div className="aspect-square w-10 rounded-full bg-pink-500" />
+            </div>
+          </header>
+          {children}
+        </section>
+        <NewInvoiceDrawer />
+      </main>
+    </>
   );
 };
 export default Layout;

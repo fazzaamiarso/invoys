@@ -1,5 +1,6 @@
 import { t } from '../trpc';
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -34,11 +35,28 @@ export const invoiceRouter = t.router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const currentClient = await ctx.prisma.customer.findUnique({
+        where: { id: input.recipientId },
+        select: { invoicePrefix: true, _count: { select: { invoices: true } } },
+      });
+
+      if (!currentClient)
+        throw new TRPCError({
+          message: 'Client not found!',
+          code: 'BAD_REQUEST',
+        });
+      const invoiceNumber = `${currentClient.invoicePrefix}-${(
+        currentClient._count.invoices + 1
+      )
+        .toString()
+        .padStart(4, '0')}`;
+
       const createdInvoice = await ctx.prisma.invoice.create({
         data: {
           name: input.name,
           dueDate: new Date(input.dueDate),
           notes: input.notes,
+          invoiceNumber,
           customer: { connect: { id: input.recipientId } },
           orders: { createMany: { data: input.orders } },
         },

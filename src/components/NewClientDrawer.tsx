@@ -1,3 +1,4 @@
+import { generatePrefix } from '@utils/invoice';
 import { trpc } from '@utils/trpc';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Button from './Button';
@@ -14,24 +15,37 @@ type FormFields = {
   email: string;
   phoneNumber: string;
   address?: string;
+  invoicePrefix: string;
 };
 const NewClientDrawer = ({ onClose, isOpen }: Props) => {
   const utils = trpc.useContext();
   const mutation = trpc.customer.create.useMutation();
-  const { register, handleSubmit } = useForm<FormFields>();
+  const { register, handleSubmit, reset } = useForm<FormFields>({
+    defaultValues: { invoicePrefix: generatePrefix() },
+  });
 
   const onSubmit: SubmitHandler<FormFields> = formValues => {
     mutation.mutate(formValues, {
       onSuccess: () => {
         utils.customer.getAll.invalidate();
         onClose();
+        reset();
       },
     });
   };
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="Create Client">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <TextInput label="Name" name="name" register={register} />
+        <div className="flex gap-20">
+          <TextInput label="Name" name="name" register={register} />
+          <div className="basis-1/3">
+            <TextInput
+              label="Invoice Prefix"
+              name="invoicePrefix"
+              register={register}
+            />
+          </div>
+        </div>
         <TextInput label="Email" name="email" register={register} />
         <TextInput
           label="Phone"

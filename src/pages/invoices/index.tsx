@@ -8,7 +8,7 @@ const Invoices = () => {
     refetchOnWindowFocus: false,
   });
   return (
-    <Layout>
+    <Layout title="Invoices">
       <h2 className="text-lg font-bold">Invoices </h2>
       <ul>
         {invoices &&
