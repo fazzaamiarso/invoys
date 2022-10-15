@@ -67,4 +67,22 @@ export const customerRouter = t.router({
       });
       return createdClient;
     }),
+  edit: t.procedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        email: z.string(),
+        address: z.string().optional(),
+        invoicePrefix: z.string().length(3),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const updatedClient = await ctx.prisma.customer.update({
+        data: input,
+        where: { id: input.id },
+      });
+      return updatedClient;
+    }),
 });

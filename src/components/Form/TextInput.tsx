@@ -6,6 +6,7 @@ type InputProps<T extends FieldValues> = {
   register: UseFormRegister<T>;
   type?: 'tel' | 'number' | 'text' | 'date';
   required?: boolean;
+  disabled?: boolean;
 };
 
 const TextInput = <T extends FieldValues>({
@@ -14,6 +15,7 @@ const TextInput = <T extends FieldValues>({
   name,
   type,
   required = true,
+  disabled,
 }: InputProps<T>) => (
   <div className="flex flex-col gap-2 mb-2 w-full">
     <label htmlFor={name} className="text-sm text-gray-500 font-semibold">
@@ -22,7 +24,7 @@ const TextInput = <T extends FieldValues>({
     <input
       type={type ?? 'text'}
       autoComplete="off"
-      {...register(name, { required })}
+      {...register(name, { required, disabled })}
       id={name}
       name={name}
       className="rounded-sm text-sm text-gray-700 border-gray-300 w-full"

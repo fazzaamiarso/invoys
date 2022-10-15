@@ -1,10 +1,12 @@
 import Button from '@components/Button';
+import EditClientDrawer from '@components/EditClientDrawer';
 import Layout from '@components/Layout';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 const ClientDetails: NextPage = () => {
   const router = useRouter();
@@ -12,6 +14,7 @@ const ClientDetails: NextPage = () => {
   if (!clientId || typeof clientId !== 'string')
     throw Error(`Client with Id: ${clientId} doesn't exist`);
 
+  const [isEditing, setIsEditing] = useState(false);
   const { data: clientDetail } = trpc.customer.getSingle.useQuery(
     { customerId: clientId },
     { refetchOnWindowFocus: false }
@@ -36,7 +39,9 @@ const ClientDetails: NextPage = () => {
             </div>
           </div>
           <div className="space-x-4">
-            <Button variant="outline">Edit</Button>
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button>
             <Button variant="danger">Delete</Button>
           </div>
         </div>
@@ -92,6 +97,13 @@ const ClientDetails: NextPage = () => {
           {/* RIGHT SECTION END */}
         </section>
       </div>
+      {clientDetail && (
+        <EditClientDrawer
+          onClose={() => setIsEditing(false)}
+          isOpen={isEditing}
+          initialValues={clientDetail}
+        />
+      )}
     </Layout>
   );
 };

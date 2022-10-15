@@ -13,11 +13,7 @@ import {
   EyeIcon,
 } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
-import {
-  BUSINESS_ADDRESS,
-  BUSINESS_EMAIL,
-  BUSINESS_NAME,
-} from 'data/businessInfo';
+import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
