@@ -91,7 +91,7 @@ const Layout = ({
       <main className="w-screen min-h-screen flex">
         <NavigationPane />
         <section className="basis-[85%]">
-          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
+          <header className="bg-white flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
             <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
               New Invoice
             </Button>

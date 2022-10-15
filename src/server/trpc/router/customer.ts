@@ -29,6 +29,17 @@ export const customerRouter = t.router({
     .query(async ({ input, ctx }) => {
       const client = await ctx.prisma.customer.findUnique({
         where: { id: input.customerId },
+        include: {
+          invoices: {
+            select: {
+              createdAt: true,
+              id: true,
+              invoiceNumber: true,
+              status: true,
+              name: true,
+            },
+          },
+        },
       });
       return client;
     }),

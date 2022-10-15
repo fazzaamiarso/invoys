@@ -4,6 +4,7 @@ import TextInput from '@components/Form/TextInput';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -28,10 +29,10 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const { register, handleSubmit, reset } = useForm<FieldValues>();
   const mutation = trpc.invoice.create.useMutation({
     onSuccess: data => {
-      utils.invoice.getAll.invalidate();
       router.push(`/invoices/${data.id}`);
       reset();
       onClose();
+      return utils.invoice.getAll.invalidate();
     },
   });
 
@@ -139,7 +140,9 @@ const RecipientCombobox = ({
   const debouncedQuery = useDebounce(query, 500);
   const { data: initialClients, isLoading } = trpc.customer.getAll.useQuery(
     { limit: 10, query: debouncedQuery },
-    { refetchOnWindowFocus: false }
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   useEffect(() => {

@@ -7,6 +7,7 @@ specifiers:
   '@heroicons/react': ^2.0.12
   '@prisma/client': ^4.4.0
   '@tailwindcss/forms': ^0.5.3
+  '@tailwindcss/line-clamp': ^0.4.2
   '@tanstack/react-query': ^4.10.0
   '@tanstack/react-table': ^8.5.15
   '@trpc/client': 10.0.0-proxy-beta.15
@@ -65,6 +66,7 @@ devDependencies:
   '@commitlint/cli': 17.1.2
   '@commitlint/config-conventional': 17.1.0
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.1.8
+  '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.1.8
   '@types/node': 18.0.0
   '@types/react': 18.0.14
   '@types/react-dom': 18.0.5
@@ -548,6 +550,14 @@ packages:
       tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
     dependencies:
       mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.1.8_postcss@8.4.17
+    dev: true
+
+  /@tailwindcss/line-clamp/0.4.2_tailwindcss@3.1.8:
+    resolution: {integrity: sha512-HFzAQuqYCjyy/SX9sLGB1lroPzmcnWv1FHkIpmypte10hptf4oPUfucryMKovZh2u0uiS9U5Ty3GghWfEJGwVw==}
+    peerDependencies:
+      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
+    dependencies:
       tailwindcss: 3.1.8_postcss@8.4.17
     dev: true
 
