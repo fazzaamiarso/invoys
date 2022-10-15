@@ -32,7 +32,7 @@ const InvoiceDetail = () => {
   );
 
   return (
-    <Layout>
+    <Layout title={invoiceDetail?.invoiceNumber}>
       <div className="flex justify-between items-center ">
         <div>
           <button
