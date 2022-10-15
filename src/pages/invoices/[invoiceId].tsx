@@ -2,11 +2,23 @@ import Button from '@components/Button';
 import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
 import {
+  CalendarDaysIcon,
+  EnvelopeIcon,
+  FolderIcon,
+  UserIcon,
+} from '@heroicons/react/24/outline';
+import {
   ArrowDownTrayIcon,
   ArrowLeftIcon,
   EyeIcon,
 } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
+import {
+  BUSINESS_ADDRESS,
+  BUSINESS_EMAIL,
+  BUSINESS_NAME,
+} from 'data/businessInfo';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const InvoiceDetail = () => {
@@ -16,18 +28,26 @@ const InvoiceDetail = () => {
     throw Error(
       `It should be impossible that this invoice Id exist: ${invoiceId}`
     );
-  const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery({
-    invoiceId,
-  });
+  const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
+    {
+      invoiceId,
+    },
+    { refetchOnWindowFocus: false, keepPreviousData: true }
+  );
 
   return (
     <Layout>
       <div className="flex justify-between items-center ">
-        <button
-          className="text-sm flex font-semibold items-center gap-2"
-          onClick={() => router.replace('/invoices')}>
-          <ArrowLeftIcon className="h-3" /> Back to invoices
-        </button>
+        <div>
+          <button
+            className="text-sm flex font-semibold items-center gap-2"
+            onClick={() => router.replace('/invoices')}>
+            <ArrowLeftIcon className="h-3" /> Back to invoices
+          </button>
+          <h2 className="text-xl font-bold">
+            Invoice {invoiceDetail?.invoiceNumber}
+          </h2>
+        </div>
         <div className="space-x-4">
           <Button variant="outline">Edit</Button>
           <Button variant="danger">Delete</Button>
@@ -38,24 +58,23 @@ const InvoiceDetail = () => {
         <div className="basis-2/3 pr-8 ">
           <div className="bg-[#f4f9fa] p-4 rounded-md">
             <div className="w-full space-y-6  rounded-md p-4 bg-white">
-              <h2 className="text-lg font-bold">
-                Invoice Details - {invoiceId}
-              </h2>
               <div className="w-full">
-                <h3 className="font-semibold">Invoice Number</h3>
-                <p className="text-sm">[Issue date] - [Due Date]</p>
+                <h3 className="font-semibold">
+                  #{invoiceDetail?.invoiceNumber}
+                </h3>
+                <p className="text-sm">
+                  [Issue date] - {invoiceDetail?.dueDate.toDateString()}
+                </p>
               </div>
-              <div className="w-full flex items-start justify-between">
-                <div className="basis-1/2">
-                  <span className="font-semibold text-sm">from</span>
-                  <p>Business Name</p>
-                  <p>Business Email</p>
-                  <address>Business Address</address>
+              <div className="w-full flex items-start justify-between gap-12">
+                <div className="basis-1/2 text-sm">
+                  <span className="font-semibold">from</span>
+                  <p>{BUSINESS_NAME}</p>
+                  <address>{BUSINESS_ADDRESS}</address>
                 </div>
-                <div className="basis-1/2">
-                  <span className="font-semibold text-sm">to</span>
+                <div className="basis-1/2 text-sm">
+                  <span className="font-semibold">to</span>
                   <p>{invoiceDetail?.customer.name}</p>
-                  <p>{invoiceDetail?.customer.email}</p>
                   <address>{invoiceDetail?.customer.address}</address>
                 </div>
               </div>
@@ -94,10 +113,12 @@ const InvoiceDetail = () => {
                   </div>
                 </div>
               </div>
-              <div className="">
-                <h4 className="text-sm font-semibold">Additional notes</h4>
-                <p className="text-sm">{invoiceDetail?.notes}</p>
-              </div>
+              {invoiceDetail?.notes && (
+                <div className="">
+                  <h4 className="text-sm font-semibold">Additional notes</h4>
+                  <p className="text-sm">{invoiceDetail.notes}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -117,18 +138,29 @@ const InvoiceDetail = () => {
             )}
           </div>
           <div className="p-4 rounded-md ring-1 ring-gray-200">
-            <h3 className="font-semibold">Clients detail</h3>
-            <p className="text-sm">{invoiceDetail?.customer.name}</p>
-            <p className="text-sm">{invoiceDetail?.customer.email}</p>
-            <address className="text-sm">
-              {invoiceDetail?.customer.address}
-            </address>
-          </div>
-          <div className="p-4 rounded-md ring-1 ring-gray-200">
-            <h3 className="font-semibold">Projects detail</h3>
-            <p className="text-sm">Admin 1</p>
-            <p className="text-sm">{invoiceDetail?.name}</p>
-            <p className="text-sm">{invoiceDetail?.dueDate.toDateString()}</p>
+            <h3 className="font-semibold pb-4">Projects detail</h3>
+            <div className="relative flex items-center gap-2 pb-3 text-gray-600">
+              <UserIcon className="h-5" />
+              <p className="text-sm">{invoiceDetail?.customer.name}</p>
+              <Link
+                href={`/clients/${invoiceDetail?.customerId}`}
+                className="absolute z-20 text-xs right-0 bg-white text-blue-500 underline hover:no-underline">
+                View Detail
+              </Link>
+            </div>
+            <div className="flex items-center gap-2 pb-3 text-gray-600">
+              <EnvelopeIcon className="h-5" />
+              <p className="text-sm ">{invoiceDetail?.customer.email}</p>
+            </div>
+            <div className="flex items-center gap-2 pb-3 text-gray-600">
+              <FolderIcon className="h-5" />
+              <p className="text-sm">{invoiceDetail?.name}</p>
+            </div>
+            <div className="flex items-center gap-2 pb-3 text-gray-600">
+              <CalendarDaysIcon className="h-5" />
+              <p className="text-sm">{invoiceDetail?.dueDate.toDateString()}</p>
+            </div>
+
             <div className="bg-gray-200 w-full h-px my-2" />
             <div>
               <h3>Project log</h3>

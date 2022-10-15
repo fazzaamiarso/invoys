@@ -1,7 +1,11 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
-import { DocumentArrowDownIcon, PlusIcon } from '@heroicons/react/24/solid';
+import {
+  DocumentArrowDownIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+} from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
 import {
   createColumnHelper,
@@ -39,6 +43,7 @@ const ClientsIndex: NextPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { data: clients } = trpc.customer.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
   const table = useReactTable({
@@ -54,6 +59,20 @@ const ClientsIndex: NextPage = () => {
       </div>
       <section className="w-full space-y-6">
         <div className="w-full flex items-center">
+          <form
+            onSubmit={e => e.preventDefault()}
+            className="flex items-center gap-4">
+            <input
+              type="search"
+              name="clientSearch"
+              id="clientSearch"
+              placeholder="search for client"
+              className="rounded-md text-sm border-gray-300 placeholder:text-gray-400"
+            />
+            <button className="">
+              <MagnifyingGlassIcon className="h-4" />{' '}
+            </button>
+          </form>
           <div className="ml-auto flex items-center gap-4">
             <Button Icon={DocumentArrowDownIcon} variant="outline">
               Download CSV
