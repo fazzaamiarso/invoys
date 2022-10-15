@@ -1,29 +1,70 @@
-import { PlusIcon } from '@heroicons/react/24/solid';
+import {
+  BanknotesIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+  Squares2X2Icon,
+  UsersIcon,
+} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import Button from './Button';
 import NewInvoiceDrawer, { invoiceDrawerStateAtom } from './NewInvoiceDrawer';
 
 const navigations = [
-  { name: 'Dashboard', href: '/' },
-  { name: 'Clients', href: '/clients' },
-  { name: 'Invoices', href: '/invoices' },
-  { name: 'Settings', href: '/#settings' },
+  {
+    name: 'Dashboard',
+    href: '/',
+    Icon: Squares2X2Icon,
+  },
+  { name: 'Clients', href: '/clients', Icon: UsersIcon },
+  {
+    name: 'Invoices',
+    href: '/invoices',
+    Icon: BanknotesIcon,
+  },
+  {
+    name: 'Settings',
+    href: '/#settings',
+    Icon: Cog6ToothIcon,
+  },
 ];
 
 const NavigationPane = () => {
+  const router = useRouter();
   return (
     <div className="p-4 space-y-12 h-screen border-r-gray-300 border-[1px] grow">
       <h1 className="text-xl font-bold">LOGO</h1>
       <nav className="">
         <ul className="space-y-8">
           {navigations.map(nav => {
+            const currPath = router.pathname;
+            const href = nav.href;
+            const isActive =
+              (currPath === '/' && href === '/') ||
+              (currPath !== '/' && href !== '/' && currPath.startsWith(href));
+
             return (
-              <li key={nav.name} className="">
-                <Link href={nav.href} className="hover:text-blue-500">
-                  {nav.name}
+              <li key={nav.name} className="w-full">
+                <Link
+                  href={nav.href}
+                  className="hover:text-blue-500 flex gap-4 items-center">
+                  <nav.Icon
+                    className={clsx(
+                      'h-5 aspect-square text-gray-600',
+                      isActive && 'text-purple-600'
+                    )}
+                  />
+                  <span
+                    className={clsx(
+                      'text-sm  text-gray-600',
+                      isActive && 'text-black'
+                    )}>
+                    {nav.name}
+                  </span>
                 </Link>
               </li>
             );

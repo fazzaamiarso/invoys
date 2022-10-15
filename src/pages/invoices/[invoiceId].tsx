@@ -1,4 +1,5 @@
 import Button from '@components/Button';
+import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
 import {
   ArrowDownTrayIcon,
@@ -21,7 +22,7 @@ const InvoiceDetail = () => {
 
   return (
     <Layout>
-      <div className="flex justify-between items-center px-8 pt-6">
+      <div className="flex justify-between items-center ">
         <button
           className="text-sm flex font-semibold items-center gap-2"
           onClick={() => router.replace('/invoices')}>
@@ -32,9 +33,9 @@ const InvoiceDetail = () => {
           <Button variant="danger">Delete</Button>
         </div>
       </div>
-      <section className="px-8 flex gap-4 py-6 ">
+      <section className="flex gap-4 py-12 ">
         {/* LEFT SECTION */}
-        <div className="basis-2/3 p-4 ">
+        <div className="basis-2/3 pr-8 ">
           <div className="bg-[#f4f9fa] p-4 rounded-md">
             <div className="w-full space-y-6  rounded-md p-4 bg-white">
               <h2 className="text-lg font-bold">
@@ -102,7 +103,7 @@ const InvoiceDetail = () => {
         </div>
         {/* LEFT SECTION END */}
         {/* RIGHT SECTION */}
-        <div className="py-6 basis-1/3 space-y-6">
+        <div className="basis-1/3 space-y-6">
           <div className=" rounded-md ring-1 ring-gray-200 p-4 flex justify-between">
             <span className="text-xl font-bold">
               $
@@ -111,7 +112,9 @@ const InvoiceDetail = () => {
                 0
               )}
             </span>
-            <span>{invoiceDetail?.status.toLowerCase()}</span>
+            {invoiceDetail?.status && (
+              <StatusBadge status={invoiceDetail?.status} />
+            )}
           </div>
           <div className="p-4 rounded-md ring-1 ring-gray-200">
             <h3 className="font-semibold">Clients detail</h3>

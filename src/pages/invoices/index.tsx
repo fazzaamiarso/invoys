@@ -1,5 +1,5 @@
+import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
-import { InvoiceStatus } from '@prisma/client';
 import {
   createColumnHelper,
   flexRender,
@@ -7,7 +7,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { InferProcedures, trpc } from '@utils/trpc';
-import clsx from 'clsx';
 import Link from 'next/link';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
@@ -111,19 +110,3 @@ const Invoices = () => {
 };
 
 export default Invoices;
-
-const StatusBadge = ({ status }: { status: InvoiceStatus }) => {
-  const statusText = status.charAt(0) + status.slice(1).toLowerCase();
-  return (
-    <div
-      className={clsx(
-        'text-xs rounded-md p-1 px-3 w-max',
-        status === 'PAID' && 'bg-[#dcfde7] text-[#176434]',
-        status === 'PENDING' && 'bg-[#fff9c2] text-[#854d0e]',
-        status === 'OVERDUE' && 'bg-[#a29c9c] text-[#981a1a]',
-        status === 'REJECTED' && 'bg-[#fde7f3] text-[#9f1a4e]'
-      )}>
-      {statusText}
-    </div>
-  );
-};
