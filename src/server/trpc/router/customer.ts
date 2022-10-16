@@ -85,4 +85,16 @@ export const customerRouter = t.router({
       });
       return updatedClient;
     }),
+  delete: t.procedure
+    .input(
+      z.object({
+        clientId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const deletedClient = await ctx.prisma.customer.delete({
+        where: { id: input.clientId },
+      });
+      return deletedClient;
+    }),
 });

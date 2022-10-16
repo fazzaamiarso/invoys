@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
+import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -51,7 +52,7 @@ const InvoiceDetail = () => {
         <div>
           <button
             className="text-sm flex font-semibold items-center gap-2"
-            onClick={() => router.replace('/invoices')}>
+            onClick={() => router.back()}>
             <ArrowLeftIcon className="h-3" /> Back to invoices
           </button>
           <h2 className="text-xl font-bold">
@@ -72,11 +73,11 @@ const InvoiceDetail = () => {
             <div className="w-full space-y-6  rounded-md p-4 bg-white">
               <div className="w-full">
                 <h3 className="font-semibold">
-                  #{invoiceDetail?.invoiceNumber}
+                  Invoice #{invoiceDetail?.invoiceNumber}
                 </h3>
                 <p className="text-sm">
-                  {invoiceDetail?.issuedOn.toDateString()} -{' '}
-                  {invoiceDetail?.dueDate.toDateString()}
+                  Issued on{dayjs(invoiceDetail?.issuedOn).format('LL')} - Due
+                  on {dayjs(invoiceDetail?.dueDate).format('LL')}
                 </p>
               </div>
               <div className="w-full flex items-start justify-between gap-12">
@@ -171,7 +172,9 @@ const InvoiceDetail = () => {
             </div>
             <div className="flex items-center gap-2 pb-3 text-gray-600">
               <CalendarDaysIcon className="h-5" />
-              <p className="text-sm">{invoiceDetail?.dueDate.toDateString()}</p>
+              <p className="text-sm">
+                {dayjs(invoiceDetail?.dueDate).format('DD MMM YYYY')}
+              </p>
             </div>
 
             <div className="bg-gray-200 w-full h-px my-2" />

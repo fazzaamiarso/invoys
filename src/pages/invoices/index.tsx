@@ -6,7 +6,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { fuzzyFilter } from '@utils/tableHelper';
 import { InferProcedures, trpc } from '@utils/trpc';
+import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
@@ -21,9 +23,19 @@ const columns = [
   }),
   columnHelper.accessor('name', {
     header: 'Project Name',
+    cell: props => (
+      <span className="line-clamp-1">
+        <span>{props.getValue()}</span>
+      </span>
+    ),
   }),
   columnHelper.accessor('customer.name', {
     header: 'Client',
+    cell: props => (
+      <span className="line-clamp-1">
+        <span>{props.getValue()}</span>
+      </span>
+    ),
   }),
   columnHelper.accessor('status', {
     header: 'Status',
@@ -31,7 +43,7 @@ const columns = [
   }),
   columnHelper.accessor('dueDate', {
     header: 'Due Date',
-    cell: props => props.getValue().toDateString(),
+    cell: props => dayjs(props.getValue()).format('LL'),
   }),
   columnHelper.accessor('orders', {
     header: 'Amount',
@@ -65,6 +77,7 @@ const Invoices = () => {
     columns,
     data: invoices ?? [],
     getCoreRowModel: getCoreRowModel(),
+    filterFns: { fuzzy: fuzzyFilter },
   });
 
   return (
@@ -77,7 +90,7 @@ const Invoices = () => {
               <th
                 key={header.id}
                 scope="col"
-                className="text-start px-4 p-2 text-sm first:w-[10%]">
+                className="text-start px-4 p-2 text-sm first:w-[12%]">
                 {flexRender(
                   header.column.columnDef.header,
                   header.getContext()
