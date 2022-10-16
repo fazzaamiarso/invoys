@@ -19,7 +19,10 @@ import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -30,6 +33,8 @@ const InvoiceDetail = () => {
     );
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useContext();
   const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
@@ -45,6 +50,23 @@ const InvoiceDetail = () => {
       router.replace('/invoices');
     },
   });
+
+  const handleDownloadPdf = async () => {
+    const element = pdfRef.current;
+    if (!element) return null;
+    // const canvas = await html2canvas(element);
+    // const data = canvas.toDataURL('image/png');
+    const dataUrl = await toPng(element);
+    console.log(dataUrl);
+
+    const pdf = new jsPDF();
+    const imgProperties = pdf.getImageProperties(dataUrl);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Invoice #${invoiceDetail?.invoiceNumber}.pdf`);
+  };
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
@@ -70,7 +92,9 @@ const InvoiceDetail = () => {
         {/* LEFT SECTION */}
         <div className="basis-2/3 pr-8 ">
           <div className="bg-[#f4f9fa] p-4 rounded-md">
-            <div className="w-full space-y-6  rounded-md p-4 bg-white">
+            <div
+              ref={pdfRef}
+              className="w-full space-y-6  rounded-md p-4 bg-white">
               <div className="w-full">
                 <h3 className="font-semibold">
                   Invoice #{invoiceDetail?.invoiceNumber}
@@ -188,10 +212,16 @@ const InvoiceDetail = () => {
           </div>
           <div className="space-y-6">
             <div className="space-x-4 flex">
-              <Button Icon={EyeIcon} variant="outline">
+              <Button
+                Icon={EyeIcon}
+                variant="outline"
+                onClick={() => setIsPreviewing(!isPreviewing)}>
                 Preview
               </Button>
-              <Button Icon={ArrowDownTrayIcon} variant="outline">
+              <Button
+                Icon={ArrowDownTrayIcon}
+                variant="outline"
+                onClick={handleDownloadPdf}>
                 Download PDF
               </Button>
             </div>
