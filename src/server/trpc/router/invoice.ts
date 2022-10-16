@@ -65,4 +65,12 @@ export const invoiceRouter = t.router({
       });
       return createdInvoice;
     }),
+  delete: t.procedure
+    .input(z.object({ invoiceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const deletedInvoice = await ctx.prisma.invoice.delete({
+        where: { id: input.invoiceId },
+      });
+      return deletedInvoice;
+    }),
 });

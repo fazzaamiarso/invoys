@@ -116,7 +116,7 @@ const ClientsIndex: NextPage = () => {
       <div className="flex gap-4 items-center pb-12">
         <h2 className="font-semibold text-2xl">Clients</h2>
       </div>
-      <section className="w-full space-y-6">
+      <section className="w-full space-y-6 overflow-y-scroll">
         <div className="w-full flex items-center">
           <form
             onSubmit={e => e.preventDefault()}

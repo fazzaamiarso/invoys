@@ -1,9 +1,11 @@
 import Button from '@components/Button';
 import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
+import { Dialog } from '@headlessui/react';
 import {
   CalendarDaysIcon,
   EnvelopeIcon,
+  ExclamationTriangleIcon,
   FolderIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
@@ -16,6 +18,7 @@ import { trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -24,12 +27,23 @@ const InvoiceDetail = () => {
     throw Error(
       `It should be impossible that this invoice Id exist: ${invoiceId}`
     );
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const utils = trpc.useContext();
   const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId,
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   );
+
+  const deleteMutation = trpc.invoice.delete.useMutation({
+    onSuccess() {
+      utils.invoice.getAll.invalidate();
+      router.replace('/invoices');
+    },
+  });
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
@@ -46,7 +60,9 @@ const InvoiceDetail = () => {
         </div>
         <div className="space-x-4">
           <Button variant="outline">Edit</Button>
-          <Button variant="danger">Delete</Button>
+          <Button variant="danger" onClick={() => setIsDeleting(true)}>
+            Delete
+          </Button>
         </div>
       </div>
       <section className="flex gap-4 py-12 ">
@@ -59,7 +75,8 @@ const InvoiceDetail = () => {
                   #{invoiceDetail?.invoiceNumber}
                 </h3>
                 <p className="text-sm">
-                  [Issue date] - {invoiceDetail?.dueDate.toDateString()}
+                  {invoiceDetail?.issuedOn.toDateString()} -{' '}
+                  {invoiceDetail?.dueDate.toDateString()}
                 </p>
               </div>
               <div className="w-full flex items-start justify-between gap-12">
@@ -180,8 +197,70 @@ const InvoiceDetail = () => {
         </div>
         {/* RIGHT SECTION */}
       </section>
+      <DeleteModal
+        isOpen={isDeleting}
+        onClose={() => setIsDeleting(false)}
+        onConfirm={() =>
+          !deleteMutation.isLoading && deleteMutation.mutate({ invoiceId })
+        }
+        title={`Delete Invoice ${invoiceDetail?.invoiceNumber}?`}
+        description="Are you sure you want to delete this Invoice? Data will be
+        permanently removed. This action cannot be undone."
+      />
     </Layout>
   );
 };
 
 export default InvoiceDetail;
+
+type DeleteModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description?: string;
+};
+const DeleteModal = ({
+  onClose,
+  onConfirm,
+  isOpen,
+  title,
+  description,
+}: DeleteModalProps) => {
+  const handleConfirm = () => {
+    onConfirm();
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <div className="fixed inset-0 z-50 bg-gray-500 bg-opacity-75 transition-opacity" />
+      <Dialog.Panel className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="relative bg-white p-6 rounded-md flex flex-col space-y-8 max-w-md">
+          <div className="flex gap-6">
+            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <ExclamationTriangleIcon
+                className="h-6 w-6 text-red-600"
+                aria-hidden="true"
+              />
+            </div>
+            <div>
+              <Dialog.Title className="font-semibold text-lg pb-1">
+                {title}
+              </Dialog.Title>
+              <p className="text-gray-500 text-sm">{description ?? ''}</p>
+            </div>
+          </div>
+          <div className="space-x-4 ml-auto">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleConfirm}>
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Dialog.Panel>
+    </Dialog>
+  );
+};
