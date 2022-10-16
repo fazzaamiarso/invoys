@@ -29,6 +29,7 @@ export const invoiceRouter = t.router({
       z.object({
         name: z.string(),
         dueDate: z.string(),
+        issuedOn: z.string(),
         notes: z.string().optional(),
         recipientId: z.string(),
         orders: z.array(orderItemSchema),
@@ -55,6 +56,7 @@ export const invoiceRouter = t.router({
         data: {
           name: input.name,
           dueDate: new Date(input.dueDate),
+          issuedOn: new Date(input.issuedOn),
           notes: input.notes,
           invoiceNumber,
           customer: { connect: { id: input.recipientId } },

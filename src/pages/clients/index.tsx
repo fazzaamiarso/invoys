@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
@@ -8,15 +10,62 @@ import {
 } from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
 import {
+  RankingInfo,
+  rankItem,
+  compareItems,
+} from '@tanstack/match-sorter-utils';
+import {
   createColumnHelper,
+  FilterFn,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  SortingFn,
+  sortingFns,
   useReactTable,
 } from '@tanstack/react-table';
 import { trpc } from '@utils/trpc';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useState } from 'react';
+
+declare module '@tanstack/table-core' {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  // Store the itemRank info
+  addMeta({
+    itemRank,
+  });
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed;
+};
+
+// const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
+//   let dir = 0;
+
+//   // Only sort by rank if the column has ranking information
+//   if (rowA.columnFiltersMeta[columnId]) {
+//     dir = compareItems(
+//       rowA.columnFiltersMeta[columnId]?.itemRank!,
+//       rowB.columnFiltersMeta[columnId]?.itemRank!
+//     );
+//   }
+
+//   // Provide an alphanumeric fallback for when the item ranks are equal
+//   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+// };
 
 const columnHelper = createColumnHelper<Customer>();
 const columns = [
@@ -46,9 +95,19 @@ const ClientsIndex: NextPage = () => {
     keepPreviousData: true,
   });
 
+  const [globalFilter, setGlobalFilter] = useState('');
+
   const table = useReactTable({
     columns,
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: 'fuzzy',
+    filterFns: { fuzzy: fuzzyFilter },
     data: clients ?? [],
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -64,8 +123,10 @@ const ClientsIndex: NextPage = () => {
             className="flex items-center gap-4">
             <input
               type="search"
-              name="clientSearch"
-              id="clientSearch"
+              value={globalFilter}
+              onChange={e => setGlobalFilter(e.target.value)}
+              name="filterClient"
+              id="filterClient"
               placeholder="search for client"
               className="rounded-md text-sm border-gray-300 placeholder:text-gray-400"
             />

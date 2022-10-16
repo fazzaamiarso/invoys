@@ -4,7 +4,6 @@ import TextInput from '@components/Form/TextInput';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
-import { useQueryClient } from '@tanstack/react-query';
 import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -15,7 +14,7 @@ import OrderTable from './OrderTable';
 type FieldValues = {
   name: string;
   dueDate: string;
-  issueDate: string;
+  issuedOn: string;
   notes?: string;
   customer: string;
 };
@@ -74,7 +73,7 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
       />
       <div className="flex gap-8 w-full">
         <TextInput
-          name="issueDate"
+          name="issuedOn"
           label="Issued on"
           type="date"
           register={register}
