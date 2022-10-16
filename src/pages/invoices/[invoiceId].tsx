@@ -20,11 +20,14 @@ import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 const InvoiceDetail = () => {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const router = useRouter();
   const { invoiceId } = router.query;
   if (!invoiceId || typeof invoiceId !== 'string')
@@ -34,6 +37,8 @@ const InvoiceDetail = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState('');
+
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useContext();
@@ -51,13 +56,25 @@ const InvoiceDetail = () => {
     },
   });
 
+  // const generatePdf = async () => {
+  //   if (!pdfRef.current) return null;
+  //   const dataUrl = await toPng(pdfRef.current);
+
+  //   const pdf = new jsPDF();
+  //   const imgProperties = pdf.getImageProperties(dataUrl);
+  //   const pdfWidth = pdf.internal.pageSize.getWidth();
+  //   const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+  //   pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+  //   const output = pdf.output("dataurlstring");
+  //   setPdfUrl(output)
+
+  // }
+
+  //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
-    const element = pdfRef.current;
-    if (!element) return null;
-    // const canvas = await html2canvas(element);
-    // const data = canvas.toDataURL('image/png');
-    const dataUrl = await toPng(element);
-    console.log(dataUrl);
+    if (!pdfRef.current) return null;
+    const dataUrl = await toPng(pdfRef.current);
 
     const pdf = new jsPDF();
     const imgProperties = pdf.getImageProperties(dataUrl);
@@ -65,6 +82,8 @@ const InvoiceDetail = () => {
     const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
 
     pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    const output = pdf.output('dataurlstring');
+    setPdfUrl(output);
     pdf.save(`Invoice #${invoiceDetail?.invoiceNumber}.pdf`);
   };
 
@@ -230,6 +249,20 @@ const InvoiceDetail = () => {
         </div>
         {/* RIGHT SECTION */}
       </section>
+      {isPreviewing && (
+        <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+          <div
+          // style={{
+          //   height: '750px',
+          //   width: '900px',
+          //   marginLeft: 'auto',
+          //   marginRight: 'auto',
+          // }}
+          >
+            <Viewer fileUrl={pdfUrl} plugins={[defaultLayoutPluginInstance]} />
+          </div>
+        </Worker>
+      )}
       <DeleteModal
         isOpen={isDeleting}
         onClose={() => setIsDeleting(false)}
