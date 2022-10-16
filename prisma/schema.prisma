@@ -23,6 +23,7 @@ model Invoice {
     id            String        @id @default(cuid())
     createdAt     DateTime      @default(now())
     name          String
+    issuedOn      DateTime      @default(now())
     dueDate       DateTime
     notes         String?       @db.Text
     invoiceNumber String
@@ -38,7 +39,7 @@ model OrderItem {
     createdAt DateTime @default(now())
     name      String
     amount    Int
-    quantity  Int      @default(1)
+    quantity  Int
 
     invoice   Invoice @relation(fields: [invoiceId], references: [id])
     invoiceId String

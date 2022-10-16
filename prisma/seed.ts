@@ -3,8 +3,8 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
-const getRandomDigit = () => {
-  return faker.datatype.number({ max: 3, min: 0 });
+const getRandomDigit = (min: number, max: number) => {
+  return faker.datatype.number({ max, min });
 };
 
 const createRandomInvoices = (
@@ -13,6 +13,7 @@ const createRandomInvoices = (
 ): Prisma.InvoiceCreateManyCustomerInput => {
   return {
     name: faker.name.jobArea(),
+    issuedOn: faker.date.recent(),
     dueDate: faker.date.future(),
     status: faker.helpers.arrayElement(Object.values(InvoiceStatus)),
     invoiceNumber: `${prefix}-${index.toString().padStart(4, '0')}`,
@@ -27,6 +28,7 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
       count: 3,
     },
   ]);
+  const invoicesCount = getRandomDigit(0, 3);
   return {
     id: faker.datatype.uuid(),
     name: companyName,
@@ -36,9 +38,12 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
     invoicePrefix: prefix,
     invoices: {
       createMany: {
-        data: Array.from({ length: getRandomDigit() }).map((_, idx) =>
-          createRandomInvoices(prefix, idx)
-        ),
+        data:
+          invoicesCount > 0
+            ? Array.from({ length: invoicesCount }).map((_, idx) =>
+                createRandomInvoices(prefix, idx)
+              )
+            : [],
       },
     },
   };
@@ -50,7 +55,7 @@ const createRandomOrders = (
   return {
     name: faker.commerce.productName(),
     amount: Number(faker.commerce.price()),
-    quantity: faker.datatype.number({ min: 1, max: 10 }),
+    quantity: getRandomDigit(1, 10),
     invoiceId,
   };
 };
@@ -66,14 +71,14 @@ const runSeed = async () => {
   });
   console.log('✓ Creating clients successful!');
 
-  console.log('🔍 Finding Clients');
+  console.log('🔍 Finding Invoices');
   const invoices = await prisma.invoice.findMany({ select: { id: true } });
 
-  console.log('🧾 Creating Orders!');
+  console.log('🧾 Creating Orders for Invoices!');
   invoices.forEach(async i => {
     await prisma.orderItem.createMany({
       data: Array.from({
-        length: faker.datatype.number({ min: 1, max: 2 }),
+        length: getRandomDigit(1, 2),
       }).map(() => createRandomOrders(i.id)),
     });
   });
