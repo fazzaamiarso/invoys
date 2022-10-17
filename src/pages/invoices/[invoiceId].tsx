@@ -1,7 +1,7 @@
 import Button from '@components/Button';
 import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
-import { Dialog } from '@headlessui/react';
+import { Dialog, Listbox, Transition } from '@headlessui/react';
 import {
   CalendarDaysIcon,
   EnvelopeIcon,
@@ -12,6 +12,7 @@ import {
 import {
   ArrowDownTrayIcon,
   ArrowLeftIcon,
+  ChevronDownIcon,
   EyeIcon,
 } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
@@ -19,12 +20,15 @@ import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { InvoiceStatus } from '@prisma/client';
+
+const pdf = new jsPDF({ format: 'A4' });
 
 const InvoiceDetail = () => {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -56,36 +60,27 @@ const InvoiceDetail = () => {
     },
   });
 
-  // const generatePdf = async () => {
-  //   if (!pdfRef.current) return null;
-  //   const dataUrl = await toPng(pdfRef.current);
-
-  //   const pdf = new jsPDF();
-  //   const imgProperties = pdf.getImageProperties(dataUrl);
-  //   const pdfWidth = pdf.internal.pageSize.getWidth();
-  //   const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-  //   pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-  //   const output = pdf.output("dataurlstring");
-  //   setPdfUrl(output)
-
-  // }
-
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
-    if (!pdfRef.current) return null;
-    const dataUrl = await toPng(pdfRef.current);
-
-    const pdf = new jsPDF();
-    const imgProperties = pdf.getImageProperties(dataUrl);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-    pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    const output = pdf.output('dataurlstring');
-    setPdfUrl(output);
     pdf.save(`Invoice #${invoiceDetail?.invoiceNumber}.pdf`);
   };
+
+  useEffect(() => {
+    const generatePdf = async () => {
+      if (!pdfRef.current) return;
+      const dataUrl = await toPng(pdfRef.current);
+
+      const imgProperties = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const output = pdf.output('dataurlstring');
+      setPdfUrl(output);
+    };
+
+    generatePdf();
+  }, []);
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
@@ -182,7 +177,7 @@ const InvoiceDetail = () => {
         {/* LEFT SECTION END */}
         {/* RIGHT SECTION */}
         <div className="basis-1/3 space-y-6">
-          <div className=" rounded-md ring-1 ring-gray-200 p-4 flex justify-between">
+          <div className=" rounded-md ring-1 ring-gray-200 p-4 flex items-center justify-between">
             <span className="text-xl font-bold">
               $
               {invoiceDetail?.orders.reduce(
@@ -191,7 +186,10 @@ const InvoiceDetail = () => {
               )}
             </span>
             {invoiceDetail?.status && (
-              <StatusBadge status={invoiceDetail?.status} />
+              <StatusSelect
+                status={invoiceDetail.status}
+                invoiceId={invoiceId}
+              />
             )}
           </div>
           <div className="p-4 rounded-md ring-1 ring-gray-200">
@@ -251,14 +249,7 @@ const InvoiceDetail = () => {
       </section>
       {isPreviewing && (
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
-          <div
-          // style={{
-          //   height: '750px',
-          //   width: '900px',
-          //   marginLeft: 'auto',
-          //   marginRight: 'auto',
-          // }}
-          >
+          <div>
             <Viewer fileUrl={pdfUrl} plugins={[defaultLayoutPluginInstance]} />
           </div>
         </Worker>
@@ -328,5 +319,52 @@ const DeleteModal = ({
         </div>
       </Dialog.Panel>
     </Dialog>
+  );
+};
+
+const StatusSelect = ({
+  status,
+  invoiceId,
+}: {
+  status: InvoiceStatus;
+  invoiceId: string;
+}) => {
+  const utils = trpc.useContext();
+  const mutation = trpc.invoice.updateStatus.useMutation({
+    onSuccess() {
+      utils.invoice.getAll.invalidate(undefined);
+      utils.invoice.getSingle.invalidate({ invoiceId });
+    },
+  });
+
+  const handleStatusChange = (newStatus: InvoiceStatus) => {
+    if (newStatus === status || mutation.isLoading) return;
+    mutation.mutate({ status: newStatus, invoiceId });
+  };
+
+  return (
+    <Listbox onChange={handleStatusChange} value={status}>
+      <div className="relative ">
+        <Listbox.Button className="ring-1 items-center gap-2 flex ring-gray-200 rounded-md p-1 pr-2">
+          <StatusBadge status={status} />
+          <ChevronDownIcon className="h-3" />
+        </Listbox.Button>
+        <Transition
+          as={Fragment}
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0">
+          <Listbox.Options className="absolute z-50 bg-white w-max right-0 translate-y-1">
+            {Object.values(InvoiceStatus).map(stat => {
+              return (
+                <Listbox.Option key={stat} value={stat} className="p-2">
+                  {stat}
+                </Listbox.Option>
+              );
+            })}
+          </Listbox.Options>
+        </Transition>
+      </div>
+    </Listbox>
   );
 };

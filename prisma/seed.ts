@@ -41,7 +41,7 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
         data:
           invoicesCount > 0
             ? Array.from({ length: invoicesCount }).map((_, idx) =>
-                createRandomInvoices(prefix, idx)
+                createRandomInvoices(prefix, idx + 1)
               )
             : [],
       },

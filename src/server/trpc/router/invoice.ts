@@ -1,6 +1,7 @@
 import { t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { InvoiceStatus } from '@prisma/client';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -72,5 +73,16 @@ export const invoiceRouter = t.router({
         where: { id: input.invoiceId },
       });
       return deletedInvoice;
+    }),
+  updateStatus: t.procedure
+    .input(
+      z.object({ invoiceId: z.string(), status: z.nativeEnum(InvoiceStatus) })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedStatus = await ctx.prisma.invoice.update({
+        where: { id: input.invoiceId },
+        data: { status: input.status },
+      });
+      return updatedStatus;
     }),
 });
