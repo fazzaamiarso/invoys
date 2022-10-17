@@ -6,6 +6,7 @@ import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
 import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
+import useDebounce from 'hooks/useDebounce';
 import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -137,18 +138,29 @@ const RecipientCombobox = ({
 }: ComboboxProps) => {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 500);
-  const { data: initialClients, isLoading } = trpc.customer.getAll.useQuery(
-    { limit: 10, query: debouncedQuery },
+  const { data: searchedClients } = trpc.customer.search.useQuery(
+    { query: debouncedQuery },
     {
       refetchOnWindowFocus: false,
+      enabled: Boolean(debouncedQuery),
+      keepPreviousData: true,
     }
   );
 
-  useEffect(() => {
-    if (initialClients && initialClients[0]) {
-      setSelectedRecipient(initialClients[0]);
+  const { data: initialClients } = trpc.customer.getAll.useQuery(
+    { limit: 10 },
+    {
+      refetchOnWindowFocus: false,
+      enabled: debouncedQuery === '',
+      staleTime: Infinity,
     }
-  }, [initialClients, setSelectedRecipient]);
+  );
+
+  // useEffect(() => {
+  //   if (initialClients && initialClients[0]) {
+  //     setSelectedRecipient(initialClients[0]);
+  //   }
+  // }, [initialClients, setSelectedRecipient]);
 
   return (
     <div>
@@ -185,16 +197,13 @@ const RecipientCombobox = ({
               </Combobox.Button>
             </div>
             <Combobox.Options className="absolute z-20 w-full rounded-md left-0 py-1 -bottom-1 translate-y-[100%] bg-white shadow-md">
-              {initialClients &&
-                query === '' &&
-                initialClients.map(c => <EmailOption key={c.id} client={c} />)}
-              {initialClients &&
-                query &&
-                initialClients.map(c => <EmailOption key={c.id} client={c} />)}
-              {isLoading && (
-                <div className="text-sm p-2">Searching clients...</div>
-              )}
-              {!isLoading && query && !initialClients?.length && (
+              {debouncedQuery === '' &&
+                initialClients?.map(c => <EmailOption key={c.id} client={c} />)}
+              {debouncedQuery &&
+                searchedClients?.map(c => (
+                  <EmailOption key={c.id} client={c} />
+                ))}
+              {searchedClients?.length === 0 && debouncedQuery && (
                 <div className="text-sm p-2">No Clients Found</div>
               )}
             </Combobox.Options>
@@ -226,17 +235,4 @@ const EmailOption = ({ client }: OptionProps) => {
       }}
     </Combobox.Option>
   );
-};
-
-const useDebounce = <T,>(val: T, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(val);
-
-  useEffect(() => {
-    const timerHandler = setTimeout(() => {
-      setDebouncedValue(val);
-    }, delay);
-    return () => clearTimeout(timerHandler);
-  }, [val, delay]);
-
-  return debouncedValue;
 };

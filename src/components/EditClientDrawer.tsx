@@ -54,13 +54,10 @@ const EditClientDrawer = ({ onClose, isOpen, initialValues }: Props) => {
       {
         onSuccess: data => {
           reset({
+            ...data,
             address: data.address ?? '',
-            email: data.email,
-            invoicePrefix: data.invoicePrefix,
-            name: data.name,
-            phoneNumber: data.phoneNumber,
           });
-          utils.customer.getSingle.invalidate();
+          utils.customer.getSingle.invalidate({ customerId: data.id });
           utils.customer.getAll.invalidate();
           onClose();
         },

@@ -45,10 +45,13 @@ const columns = [
 
 const ClientsIndex: NextPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { data: clients } = trpc.customer.getAll.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const { data: clients } = trpc.customer.getAll.useQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   const [globalFilter, setGlobalFilter] = useState('');
 

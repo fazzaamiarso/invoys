@@ -4,25 +4,24 @@ import { t } from '../trpc';
 
 export const customerRouter = t.router({
   getAll: t.procedure
+    .input(z.object({ limit: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.customer.findMany({ take: input.limit });
+    }),
+  search: t.procedure
     .input(
-      z
-        .object({
-          limit: z.number().optional(),
-          query: z.string().optional(),
-        })
-        .optional()
+      z.object({
+        limit: z.number().optional(),
+        query: z.string(),
+      })
     )
     .query(async ({ ctx, input }) => {
-      if (!input?.limit || !input.query) {
-        return await ctx.prisma.customer.findMany();
-      } else {
-        return await ctx.prisma.customer.findMany({
-          take: input?.limit ?? 10,
-          where: {
-            email: { search: `+${input?.query}` },
-          },
-        });
-      }
+      return await ctx.prisma.customer.findMany({
+        take: input?.limit ?? 10,
+        where: {
+          email: { search: `+${input?.query}` },
+        },
+      });
     }),
   getSingle: t.procedure
     .input(z.object({ customerId: z.string() }))

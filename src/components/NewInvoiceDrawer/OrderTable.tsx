@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { fuzzyFilter } from '@utils/tableHelper';
 import clsx from 'clsx';
 import { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { InvoiceOrderInput } from './InvoiceForm';
@@ -89,6 +90,7 @@ const OrderTable = ({ orderData, setOrderData }: OrderTableProps) => {
     columns,
     data: orderData,
     defaultColumn,
+    filterFns: { fuzzy: fuzzyFilter },
     getCoreRowModel: getCoreRowModel(),
     meta: {
       updateData: (rowIndex, columnId, value) => {
