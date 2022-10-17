@@ -1,66 +1,78 @@
 import { TrashIcon } from '@heroicons/react/24/solid';
 import {
-  ColumnDef,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  Table,
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
 import clsx from 'clsx';
-import { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { InvoiceOrderInput } from './InvoiceForm';
 import s from './tables.module.css';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
     removeRow: (rowIndex: number) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    register: UseFormRegister<any>;
   }
 }
 
-const defaultColumn: Partial<ColumnDef<InvoiceOrderInput[0]>> = {
-  cell: ({ getValue, row: { index }, column: { id }, table }) => {
-    const initialValue = getValue();
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, setValue] = useState(initialValue);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const initialType = useRef(typeof value);
-
-    const onBlur = () => {
-      table.options.meta?.updateData(index, id, value);
-    };
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return (
-      <input
-        type={initialType.current === 'string' ? 'text' : 'number'}
-        value={value as string}
-        onChange={e => setValue(e.target.value)}
-        onBlur={onBlur}
-        autoComplete="off"
-        required
-        className="w-full rounded-sm border-gray-300 text-sm text-gray-700"
-      />
-    );
-  },
+type TableInputProps = {
+  type: 'text' | 'number';
+  rowIdx: number;
+  columnId: string;
+  table: Table<InvoiceOrderInput[0]>;
+};
+const TableInput = ({ type, rowIdx, columnId, table }: TableInputProps) => {
+  return (
+    <input
+      {...table.options.meta?.register(`orders.${rowIdx}.${columnId}`)}
+      type={type}
+      autoComplete="off"
+      required
+      className="w-full rounded-sm border-gray-300 text-sm text-gray-700"
+    />
+  );
 };
 
 const columnHelper = createColumnHelper<InvoiceOrderInput[0]>();
 const columns = [
   columnHelper.accessor('name', {
     header: 'Item',
+    cell: props => (
+      <TableInput
+        type="text"
+        columnId={props.column.id}
+        rowIdx={props.row.index}
+        table={props.table}
+      />
+    ),
   }),
   columnHelper.accessor('quantity', {
     header: 'qty',
+    cell: props => (
+      <TableInput
+        type="number"
+        columnId={props.column.id}
+        rowIdx={props.row.index}
+        table={props.table}
+      />
+    ),
   }),
   columnHelper.accessor('amount', {
     header: 'price',
+    cell: props => (
+      <TableInput
+        type="number"
+        columnId={props.column.id}
+        rowIdx={props.row.index}
+        table={props.table}
+      />
+    ),
   }),
   columnHelper.accessor(row => `${row.amount * row.quantity}`, {
     header: 'total',
@@ -80,35 +92,25 @@ const columns = [
   }),
 ];
 
-type OrderTableProps = {
-  orderData: InvoiceOrderInput;
-  setOrderData: Dispatch<SetStateAction<InvoiceOrderInput>>;
+type OrderTableProps<T extends FieldValues> = {
+  orders: InvoiceOrderInput;
+  onRemoveField: (fieldIdx: number) => void;
+  register: UseFormRegister<T>;
 };
 
-const OrderTable = ({ orderData, setOrderData }: OrderTableProps) => {
+const OrderTable = <T extends FieldValues>({
+  orders,
+  onRemoveField,
+  register,
+}: OrderTableProps<T>) => {
   const table = useReactTable({
     columns,
-    data: orderData,
-    defaultColumn,
+    data: orders,
     filterFns: { fuzzy: fuzzyFilter },
     getCoreRowModel: getCoreRowModel(),
     meta: {
-      updateData: (rowIndex, columnId, value) => {
-        setOrderData(old =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                ...old[rowIndex]!,
-                [columnId]: value,
-              };
-            }
-            return row;
-          })
-        );
-      },
-      removeRow: rowIndex =>
-        setOrderData(old => old.filter((_, index) => index !== rowIndex)),
+      register,
+      removeRow: rowIndex => onRemoveField(rowIndex),
     },
   });
 

@@ -9,8 +9,18 @@ import clsx from 'clsx';
 import useDebounce from 'hooks/useDebounce';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import {
+  useForm,
+  SubmitHandler,
+  Controller,
+  useFieldArray,
+  Control,
+  useWatch,
+} from 'react-hook-form';
 import OrderTable from './OrderTable';
+
+export type InvoiceOrderInput =
+  InferProcedures['invoice']['create']['input']['orders'];
 
 type FieldValues = {
   name: string;
@@ -19,15 +29,26 @@ type FieldValues = {
   notes?: string;
   customer: string;
   selectedClient?: string;
+  orders: InvoiceOrderInput;
 };
-
-export type InvoiceOrderInput =
-  InferProcedures['invoice']['create']['input']['orders'];
 
 const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
+
+  const { register, handleSubmit, reset, control } = useForm<FieldValues>({
+    defaultValues: {
+      orders: [{ amount: 300, quantity: 1, name: 'Company Profile' }],
+    },
+  });
+  const { fields, append, remove } = useFieldArray<FieldValues>({
+    name: 'orders',
+    control,
+  });
+
+  const addOrderField = () => append({ amount: 0, quantity: 0, name: '' });
+  const removeOrderField = (fieldIdx: number) => remove(fieldIdx);
+
   const utils = trpc.useContext();
-  const { register, handleSubmit, reset, control } = useForm<FieldValues>();
   const mutation = trpc.invoice.create.useMutation({
     onSuccess: data => {
       router.push(`/invoices/${data.id}`);
@@ -37,27 +58,14 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
     },
   });
 
-  const [data, setData] = useState<InvoiceOrderInput>([
-    {
-      name: 'Landing page',
-      amount: 750,
-      quantity: 3,
-    },
-  ]);
-
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
+    console.log(fieldValues.selectedClient);
     if (!fieldValues.selectedClient) return;
     mutation.mutate({
       ...fieldValues,
       recipientEmail: fieldValues.selectedClient,
-      orders: data,
     });
   };
-
-  const totalAmount = data.reduce(
-    (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
-    0
-  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -94,27 +102,19 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         />
       </div>
       <div className="w-full">
-        <OrderTable orderData={data} setOrderData={setData} />
+        <OrderTable
+          orders={fields}
+          onRemoveField={removeOrderField}
+          register={register}
+        />
         <div className="w-full flex justify-between items-center pt-2">
           <button
             type="button"
             className="text-blue-500 text-xs font-semibold"
-            onClick={() =>
-              setData(prevData => [
-                ...prevData,
-                {
-                  name: '',
-                  amount: 0,
-                  quantity: 0,
-                },
-              ])
-            }>
+            onClick={addOrderField}>
             + ADD ITEM
           </button>
-          <div className="space-x-2">
-            <span className="text-sm">Total</span>
-            <span className="font-semibold text-lg">${totalAmount}</span>
-          </div>
+          <TotalAmount control={control} />
         </div>
       </div>
       <TextArea name="notes" label="Additional notes" register={register} />
@@ -160,6 +160,7 @@ const RecipientCombobox = ({
       refetchOnWindowFocus: false,
       enabled: debouncedQuery === '',
       staleTime: Infinity,
+      onSuccess: data => data[0] && onSelectClient(data[0].email),
     }
   );
 
@@ -237,5 +238,21 @@ const EmailOption = ({ client }: OptionProps) => {
         );
       }}
     </Combobox.Option>
+  );
+};
+
+const TotalAmount = ({ control }: { control: Control<FieldValues> }) => {
+  const watchedOrders = useWatch({ name: 'orders', control });
+
+  const totalAmount = watchedOrders.reduce(
+    (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
+    0
+  );
+
+  return (
+    <div className="space-x-2">
+      <span className="text-sm">Total</span>
+      <span className="font-semibold text-lg">${totalAmount}</span>
+    </div>
   );
 };
