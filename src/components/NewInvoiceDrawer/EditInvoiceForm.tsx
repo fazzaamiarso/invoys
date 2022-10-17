@@ -22,22 +22,33 @@ import OrderTable from './OrderTable';
 export type InvoiceOrderInput =
   InferProcedures['invoice']['create']['input']['orders'];
 
+export type InvoiceGetSingleOutput =
+  InferProcedures['invoice']['getSingle']['output'];
+
 type FieldValues = {
   name: string;
   dueDate: string;
   issuedOn: string;
   notes?: string;
-  customer: string;
   selectedClient?: string;
   orders: InvoiceOrderInput;
 };
 
-const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
+const EditInvoiceForm = ({
+  onClose,
+  invoiceDetails,
+}: {
+  onClose: () => void;
+  invoiceDetails: NonNullable<InvoiceGetSingleOutput>;
+}) => {
   const router = useRouter();
 
   const { register, handleSubmit, reset, control } = useForm<FieldValues>({
     defaultValues: {
-      orders: [{ amount: 300, quantity: 1, name: 'Company Profile' }],
+      ...invoiceDetails,
+      dueDate: invoiceDetails.dueDate.toString(),
+      issuedOn: invoiceDetails.issuedOn.toString(),
+      notes: invoiceDetails.notes ?? '',
     },
   });
   const { fields, append, remove } = useFieldArray<FieldValues>({
@@ -49,11 +60,12 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const removeOrderField = (fieldIdx: number) => remove(fieldIdx);
 
   const utils = trpc.useContext();
-  const mutation = trpc.invoice.create.useMutation({
+  const mutation = trpc.invoice.edit.useMutation({
     onSuccess: data => {
       router.push(`/invoices/${data.id}`);
       reset();
       onClose();
+      utils.invoice.getSingle.invalidate({ invoiceId: data.id });
       return utils.invoice.getAll.invalidate();
     },
   });
@@ -63,6 +75,7 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
     mutation.mutate({
       ...fieldValues,
       recipientEmail: fieldValues.selectedClient,
+      invoiceId: invoiceDetails.id,
     });
   };
 
@@ -124,15 +137,15 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
         <Button
           type="submit"
           isLoading={mutation.isLoading}
-          loadingContent="Creating invoice...">
-          Create invoice
+          loadingContent="Saving changes...">
+          Save changes
         </Button>
       </div>
     </form>
   );
 };
 
-export default InvoiceForm;
+export default EditInvoiceForm;
 
 type ComboboxProps = {
   selectedClient?: string;

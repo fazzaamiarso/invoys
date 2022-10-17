@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import Button from './Button';
-import NewInvoiceDrawer, { invoiceDrawerStateAtom } from './NewInvoiceDrawer';
+import { invoiceDrawerStateAtom, NewInvoiceDrawer } from './NewInvoiceDrawer';
 
 const navigations = [
   {

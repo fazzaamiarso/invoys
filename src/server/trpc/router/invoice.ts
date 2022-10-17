@@ -66,6 +66,32 @@ export const invoiceRouter = t.router({
       });
       return createdInvoice;
     }),
+  edit: t.procedure
+    .input(
+      z.object({
+        invoiceId: z.string(),
+        name: z.string(),
+        dueDate: z.string(),
+        issuedOn: z.string(),
+        notes: z.string().optional(),
+        recipientEmail: z.string(),
+        orders: z.array(orderItemSchema),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const updatedInvoice = await ctx.prisma.invoice.update({
+        where: { id: input.invoiceId },
+        data: {
+          name: input.name,
+          dueDate: new Date(input.dueDate),
+          issuedOn: new Date(input.issuedOn),
+          notes: input.notes,
+          customer: { connect: { email: input.recipientEmail } },
+          orders: { createMany: { data: input.orders } },
+        },
+      });
+      return updatedInvoice;
+    }),
   delete: t.procedure
     .input(z.object({ invoiceId: z.string() }))
     .mutation(async ({ ctx, input }) => {

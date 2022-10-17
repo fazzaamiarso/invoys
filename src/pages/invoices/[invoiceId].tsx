@@ -27,6 +27,7 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { InvoiceStatus } from '@prisma/client';
+import { EditInvoiceDrawer } from '@components/NewInvoiceDrawer';
 
 const pdf = new jsPDF({ format: 'A4' });
 
@@ -39,6 +40,7 @@ const InvoiceDetail = () => {
       `It should be impossible that this invoice Id exist: ${invoiceId}`
     );
 
+  const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState('');
@@ -96,7 +98,9 @@ const InvoiceDetail = () => {
           </h2>
         </div>
         <div className="space-x-4">
-          <Button variant="outline">Edit</Button>
+          <Button variant="outline" onClick={() => setIsEditing(true)}>
+            Edit
+          </Button>
           <Button variant="danger" onClick={() => setIsDeleting(true)}>
             Delete
           </Button>
@@ -247,10 +251,21 @@ const InvoiceDetail = () => {
         </div>
         {/* RIGHT SECTION */}
       </section>
+      {invoiceDetail && (
+        <EditInvoiceDrawer
+          invoiceDetails={invoiceDetail}
+          onClose={() => setIsEditing(false)}
+          isOpen={isEditing}
+        />
+      )}
       {isPreviewing && (
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
           <div>
-            <Viewer fileUrl={pdfUrl} plugins={[defaultLayoutPluginInstance]} />
+            <Viewer
+              key={pdfUrl}
+              fileUrl={pdfUrl}
+              plugins={[defaultLayoutPluginInstance]}
+            />
           </div>
         </Worker>
       )}
