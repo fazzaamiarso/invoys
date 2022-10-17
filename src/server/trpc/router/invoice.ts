@@ -32,13 +32,13 @@ export const invoiceRouter = t.router({
         dueDate: z.string(),
         issuedOn: z.string(),
         notes: z.string().optional(),
-        recipientId: z.string(),
+        recipientEmail: z.string(),
         orders: z.array(orderItemSchema),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const currentClient = await ctx.prisma.customer.findUnique({
-        where: { id: input.recipientId },
+        where: { email: input.recipientEmail },
         select: { invoicePrefix: true, _count: { select: { invoices: true } } },
       });
 
@@ -60,7 +60,7 @@ export const invoiceRouter = t.router({
           issuedOn: new Date(input.issuedOn),
           notes: input.notes,
           invoiceNumber,
-          customer: { connect: { id: input.recipientId } },
+          customer: { connect: { email: input.recipientEmail } },
           orders: { createMany: { data: input.orders } },
         },
       });

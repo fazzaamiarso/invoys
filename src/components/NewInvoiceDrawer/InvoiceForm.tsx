@@ -8,8 +8,8 @@ import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import useDebounce from 'hooks/useDebounce';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import OrderTable from './OrderTable';
 
 type FieldValues = {
@@ -18,6 +18,7 @@ type FieldValues = {
   issuedOn: string;
   notes?: string;
   customer: string;
+  selectedClient?: string;
 };
 
 export type InvoiceOrderInput =
@@ -26,7 +27,7 @@ export type InvoiceOrderInput =
 const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const utils = trpc.useContext();
-  const { register, handleSubmit, reset } = useForm<FieldValues>();
+  const { register, handleSubmit, reset, control } = useForm<FieldValues>();
   const mutation = trpc.invoice.create.useMutation({
     onSuccess: data => {
       router.push(`/invoices/${data.id}`);
@@ -36,9 +37,6 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
     },
   });
 
-  const [selectedRecipient, setSelectedRecipient] = useState<Customer | null>(
-    null
-  );
   const [data, setData] = useState<InvoiceOrderInput>([
     {
       name: 'Landing page',
@@ -48,10 +46,10 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
   ]);
 
   const onSubmit: SubmitHandler<FieldValues> = async fieldValues => {
-    if (!selectedRecipient?.id) return;
+    if (!fieldValues.selectedClient) return;
     mutation.mutate({
       ...fieldValues,
-      recipientId: selectedRecipient.id,
+      recipientEmail: fieldValues.selectedClient,
       orders: data,
     });
   };
@@ -63,10 +61,19 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <RecipientCombobox
-        selectedRecipient={selectedRecipient}
-        setSelectedRecipient={setSelectedRecipient}
+      <Controller
+        name="selectedClient"
+        control={control}
+        render={({ field }) => {
+          return (
+            <RecipientCombobox
+              selectedClient={field.value}
+              onSelectClient={field.onChange}
+            />
+          );
+        }}
       />
+
       <TextInput
         name="name"
         label="Project / Description"
@@ -129,12 +136,12 @@ const InvoiceForm = ({ onClose }: { onClose: () => void }) => {
 export default InvoiceForm;
 
 type ComboboxProps = {
-  selectedRecipient: Customer | null;
-  setSelectedRecipient: Dispatch<SetStateAction<Customer | null>>;
+  selectedClient?: string;
+  onSelectClient: (value: string) => void;
 };
 const RecipientCombobox = ({
-  selectedRecipient,
-  setSelectedRecipient,
+  selectedClient,
+  onSelectClient,
 }: ComboboxProps) => {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 500);
@@ -156,19 +163,16 @@ const RecipientCombobox = ({
     }
   );
 
-  // useEffect(() => {
-  //   if (initialClients && initialClients[0]) {
-  //     setSelectedRecipient(initialClients[0]);
-  //   }
-  // }, [initialClients, setSelectedRecipient]);
+  const selectedClientEmail =
+    selectedClient ?? (initialClients && initialClients[0]?.email) ?? '';
 
   return (
     <div>
       <Combobox
         as="div"
         className="relative"
-        value={selectedRecipient ?? (initialClients && initialClients[0]) ?? {}}
-        onChange={setSelectedRecipient}>
+        value={selectedClientEmail}
+        onChange={onSelectClient}>
         <div className="rounded-md bg-blue-50 ring-1 ring-blue-200 space-y-4 p-4">
           <div className="relative w-full">
             <div className="relative flex flex-col gap-2">
@@ -182,11 +186,7 @@ const RecipientCombobox = ({
                 id="rec-email"
                 autoComplete="off"
                 onChange={event => setQuery(event.target.value)}
-                displayValue={_ =>
-                  selectedRecipient?.email ??
-                  (initialClients && initialClients[0]?.email) ??
-                  ''
-                }
+                displayValue={() => selectedClientEmail}
                 className="rounded-sm text-sm border-gray-300 text-gray-700"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center px-3">
@@ -219,7 +219,10 @@ type OptionProps = {
 };
 const EmailOption = ({ client }: OptionProps) => {
   return (
-    <Combobox.Option key={client.id} value={client} className="w-full text-sm">
+    <Combobox.Option
+      key={client.id}
+      value={client.email}
+      className="w-full text-sm">
       {({ active, selected }) => {
         return (
           <div className={clsx('w-full py-2', active && 'bg-pink-100')}>
