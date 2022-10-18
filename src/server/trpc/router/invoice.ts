@@ -2,6 +2,7 @@ import { t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
+import { sendInvoice } from '@lib/courier';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -110,5 +111,17 @@ export const invoiceRouter = t.router({
         data: { status: input.status },
       });
       return updatedStatus;
+    }),
+  sendEmail: t.procedure
+    .input(
+      z.object({
+        customerName: z.string(),
+        invoiceNumber: z.string(),
+        pdfUri: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const requestId = await sendInvoice(input);
+      return requestId;
     }),
 });

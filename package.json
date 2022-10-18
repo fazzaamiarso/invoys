@@ -27,6 +27,7 @@
     "@trpc/next": "10.0.0-proxy-beta.15",
     "@trpc/react": "10.0.0-proxy-beta.15",
     "@trpc/server": "10.0.0-proxy-beta.15",
+    "@trycourier/courier": "^4.0.1",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.5",
     "html-to-image": "^1.10.8",

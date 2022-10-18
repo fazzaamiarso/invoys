@@ -20,16 +20,14 @@ import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
-import { toPng } from 'html-to-image';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { toJpeg } from 'html-to-image';
+import { Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { InvoiceStatus } from '@prisma/client';
 import { EditInvoiceDrawer } from '@components/NewInvoiceDrawer';
-
-const pdf = new jsPDF({ format: 'A4' });
 
 const InvoiceDetail = () => {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -52,7 +50,13 @@ const InvoiceDetail = () => {
     {
       invoiceId,
     },
-    { refetchOnWindowFocus: false, keepPreviousData: true }
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      onSuccess: () => {
+        return generatePdf();
+      },
+    }
   );
 
   const deleteMutation = trpc.invoice.delete.useMutation({
@@ -61,28 +65,42 @@ const InvoiceDetail = () => {
       router.replace('/invoices');
     },
   });
+  const sendEmailMutation = trpc.invoice.sendEmail.useMutation({
+    onSuccess: data => {
+      console.log(data);
+    },
+    onError: error => {
+      console.error(JSON.stringify(error));
+    },
+  });
+
+  const generatePdf = async () => {
+    const pdf = new jsPDF();
+    if (!pdfRef.current) return;
+    const dataUrl = await toJpeg(pdfRef.current);
+
+    const imgProperties = pdf.getImageProperties(dataUrl);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    const output = pdf.output('datauristring');
+    setPdfUrl(output);
+  };
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
+    if (!pdfRef.current) return;
+
+    const pdf = new jsPDF();
+    const dataUrl = await toJpeg(pdfRef.current);
+    const imgProperties = pdf.getImageProperties(dataUrl);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
     pdf.save(`Invoice #${invoiceDetail?.invoiceNumber}.pdf`);
   };
-
-  useEffect(() => {
-    const generatePdf = async () => {
-      if (!pdfRef.current) return;
-      const dataUrl = await toPng(pdfRef.current);
-
-      const imgProperties = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const output = pdf.output('dataurlstring');
-      setPdfUrl(output);
-    };
-
-    generatePdf();
-  }, []);
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
@@ -236,7 +254,9 @@ const InvoiceDetail = () => {
               <Button
                 Icon={EyeIcon}
                 variant="outline"
-                onClick={() => setIsPreviewing(!isPreviewing)}>
+                onClick={() => {
+                  setIsPreviewing(!isPreviewing);
+                }}>
                 Preview
               </Button>
               <Button
@@ -246,7 +266,19 @@ const InvoiceDetail = () => {
                 Download PDF
               </Button>
             </div>
-            <Button variant="primary">Send Invoice to Email</Button>
+            <Button
+              variant="primary"
+              onClick={
+                () => ''
+                // invoiceDetail &&
+                // sendEmailMutation.mutate({
+                //   customerName: invoiceDetail.customer.name,
+                //   invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
+                //   pdfUri: pdfUrl,
+                // })
+              }>
+              Send Invoice to Email
+            </Button>
           </div>
         </div>
         {/* RIGHT SECTION */}
@@ -258,16 +290,14 @@ const InvoiceDetail = () => {
           isOpen={isEditing}
         />
       )}
-      {isPreviewing && (
-        <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
-          <div>
-            <Viewer
-              key={pdfUrl}
-              fileUrl={pdfUrl}
-              plugins={[defaultLayoutPluginInstance]}
-            />
-          </div>
-        </Worker>
+      {isPreviewing && pdfUrl && (
+        <div>
+          <Viewer
+            key={pdfUrl}
+            fileUrl={pdfUrl}
+            plugins={[defaultLayoutPluginInstance]}
+          />
+        </div>
       )}
       <DeleteModal
         isOpen={isDeleting}

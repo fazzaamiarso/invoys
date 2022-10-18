@@ -3,6 +3,7 @@ import TextArea from '@components/Form/TextArea';
 import TextInput from '@components/Form/TextInput';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { dayjs } from '@lib/dayjs';
 import { Customer } from '@prisma/client';
 import { InferProcedures, trpc } from '@utils/trpc';
 import clsx from 'clsx';
@@ -46,8 +47,8 @@ const EditInvoiceForm = ({
   const { register, handleSubmit, control } = useForm<FieldValues>({
     defaultValues: {
       ...invoiceDetails,
-      dueDate: invoiceDetails.dueDate.toISOString(), //fix this date for default value
-      issuedOn: invoiceDetails.issuedOn.toISOString(),
+      dueDate: dayjs(invoiceDetails.dueDate).format('YYYY-MM-DD'), //fix this date for default value
+      issuedOn: dayjs(invoiceDetails.issuedOn).format('YYYY-MM-DD'),
       notes: invoiceDetails.notes ?? '',
       selectedClient: invoiceDetails.customer.email,
     },

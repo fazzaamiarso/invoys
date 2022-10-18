@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import Button from './Button';
 import { invoiceDrawerStateAtom, NewInvoiceDrawer } from './NewInvoiceDrawer';
+import { Worker } from '@react-pdf-viewer/core';
 
 const navigations = [
   {
@@ -100,7 +101,9 @@ const Layout = ({
               <div className="aspect-square w-10 rounded-full bg-pink-500" />
             </div>
           </header>
-          <div className="content-layout py-8">{children}</div>
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+            <div className="content-layout py-8">{children}</div>
+          </Worker>
         </section>
         <NewInvoiceDrawer />
       </main>
