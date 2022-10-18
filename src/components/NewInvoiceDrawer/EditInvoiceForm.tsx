@@ -43,12 +43,13 @@ const EditInvoiceForm = ({
 }) => {
   const router = useRouter();
 
-  const { register, handleSubmit, reset, control } = useForm<FieldValues>({
+  const { register, handleSubmit, control } = useForm<FieldValues>({
     defaultValues: {
       ...invoiceDetails,
-      dueDate: invoiceDetails.dueDate.toString(),
-      issuedOn: invoiceDetails.issuedOn.toString(),
+      dueDate: invoiceDetails.dueDate.toISOString(), //fix this date for default value
+      issuedOn: invoiceDetails.issuedOn.toISOString(),
       notes: invoiceDetails.notes ?? '',
+      selectedClient: invoiceDetails.customer.email,
     },
   });
   const { fields, append, remove } = useFieldArray<FieldValues>({
@@ -62,8 +63,6 @@ const EditInvoiceForm = ({
   const utils = trpc.useContext();
   const mutation = trpc.invoice.edit.useMutation({
     onSuccess: data => {
-      router.push(`/invoices/${data.id}`);
-      reset();
       onClose();
       utils.invoice.getSingle.invalidate({ invoiceId: data.id });
       return utils.invoice.getAll.invalidate();
