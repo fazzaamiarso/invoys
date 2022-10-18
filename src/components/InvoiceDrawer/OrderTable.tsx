@@ -1,5 +1,6 @@
 import { TrashIcon } from '@heroicons/react/24/solid';
 import {
+  CellContext,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -7,10 +8,18 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
+import { InferProcedures } from '@utils/trpc';
 import clsx from 'clsx';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
-import { InvoiceOrderInput } from './InvoiceForm';
+import {
+  Control,
+  FieldValues,
+  UseFormRegister,
+  useWatch,
+} from 'react-hook-form';
 import s from './tables.module.css';
+
+export type InvoiceOrderInput =
+  InferProcedures['invoice']['create']['input']['orders'];
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,6 +27,7 @@ declare module '@tanstack/react-table' {
     removeRow: (rowIndex: number) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     register: UseFormRegister<any>;
+    control: Control<any>;
   }
 }
 
@@ -76,9 +86,10 @@ const columns = [
       />
     ),
   }),
-  columnHelper.accessor(row => `${row.amount * row.quantity}`, {
+  columnHelper.display({
+    id: 'total',
     header: 'total',
-    cell: data => data.getValue(),
+    cell: data => <TotalDisplay cellProps={data} />,
   }),
   columnHelper.display({
     id: 'actions',
@@ -94,16 +105,43 @@ const columns = [
   }),
 ];
 
+const TotalDisplay = ({
+  cellProps,
+}: {
+  cellProps: CellContext<
+    {
+      name: string;
+      amount: number;
+      quantity: number;
+    },
+    unknown
+  >;
+}) => {
+  const control = cellProps.table.options.meta?.control;
+  const watchedOrders = useWatch({ name: 'orders', control });
+
+  const currentRow = watchedOrders[cellProps.row.index];
+
+  const calculatedTotalAmount =
+    (currentRow?.amount ?? 0) * (currentRow?.quantity ?? 0);
+
+  return (
+    <span>{isNaN(calculatedTotalAmount) ? 0 : calculatedTotalAmount}</span>
+  );
+};
+
 type OrderTableProps<T extends FieldValues> = {
   orders: InvoiceOrderInput;
-  onRemoveField: (fieldIdx: number) => void;
   register: UseFormRegister<T>;
+  control: Control<T>;
+  onRemoveField: (fieldIdx: number) => void;
 };
 
 const OrderTable = <T extends FieldValues>({
   orders,
   onRemoveField,
   register,
+  control,
 }: OrderTableProps<T>) => {
   const table = useReactTable({
     columns,
@@ -111,6 +149,7 @@ const OrderTable = <T extends FieldValues>({
     filterFns: { fuzzy: fuzzyFilter },
     getCoreRowModel: getCoreRowModel(),
     meta: {
+      control,
       register,
       removeRow: rowIndex => onRemoveField(rowIndex),
     },

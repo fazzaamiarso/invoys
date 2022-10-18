@@ -12,8 +12,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import Button from './Button';
-import { invoiceDrawerStateAtom, NewInvoiceDrawer } from './NewInvoiceDrawer';
 import { Worker } from '@react-pdf-viewer/core';
+import {
+  invoiceDrawerStateAtom,
+  NewInvoiceDrawer,
+} from './InvoiceDrawer/NewInvoiceDrawer';
 
 const navigations = [
   {

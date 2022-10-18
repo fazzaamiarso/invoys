@@ -27,7 +27,7 @@ import { Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { InvoiceStatus } from '@prisma/client';
-import { EditInvoiceDrawer } from '@components/NewInvoiceDrawer';
+import { EditInvoiceDrawer } from '@components/InvoiceDrawer/EditInvoiceDrawer';
 
 const InvoiceDetail = () => {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
