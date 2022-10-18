@@ -42,12 +42,10 @@ const EditInvoiceForm = ({
   onClose: () => void;
   invoiceDetails: NonNullable<InvoiceGetSingleOutput>;
 }) => {
-  const router = useRouter();
-
   const { register, handleSubmit, control } = useForm<FieldValues>({
     defaultValues: {
       ...invoiceDetails,
-      dueDate: dayjs(invoiceDetails.dueDate).format('YYYY-MM-DD'), //fix this date for default value
+      dueDate: dayjs(invoiceDetails.dueDate).format('YYYY-MM-DD'),
       issuedOn: dayjs(invoiceDetails.issuedOn).format('YYYY-MM-DD'),
       notes: invoiceDetails.notes ?? '',
       selectedClient: invoiceDetails.customer.email,

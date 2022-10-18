@@ -80,6 +80,10 @@ export const invoiceRouter = t.router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ctx.prisma.orderItem.deleteMany({
+        where: { invoiceId: input.invoiceId },
+      });
+
       const updatedInvoice = await ctx.prisma.invoice.update({
         where: { id: input.invoiceId },
         data: {
@@ -87,10 +91,10 @@ export const invoiceRouter = t.router({
           dueDate: new Date(input.dueDate),
           issuedOn: new Date(input.issuedOn),
           notes: input.notes,
-          customer: { connect: { email: input.recipientEmail } },
           orders: { createMany: { data: input.orders } },
         },
       });
+
       return updatedInvoice;
     }),
   delete: t.procedure
