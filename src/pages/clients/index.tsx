@@ -17,7 +17,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { fuzzyFilter } from '@utils/tableHelper';
+import { fuzzyFilter, fuzzySort } from '@utils/tableHelper';
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import { NextPage } from 'next';
@@ -27,6 +27,7 @@ import { useState } from 'react';
 const columnHelper = createColumnHelper<Customer>();
 const columns = [
   columnHelper.accessor('name', {
+    sortingFn: fuzzySort,
     header: props => (
       <span className="flex items-center">
         <span>Name</span>
@@ -50,6 +51,7 @@ const columns = [
     header: 'Prefix',
   }),
   columnHelper.accessor('email', {
+    sortingFn: fuzzySort,
     header: props => (
       <span className="flex items-center">
         <span>Email</span>
