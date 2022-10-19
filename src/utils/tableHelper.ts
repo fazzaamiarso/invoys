@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+import { OrderItem } from '@prisma/client';
 import {
   rankItem,
   compareItems,
@@ -39,4 +40,25 @@ export const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
 
   // Provide an alphanumeric fallback for when the item ranks are equal
   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
+
+export const orderTotalSort: SortingFn<any> = (rowA, rowB, columnId) => {
+  return (
+    Number(
+      rowA
+        .getValue<OrderItem[]>(columnId)
+        .reduce(
+          (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
+          0
+        )
+    ) -
+    Number(
+      rowB
+        .getValue<OrderItem[]>(columnId)
+        .reduce(
+          (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
+          0
+        )
+    )
+  );
 };
