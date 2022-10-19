@@ -2,6 +2,7 @@ import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
 import {
+  ChevronUpDownIcon,
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -18,6 +19,7 @@ import {
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
 import { trpc } from '@utils/trpc';
+import clsx from 'clsx';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -25,7 +27,19 @@ import { useState } from 'react';
 const columnHelper = createColumnHelper<Customer>();
 const columns = [
   columnHelper.accessor('name', {
-    header: 'Name',
+    header: props => (
+      <span className="flex items-center">
+        <span>Name</span>
+        <button className="" onClick={props.column.getToggleSortingHandler()}>
+          <ChevronUpDownIcon
+            className={clsx(
+              'w-4 aspect-square ml-1',
+              props.column.getIsSorted() && 'text-purple-500'
+            )}
+          />
+        </button>
+      </span>
+    ),
     cell: props => (
       <Link href={`clients/${props.cell.row.original.id}`}>
         {props.getValue()}
@@ -36,7 +50,19 @@ const columns = [
     header: 'Prefix',
   }),
   columnHelper.accessor('email', {
-    header: 'Email',
+    header: props => (
+      <span className="flex items-center">
+        <span>Email</span>
+        <button className="" onClick={props.column.getToggleSortingHandler()}>
+          <ChevronUpDownIcon
+            className={clsx(
+              'w-4 aspect-square ml-1',
+              props.column.getIsSorted() && 'text-purple-500'
+            )}
+          />
+        </button>
+      </span>
+    ),
   }),
   columnHelper.accessor('phoneNumber', {
     header: 'Phone Number',

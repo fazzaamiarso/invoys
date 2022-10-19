@@ -29,7 +29,12 @@ export const EditInvoiceDrawer = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { register, handleSubmit, control } = useForm<EditInvoiceInput>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isDirty },
+  } = useForm<EditInvoiceInput>({
     defaultValues: {
       ...invoiceDetails,
       dueDate: dayjs(invoiceDetails.dueDate).format('YYYY-MM-DD'),
@@ -56,6 +61,7 @@ export const EditInvoiceDrawer = ({
   });
 
   const onSubmit: SubmitHandler<EditInvoiceInput> = async fieldValues => {
+    if (!isDirty) return onClose();
     if (!fieldValues.recipientEmail) return;
     mutation.mutate({
       ...fieldValues,

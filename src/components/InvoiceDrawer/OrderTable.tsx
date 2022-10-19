@@ -40,9 +40,12 @@ type TableInputProps = {
 const TableInput = ({ type, rowIdx, columnId, table }: TableInputProps) => {
   return (
     <input
-      {...table.options.meta?.register(`orders.${rowIdx}.${columnId}`, {
-        valueAsNumber: type === 'number',
-      })}
+      {...table.options.meta?.register(
+        `orders.${rowIdx}.${columnId}` as const,
+        {
+          valueAsNumber: type === 'number',
+        }
+      )}
       type={type}
       autoComplete="off"
       required
