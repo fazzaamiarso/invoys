@@ -13,3 +13,7 @@
 .danger {
     @apply bg-red-600 text-white hover:bg-red-500 transition-all
 }
+
+.ghost{
+    @apply bg-transparent text-gray-500 hover:text-gray-600 transition-all
+}

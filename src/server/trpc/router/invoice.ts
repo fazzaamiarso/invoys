@@ -10,6 +10,20 @@ const orderItemSchema = z.object({
   quantity: z.number(),
 });
 
+const sortSchema = z.enum(['asc', 'desc']).optional();
+
+const parseSort = (sortObject: Record<string, any>) => {
+  for (const key in sortObject) {
+    if (!key) continue;
+    const splitted = key.split('_');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const init = { [splitted.pop()!]: sortObject[key] };
+    return splitted.length > 1
+      ? splitted.reduceRight((acc, k) => ({ [k]: acc }), init)
+      : init;
+  }
+};
+
 export const invoiceRouter = t.router({
   getAll: t.procedure
     .input(
@@ -17,22 +31,31 @@ export const invoiceRouter = t.router({
         .object({
           status: z.nativeEnum(InvoiceStatus).optional(),
           query: z.string(),
+          sort: z
+            .object({
+              customer_name: sortSchema,
+              dueDate: sortSchema,
+            })
+            .optional(),
         })
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      // Implement the search
+      const query = { contains: input?.query };
+
       const invoices = await ctx.prisma.invoice.findMany({
+        include: { orders: true, customer: true },
         where: {
           status: input?.status,
           OR: [
-            { invoiceNumber: { contains: input?.query } },
-            { name: { contains: input?.query } },
-            { customer: { name: { contains: input?.query } } },
+            { invoiceNumber: query },
+            { name: query },
+            { customer: { name: query } },
           ],
         },
-        include: { orders: true, customer: true },
+        orderBy: parseSort(input?.sort ?? {}),
       });
+
       return invoices;
     }),
   getSingle: t.procedure
@@ -139,7 +162,7 @@ export const invoiceRouter = t.router({
       z.object({
         customerName: z.string(),
         invoiceNumber: z.string(),
-        pdfUri: z.string(),
+        invoiceViewUrl: z.string(),
       })
     )
     .mutation(async ({ input }) => {

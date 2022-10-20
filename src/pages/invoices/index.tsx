@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter, fuzzySort, orderTotalSort } from '@utils/tableHelper';
@@ -23,6 +24,7 @@ import { Listbox } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
+import { assert } from 'console';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -122,20 +124,31 @@ const columns = [
 const Invoices = () => {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
+
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
     undefined
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
   const { data: invoices, refetch } = trpc.invoice.getAll.useQuery(
-    { status: statusFilter, query: debouncedQuery },
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    {
+      status: statusFilter,
+      query: debouncedQuery,
+      sort: sorting.length
+        ? {
+            [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
+          }
+        : undefined,
+    },
     {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       keepPreviousData: true,
-      enabled: prevStatus !== statusFilter || false,
+      enabled: prevStatus !== statusFilter || Boolean(sorting) || false,
     }
   );
 
@@ -147,9 +160,14 @@ const Invoices = () => {
   const table = useReactTable({
     columns,
     data: invoices ?? [],
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     filterFns: { fuzzy: fuzzyFilter },
+    manualSorting: true,
   });
 
   return (

@@ -1,5 +1,4 @@
 import { CourierClient } from '@trycourier/courier';
-import { readFileSync } from 'fs';
 
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
 const authToken = process.env.COURIER_AUTH_TOKEN;
@@ -12,11 +11,11 @@ const courierClient = CourierClient({
 export const sendInvoice = async ({
   customerName,
   invoiceNumber,
-  pdfUri,
+  invoiceViewUrl,
 }: {
   customerName: string;
   invoiceNumber: string;
-  pdfUri: string;
+  invoiceViewUrl: string;
 }) => {
   try {
     const { requestId } = await courierClient.send({
@@ -28,24 +27,7 @@ export const sendInvoice = async ({
         data: {
           customerName,
           invoiceNumber,
-        },
-        providers: {
-          mailjet: {
-            override: {
-              body: {
-                Attachments: [
-                  {
-                    ContentType: 'application/pdf',
-                    Filename: 'test.pdf',
-                    Base64Content: pdfUri.replace(
-                      'data:application/pdf;filename=generated.pdf;base64,',
-                      ''
-                    ),
-                  },
-                ],
-              },
-            },
-          },
+          invoiceViewUrl,
         },
       },
     });

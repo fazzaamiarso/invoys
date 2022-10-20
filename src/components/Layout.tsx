@@ -101,7 +101,7 @@ const Layout = ({
             </Button>
             <div className="ml-auto flex items-center gap-4">
               <div className="font-semibold">Gojo Satoru</div>
-              <div className="aspect-square w-10 rounded-full bg-pink-500" />
+              <div className="aspect-square w-10 rounded-full bg-gradient-to-bl from-pink-500 via-red-500 to-yellow-500" />
             </div>
           </header>
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">

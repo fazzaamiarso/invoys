@@ -15,7 +15,7 @@ import {
   ArrowLeftIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/solid';
-import { trpc } from '@utils/trpc';
+import { getBaseUrl, trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
@@ -23,7 +23,6 @@ import { useRouter } from 'next/router';
 import { Fragment, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import { toJpeg } from 'html-to-image';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { InvoiceStatus } from '@prisma/client';
 import { EditInvoiceDrawer } from '@components/InvoiceDrawer/EditInvoiceDrawer';
 
@@ -247,14 +246,15 @@ const InvoiceDetail = () => {
             </div>
             <Button
               variant="primary"
-              onClick={
-                () => ''
-                // invoiceDetail &&
-                // sendEmailMutation.mutate({
-                //   customerName: invoiceDetail.customer.name,
-                //   invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
-                //   pdfUri: pdfUrl,
-                // })
+              onClick={() =>
+                invoiceDetail &&
+                sendEmailMutation.mutate({
+                  customerName: invoiceDetail.customer.name,
+                  invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
+                  invoiceViewUrl: `${getBaseUrl()}/invoices/${
+                    invoiceDetail.id
+                  }/preview`,
+                })
               }>
               Send Invoice to Email
             </Button>

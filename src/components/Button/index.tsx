@@ -11,7 +11,7 @@ type HeroIconProps = (
 ) => JSX.Element;
 
 type CommonProps = {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   Icon?: HeroIconProps;
   disabled?: boolean;
   onClick?: () => void;

@@ -48,7 +48,7 @@ const InvoicePreview: NextPage = () => {
   return (
     <>
       <main className="w-10/12 mx-auto max-w-xl space-y-6 py-12">
-        <h2 className="text-3xl font-bold">Preview</h2>
+        <h2 className="text-lg font-bold">Preview</h2>
         <div
           ref={pdfRef}
           className="w-full space-y-6  rounded-md p-4 ring-1 ring-gray-300 bg-white">
