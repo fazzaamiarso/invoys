@@ -32,7 +32,7 @@ const navigations = [
   },
   {
     name: 'Settings',
-    href: '/#settings',
+    href: '/settings',
     Icon: Cog6ToothIcon,
   },
 ];

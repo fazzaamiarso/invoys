@@ -26,7 +26,7 @@ export const NewInvoiceDrawer = () => {
 
   const { register, handleSubmit, reset, control } = useForm<NewInvoiceInput>({
     defaultValues: {
-      orders: [{ amount: 300, quantity: 1, name: 'Company Profile' }],
+      orders: [{ amount: 0, quantity: 1, name: '' }],
     },
   });
   const { fields, append, remove } = useFieldArray<NewInvoiceInput>({
@@ -113,7 +113,7 @@ export const NewInvoiceDrawer = () => {
         <TextArea name="notes" label="Additional notes" register={register} />
         <div className="flex items-center justify-between w-full border-t-[1px] border-t-gray-300 py-4">
           <button type="button" className="text-sm">
-            PREVIEW
+            DRAFT
           </button>
           <Button
             type="submit"

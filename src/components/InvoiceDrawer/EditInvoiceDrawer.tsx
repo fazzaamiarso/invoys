@@ -33,7 +33,6 @@ export const EditInvoiceDrawer = ({
     register,
     handleSubmit,
     control,
-    getValues,
     formState: { isDirty },
   } = useForm<EditInvoiceInput>({
     defaultValues: {
@@ -42,6 +41,7 @@ export const EditInvoiceDrawer = ({
       issuedOn: dayjs(invoiceDetails.issuedOn).format('YYYY-MM-DD'),
       notes: invoiceDetails.notes ?? '',
       recipientEmail: invoiceDetails.customer.email,
+      orders: [{ amount: 0, quantity: 0, name: '' }],
     },
   });
   const { fields, append, remove } = useFieldArray<EditInvoiceInput>({

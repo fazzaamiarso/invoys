@@ -4,7 +4,8 @@ import { Customer } from '@prisma/client';
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import useDebounce from '@hooks/useDebounce';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 type ComboboxProps = {
   selectedClient?: string;
@@ -29,18 +30,20 @@ export const RecipientCombobox = ({
     { limit: 10 },
     {
       refetchOnWindowFocus: false,
-      enabled: debouncedQuery === '',
       staleTime: Infinity,
-      onSuccess: data => data[0] && onSelectClient(data[0].email),
+      keepPreviousData: true,
     }
   );
+
+  const selectedRecipient =
+    selectedClient ?? (initialClients && initialClients[0]?.email) ?? '';
 
   return (
     <div>
       <Combobox
         as="div"
         className="relative"
-        value={selectedClient ?? ''}
+        value={selectedRecipient}
         onChange={onSelectClient}>
         <div className="rounded-md bg-blue-50 ring-1 ring-blue-200 space-y-4 p-4">
           <div className="relative w-full">
@@ -55,7 +58,7 @@ export const RecipientCombobox = ({
                 id="rec-email"
                 autoComplete="off"
                 onChange={event => setQuery(event.target.value)}
-                displayValue={() => selectedClient ?? ''}
+                displayValue={() => selectedRecipient}
                 className="rounded-sm text-sm border-gray-300 text-gray-700"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center px-3">

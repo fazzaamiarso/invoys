@@ -15,7 +15,7 @@ import {
   ChevronDownIcon,
   EyeIcon,
 } from '@heroicons/react/24/solid';
-import { trpc } from '@utils/trpc';
+import { getBaseUrl, trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
@@ -251,14 +251,13 @@ const InvoiceDetail = () => {
           </div>
           <div className="space-y-6">
             <div className="space-x-4 flex">
-              <Button
-                Icon={EyeIcon}
-                variant="outline"
-                onClick={() => {
-                  setIsPreviewing(!isPreviewing);
-                }}>
+              <a
+                href={`/invoices/${invoiceId}/preview`}
+                target="_blank"
+                rel="noReferrer"
+                referrerPolicy="no-referrer">
                 Preview
-              </Button>
+              </a>
               <Button
                 Icon={ArrowDownTrayIcon}
                 variant="outline"
