@@ -152,7 +152,7 @@ const Invoices = () => {
 
   return (
     <Layout title="Invoices">
-      <h2 className="text-2xl font-bold pb-6">Invoices</h2>
+      <h2 className="text-lg font-bold pb-6">Invoices</h2>
       <div className="w-full flex items-center pb-6">
         <form
           onSubmit={e => {
@@ -210,41 +210,43 @@ const Invoices = () => {
           </Button>
         </div>
       </div>
-      <table className="w-full ring-1 ring-gray-300 rounded-sm">
-        <thead className="border-b-2 border-b-gray-300">
-          <tr className="">
-            {table.getFlatHeaders().map(header => (
-              <th
-                key={header.id}
-                scope="col"
-                className="text-start px-4 p-2 text-sm first:w-[12%]">
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="">
-          {table.getRowModel().rows.map(row => {
-            return (
-              <tr key={row.id} className="">
-                {row.getVisibleCells().map(cell => {
-                  return (
-                    <td key={cell.id} className="p-4 py-4 text-sm">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="w-full h-[550px] overflow-y-scroll">
+        <table className="w-full ring-1 ring-gray-300 rounded-sm">
+          <thead className="border-b-2 border-b-gray-300">
+            <tr className="">
+              {table.getFlatHeaders().map(header => (
+                <th
+                  key={header.id}
+                  scope="col"
+                  className="text-start px-4 p-2 text-sm first:w-[12%]">
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="">
+            {table.getRowModel().rows.map(row => {
+              return (
+                <tr key={row.id} className="">
+                  {row.getVisibleCells().map(cell => {
+                    return (
+                      <td key={cell.id} className="p-4 py-4 text-sm">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </Layout>
   );
 };
