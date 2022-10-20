@@ -33,6 +33,7 @@ export const EditInvoiceDrawer = ({
     register,
     handleSubmit,
     control,
+    getValues,
     formState: { isDirty },
   } = useForm<EditInvoiceInput>({
     defaultValues: {
@@ -65,7 +66,6 @@ export const EditInvoiceDrawer = ({
     if (!fieldValues.recipientEmail) return;
     mutation.mutate({
       ...fieldValues,
-      recipientEmail: fieldValues.recipientEmail,
       invoiceId: invoiceDetails.id,
     });
   };

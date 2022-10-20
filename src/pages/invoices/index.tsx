@@ -17,12 +17,12 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Button from '@components/Button';
 import { Listbox } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
-import { Controller, useForm } from 'react-hook-form';
-import useDebounce from 'hooks/useDebounce';
+import useDebounce from '@hooks/useDebounce';
+import usePrevious from '@hooks/usePrevious';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -119,16 +119,6 @@ const columns = [
   }),
 ];
 
-const usePrevious = <T,>(value: T) => {
-  const savedValue = useRef(value);
-
-  useEffect(() => {
-    savedValue.current = value;
-  }, [value]);
-
-  return savedValue.current;
-};
-
 const Invoices = () => {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
@@ -151,6 +141,7 @@ const Invoices = () => {
     refetch();
   }, [refetch]);
 
+  //TODO: Change column sort to server
   const table = useReactTable({
     columns,
     data: invoices ?? [],

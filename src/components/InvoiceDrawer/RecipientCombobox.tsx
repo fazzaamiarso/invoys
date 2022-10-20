@@ -3,7 +3,7 @@ import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { Customer } from '@prisma/client';
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
-import useDebounce from 'hooks/useDebounce';
+import useDebounce from '@hooks/useDebounce';
 import { useState } from 'react';
 
 type ComboboxProps = {
@@ -35,15 +35,12 @@ export const RecipientCombobox = ({
     }
   );
 
-  const selectedClientEmail =
-    selectedClient ?? (initialClients && initialClients[0]?.email) ?? '';
-
   return (
     <div>
       <Combobox
         as="div"
         className="relative"
-        value={selectedClientEmail}
+        value={selectedClient ?? ''}
         onChange={onSelectClient}>
         <div className="rounded-md bg-blue-50 ring-1 ring-blue-200 space-y-4 p-4">
           <div className="relative w-full">
@@ -58,7 +55,7 @@ export const RecipientCombobox = ({
                 id="rec-email"
                 autoComplete="off"
                 onChange={event => setQuery(event.target.value)}
-                displayValue={() => selectedClientEmail}
+                displayValue={() => selectedClient ?? ''}
                 className="rounded-sm text-sm border-gray-300 text-gray-700"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 top-8 flex items-center px-3">
