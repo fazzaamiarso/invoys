@@ -13,9 +13,8 @@ import {
   ArrowDownTrayIcon,
   ArrowLeftIcon,
   ChevronDownIcon,
-  EyeIcon,
 } from '@heroicons/react/24/solid';
-import { getBaseUrl, trpc } from '@utils/trpc';
+import { trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
@@ -23,39 +22,32 @@ import { useRouter } from 'next/router';
 import { Fragment, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import { toJpeg } from 'html-to-image';
-import { Viewer } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { InvoiceStatus } from '@prisma/client';
 import { EditInvoiceDrawer } from '@components/InvoiceDrawer/EditInvoiceDrawer';
 
 const InvoiceDetail = () => {
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const router = useRouter();
   const { invoiceId } = router.query;
-  if (!invoiceId || typeof invoiceId !== 'string')
+  if (router.isReady && (!invoiceId || typeof invoiceId !== 'string'))
     throw Error(
       `It should be impossible that this invoice Id exist: ${invoiceId}`
     );
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPreviewing, setIsPreviewing] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState('');
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useContext();
   const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
     {
-      invoiceId,
+      invoiceId: invoiceId as string,
     },
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
-      onSuccess: () => {
-        return generatePdf();
-      },
+      enabled: router.isReady,
     }
   );
 
@@ -73,20 +65,6 @@ const InvoiceDetail = () => {
       console.error(JSON.stringify(error));
     },
   });
-
-  const generatePdf = async () => {
-    const pdf = new jsPDF();
-    if (!pdfRef.current) return;
-    const dataUrl = await toJpeg(pdfRef.current);
-
-    const imgProperties = pdf.getImageProperties(dataUrl);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-    pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-    const output = pdf.output('datauristring');
-    setPdfUrl(output);
-  };
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
@@ -210,7 +188,7 @@ const InvoiceDetail = () => {
             {invoiceDetail?.status && (
               <StatusSelect
                 status={invoiceDetail.status}
-                invoiceId={invoiceId}
+                invoiceId={invoiceDetail.id}
               />
             )}
           </div>
@@ -289,20 +267,14 @@ const InvoiceDetail = () => {
           isOpen={isEditing}
         />
       )}
-      {isPreviewing && pdfUrl && (
-        <div>
-          <Viewer
-            key={pdfUrl}
-            fileUrl={pdfUrl}
-            plugins={[defaultLayoutPluginInstance]}
-          />
-        </div>
-      )}
+
       <DeleteModal
         isOpen={isDeleting}
         onClose={() => setIsDeleting(false)}
         onConfirm={() =>
-          !deleteMutation.isLoading && deleteMutation.mutate({ invoiceId })
+          !deleteMutation.isLoading &&
+          invoiceDetail &&
+          deleteMutation.mutate({ invoiceId: invoiceDetail.id })
         }
         title={`Delete Invoice ${invoiceDetail?.invoiceNumber}?`}
         description="Are you sure you want to delete this Invoice? Data will be
