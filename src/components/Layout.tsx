@@ -40,7 +40,7 @@ const navigations = [
 const NavigationPane = () => {
   const router = useRouter();
   return (
-    <div className="p-4 space-y-12 h-screen border-r-gray-300 border-[1px] grow">
+    <div className="p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
       <h1 className="text-xl font-bold">LOGO</h1>
       <nav className="">
         <ul className="space-y-8">

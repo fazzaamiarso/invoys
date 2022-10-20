@@ -1,6 +1,7 @@
-import { forwardRef, PropsWithChildren, ReactNode } from 'react';
+import React, { forwardRef, PropsWithChildren, ReactNode } from 'react';
 import clsx from 'clsx';
 import v from './variant.module.css';
+import Link, { LinkProps } from 'next/link';
 
 type HeroIconProps = (
   props: React.ComponentProps<'svg'> & {
@@ -9,23 +10,54 @@ type HeroIconProps = (
   }
 ) => JSX.Element;
 
-type ButtonProps = PropsWithChildren<{
-  type?: 'button' | 'submit' | 'reset';
+type CommonProps = {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   Icon?: HeroIconProps;
   disabled?: boolean;
   onClick?: () => void;
+};
+
+type ButtonProps = CommonProps & {
+  type?: 'button' | 'submit' | 'reset';
   isLoading?: boolean;
   loadingContent?: ReactNode;
-}>;
+};
+
+type AnchorProps = CommonProps &
+  LinkProps &
+  Omit<React.HTMLProps<HTMLAnchorElement>, keyof LinkProps>;
 
 type RefEl = HTMLButtonElement;
 
-const Button = forwardRef<RefEl, ButtonProps>(
-  (
-    { type, children, variant, Icon, onClick, isLoading, loadingContent },
-    ref
-  ) => {
+const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
+  (props, ref) => {
+    if ('href' in props)
+      return (
+        <Link
+          {...props}
+          ref={null}
+          href={props.href}
+          onClick={props.onClick}
+          className={clsx(
+            'px-4 py-2 rounded-md font-semibold text-sm',
+            props.Icon ? 'flex items-center gap-2' : '',
+            props.variant ? v[props.variant] : v.primary
+          )}>
+          {props.Icon && <props.Icon className="aspect-square h-4" />}
+          {props.children}
+        </Link>
+      );
+
+    const {
+      type,
+      children,
+      variant,
+      Icon,
+      onClick,
+      isLoading,
+      loadingContent,
+    } = props;
+
     return (
       <button
         ref={ref}

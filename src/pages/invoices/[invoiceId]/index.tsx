@@ -6,6 +6,7 @@ import {
   CalendarDaysIcon,
   EnvelopeIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
   FolderIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
@@ -229,13 +230,14 @@ const InvoiceDetail = () => {
           </div>
           <div className="space-y-6">
             <div className="space-x-4 flex">
-              <a
+              <Button
+                variant="outline"
+                Icon={EyeIcon}
                 href={`/invoices/${invoiceId}/preview`}
                 target="_blank"
-                rel="noReferrer"
-                referrerPolicy="no-referrer">
+                rel="noReferrer">
                 Preview
-              </a>
+              </Button>
               <Button
                 Icon={ArrowDownTrayIcon}
                 variant="outline"

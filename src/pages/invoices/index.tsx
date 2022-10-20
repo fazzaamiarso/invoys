@@ -125,6 +125,8 @@ const Invoices = () => {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
     undefined
   );
+
+  const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
   const { data: invoices, refetch } = trpc.invoice.getAll.useQuery(
@@ -156,6 +158,7 @@ const Invoices = () => {
       <div className="w-full flex items-center pb-6">
         <form
           onSubmit={e => {
+            if (prevQuery === debouncedQuery) return;
             e.preventDefault();
             refetch();
           }}
@@ -167,6 +170,7 @@ const Invoices = () => {
             id="query"
             placeholder="search for client, invoice number, or projects"
             className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full"
+            required
           />
           <button type="submit" className="">
             <MagnifyingGlassIcon className="h-4" />{' '}
