@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react';
+import { forwardRef, PropsWithChildren, ReactNode } from 'react';
 import clsx from 'clsx';
 import v from './variant.module.css';
 
@@ -19,29 +19,30 @@ type ButtonProps = PropsWithChildren<{
   loadingContent?: ReactNode;
 }>;
 
-const Button = ({
-  type,
-  children,
-  variant,
-  Icon,
-  onClick,
-  isLoading,
-  loadingContent,
-}: ButtonProps) => {
-  return (
-    <button
-      type={type ?? 'button'}
-      onClick={onClick}
-      className={clsx(
-        'px-4 py-2 rounded-md font-semibold text-sm',
-        Icon ? 'flex items-center gap-2' : '',
-        variant ? v[variant] : v.primary
-      )}>
-      {isLoading && loadingContent}
-      {!isLoading && Icon && <Icon className="aspect-square h-4" />}
-      {!isLoading && children}
-    </button>
-  );
-};
+type RefEl = HTMLButtonElement;
 
+const Button = forwardRef<RefEl, ButtonProps>(
+  (
+    { type, children, variant, Icon, onClick, isLoading, loadingContent },
+    ref
+  ) => {
+    return (
+      <button
+        ref={ref}
+        type={type ?? 'button'}
+        onClick={onClick}
+        className={clsx(
+          'px-4 py-2 rounded-md font-semibold text-sm',
+          Icon ? 'flex items-center gap-2' : '',
+          variant ? v[variant] : v.primary
+        )}>
+        {isLoading && loadingContent}
+        {!isLoading && Icon && <Icon className="aspect-square h-4" />}
+        {!isLoading && children}
+      </button>
+    );
+  }
+);
+
+Button.displayName = 'Button';
 export default Button;

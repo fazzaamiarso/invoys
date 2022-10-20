@@ -11,12 +11,30 @@ const orderItemSchema = z.object({
 });
 
 export const invoiceRouter = t.router({
-  getAll: t.procedure.query(async ({ ctx }) => {
-    const invoices = await ctx.prisma.invoice.findMany({
-      include: { orders: true, customer: true },
-    });
-    return invoices;
-  }),
+  getAll: t.procedure
+    .input(
+      z
+        .object({
+          status: z.nativeEnum(InvoiceStatus).optional(),
+          query: z.string(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      // Implement the search
+      const invoices = await ctx.prisma.invoice.findMany({
+        where: {
+          status: input?.status,
+          OR: [
+            { invoiceNumber: { contains: input?.query } },
+            { name: { contains: input?.query } },
+            { customer: { name: { contains: input?.query } } },
+          ],
+        },
+        include: { orders: true, customer: true },
+      });
+      return invoices;
+    }),
   getSingle: t.procedure
     .input(z.object({ invoiceId: z.string() }))
     .query(async ({ ctx, input }) => {

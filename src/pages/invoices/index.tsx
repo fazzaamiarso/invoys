@@ -4,7 +4,6 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
@@ -18,8 +17,12 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import Button from '@components/Button';
+import { Listbox } from '@headlessui/react';
+import { InvoiceStatus } from '@prisma/client';
+import { Controller, useForm } from 'react-hook-form';
+import useDebounce from 'hooks/useDebounce';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -116,22 +119,41 @@ const columns = [
   }),
 ];
 
-const Invoices = () => {
-  const [globalFilter, setGlobalFilter] = useState('');
+const usePrevious = <T,>(value: T) => {
+  const savedValue = useRef(value);
 
-  const { data: invoices } = trpc.invoice.getAll.useQuery(undefined, {
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
+  useEffect(() => {
+    savedValue.current = value;
+  }, [value]);
+
+  return savedValue.current;
+};
+
+const Invoices = () => {
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 200);
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
+    undefined
+  );
+  const prevStatus = usePrevious(statusFilter);
+
+  const { data: invoices, refetch } = trpc.invoice.getAll.useQuery(
+    { status: statusFilter, query: debouncedQuery },
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: prevStatus !== statusFilter || false,
+    }
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const table = useReactTable({
     columns,
     data: invoices ?? [],
-    state: {
-      globalFilter,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     filterFns: { fuzzy: fuzzyFilter },
@@ -142,21 +164,55 @@ const Invoices = () => {
       <h2 className="text-2xl font-bold pb-6">Invoices</h2>
       <div className="w-full flex items-center pb-6">
         <form
-          onSubmit={e => e.preventDefault()}
-          className="flex items-center gap-4">
+          onSubmit={e => {
+            e.preventDefault();
+            refetch();
+          }}
+          className="flex items-center gap-4 w-80">
           <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
             type="search"
-            value={globalFilter}
-            onChange={e => setGlobalFilter(e.target.value)}
-            name="filterClient"
-            id="filterClient"
+            id="query"
             placeholder="search for client, invoice number, or projects"
-            className="rounded-md text-sm border-gray-300 placeholder:text-gray-400"
+            className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full"
           />
-          <button className="">
+          <button type="submit" className="">
             <MagnifyingGlassIcon className="h-4" />{' '}
           </button>
         </form>
+        {/* FILTER */}
+        <Listbox onChange={setStatusFilter} value={statusFilter}>
+          <div className="relative ml-8">
+            <Listbox.Button as={Fragment}>
+              <Button variant="outline">
+                {statusFilter
+                  ? statusFilter.charAt(0).toUpperCase() +
+                    statusFilter.slice(1).toLowerCase()
+                  : 'All Status'}
+              </Button>
+            </Listbox.Button>
+            <Listbox.Options className="absolute bottom-0 py-1 translate-y-full bg-white z-20 shadow-lg rounded-md w-max">
+              <Listbox.Option
+                value={undefined}
+                className="px-3 py-1 text-sm cursor-pointer">
+                All Status
+              </Listbox.Option>
+              {Object.values(InvoiceStatus).map(status => {
+                return (
+                  <Listbox.Option
+                    key={status}
+                    value={status}
+                    className="py-1 px-3 text-sm cursor-pointer">
+                    {status.charAt(0).toUpperCase() +
+                      status.slice(1).toLowerCase()}
+                  </Listbox.Option>
+                );
+              })}
+            </Listbox.Options>
+          </div>
+        </Listbox>
+        {/* FILTER END */}
         <div className="ml-auto flex items-center gap-4">
           <Button Icon={DocumentArrowDownIcon} variant="outline">
             Download CSV

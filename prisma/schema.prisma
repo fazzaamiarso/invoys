@@ -32,6 +32,8 @@ model Invoice {
     orders     OrderItem[]
     customer   Customer    @relation(fields: [customerId], references: [id])
     customerId String
+
+    @@fulltext([name, invoiceNumber])
 }
 
 model OrderItem {
