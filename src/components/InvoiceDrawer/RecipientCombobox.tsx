@@ -4,8 +4,7 @@ import { Customer } from '@prisma/client';
 import { trpc } from '@utils/trpc';
 import clsx from 'clsx';
 import useDebounce from '@hooks/useDebounce';
-import { useEffect, useState } from 'react';
-import { flushSync } from 'react-dom';
+import { useState } from 'react';
 
 type ComboboxProps = {
   selectedClient?: string;
@@ -15,6 +14,7 @@ export const RecipientCombobox = ({
   selectedClient,
   onSelectClient,
 }: ComboboxProps) => {
+  const utils = trpc.useContext();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 500);
   const { data: searchedClients } = trpc.customer.search.useQuery(
@@ -32,6 +32,13 @@ export const RecipientCombobox = ({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       keepPreviousData: true,
+      initialData: () => {
+        const data = utils.customer.infiniteClients.getData({
+          limit: 10,
+          query: '',
+        });
+        return data?.customer.length ? data.customer : undefined;
+      },
     }
   );
 

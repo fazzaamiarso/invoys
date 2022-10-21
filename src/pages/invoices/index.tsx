@@ -25,6 +25,7 @@ import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
 import { useInView } from 'react-intersection-observer';
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -221,7 +222,7 @@ const Invoices = () => {
         <Listbox onChange={setStatusFilter} value={statusFilter}>
           <div className="relative ml-8">
             <Listbox.Button as={Fragment}>
-              <Button variant="outline">
+              <Button variant="outline" Icon={FunnelIcon}>
                 {statusFilter
                   ? statusFilter.charAt(0).toUpperCase() +
                     statusFilter.slice(1).toLowerCase()
