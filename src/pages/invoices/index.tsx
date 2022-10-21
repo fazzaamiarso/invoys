@@ -5,10 +5,11 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  HeaderContext,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { fuzzyFilter, fuzzySort, orderTotalSort } from '@utils/tableHelper';
+import { fuzzyFilter, fuzzySort } from '@utils/tableHelper';
 import { InferProcedures, trpc } from '@utils/trpc';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
@@ -18,7 +19,14 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import Button from '@components/Button';
 import { Listbox } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
@@ -48,17 +56,7 @@ const columns = [
   columnHelper.accessor('customer.name', {
     sortingFn: fuzzySort,
     header: props => (
-      <span className="flex items-center">
-        <span>Client</span>
-        <button className="" onClick={props.column.getToggleSortingHandler()}>
-          <ChevronUpDownIcon
-            className={clsx(
-              'w-4 aspect-square ml-1',
-              props.column.getIsSorted() && 'text-purple-500'
-            )}
-          />
-        </button>
-      </span>
+      <SortableHeader headerProps={props}>Client</SortableHeader>
     ),
     cell: props => (
       <span className="line-clamp-1">
@@ -73,35 +71,14 @@ const columns = [
   columnHelper.accessor('dueDate', {
     sortingFn: 'datetime',
     header: props => (
-      <span className="flex items-center">
-        <span>Due Date</span>
-        <button className="" onClick={props.column.getToggleSortingHandler()}>
-          <ChevronUpDownIcon
-            className={clsx(
-              'w-4 aspect-square ml-1',
-              props.column.getIsSorted() && 'text-purple-500'
-            )}
-          />
-        </button>
-      </span>
+      <SortableHeader headerProps={props}>Due Date</SortableHeader>
     ),
     cell: props => dayjs(props.getValue()).format('LL'),
   }),
   columnHelper.accessor('orders', {
-    sortingFn: orderTotalSort,
     enableSorting: false,
     header: props => (
-      <span className="flex items-center">
-        <span>Amount</span>
-        <button className="" onClick={props.column.getToggleSortingHandler()}>
-          <ChevronUpDownIcon
-            className={clsx(
-              'w-4 aspect-square ml-1',
-              props.column.getIsSorted() && 'text-purple-500'
-            )}
-          />
-        </button>
-      </span>
+      <SortableHeader headerProps={props}>Amount</SortableHeader>
     ),
     cell: props =>
       `$${props
@@ -123,19 +100,46 @@ const columns = [
   }),
 ];
 
+const SortableHeader = ({
+  headerProps,
+  children,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+PropsWithChildren<{ headerProps: HeaderContext<any, any> }>) => {
+  return (
+    <span className="flex items-center">
+      <span>{children}</span>
+      <button
+        className=""
+        onClick={headerProps.column.getToggleSortingHandler()}>
+        <ChevronUpDownIcon
+          className={clsx(
+            'w-4 aspect-square ml-1',
+            headerProps.column.getIsSorted() && 'text-purple-500'
+          )}
+        />
+      </button>
+    </span>
+  );
+};
+
 const Invoices = () => {
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebounce(query, 200);
-
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
     undefined
   );
   const [sorting, setSorting] = useState<SortingState>([]);
-
   const tableParentRef = useRef<HTMLDivElement>(null);
 
+  const debouncedQuery = useDebounce(query, 200);
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
+
+  const sortValue =
+    sorting.length && sorting[0]
+      ? {
+          [sorting[0].id]: sorting[0]?.desc ? 'desc' : 'asc',
+        }
+      : undefined;
 
   const {
     data,
@@ -148,12 +152,7 @@ const Invoices = () => {
     {
       status: statusFilter,
       query: debouncedQuery,
-      sort: sorting.length
-        ? {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
-          }
-        : undefined,
+      sort: sortValue,
     },
     {
       refetchOnMount: false,
@@ -229,10 +228,10 @@ const Invoices = () => {
                   : 'All Status'}
               </Button>
             </Listbox.Button>
-            <Listbox.Options className="absolute bottom-0 py-1 translate-y-full bg-white z-20 shadow-lg rounded-md w-max">
+            <Listbox.Options className="absolute bottom-0 py-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
               <Listbox.Option
                 value={undefined}
-                className="px-3 py-1 text-sm cursor-pointer">
+                className="px-3 py-2 text-sm cursor-pointer">
                 All Status
               </Listbox.Option>
               {Object.values(InvoiceStatus).map(status => {
@@ -240,7 +239,7 @@ const Invoices = () => {
                   <Listbox.Option
                     key={status}
                     value={status}
-                    className="py-1 px-3 text-sm cursor-pointer">
+                    className="py-2 px-3 text-sm cursor-pointer">
                     {status.charAt(0).toUpperCase() +
                       status.slice(1).toLowerCase()}
                   </Listbox.Option>

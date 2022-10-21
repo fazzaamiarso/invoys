@@ -15,7 +15,7 @@ import {
   ArrowLeftIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/solid';
-import { getBaseUrl, trpc } from '@utils/trpc';
+import { trpc } from '@utils/trpc';
 import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
@@ -57,14 +57,7 @@ const InvoiceDetail = () => {
       router.replace('/invoices');
     },
   });
-  const sendEmailMutation = trpc.invoice.sendEmail.useMutation({
-    onSuccess: data => {
-      console.log(data);
-    },
-    onError: error => {
-      console.error(JSON.stringify(error));
-    },
-  });
+  const sendEmailMutation = trpc.invoice.sendEmail.useMutation({});
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
@@ -114,7 +107,7 @@ const InvoiceDetail = () => {
                   Invoice #{invoiceDetail?.invoiceNumber}
                 </h3>
                 <p className="text-sm">
-                  Issued on{dayjs(invoiceDetail?.issuedOn).format('LL')} - Due
+                  Issued on {dayjs(invoiceDetail?.issuedOn).format('LL')} - Due
                   on {dayjs(invoiceDetail?.dueDate).format('LL')}
                 </p>
               </div>
@@ -217,15 +210,6 @@ const InvoiceDetail = () => {
                 {dayjs(invoiceDetail?.dueDate).format('DD MMM YYYY')}
               </p>
             </div>
-
-            <div className="bg-gray-200 w-full h-px my-2" />
-            <div>
-              <h3>Project log</h3>
-              <ul>
-                <li className="text-sm">Invoice issued</li>
-                <li className="text-sm">Due date prolonged</li>
-              </ul>
-            </div>
           </div>
           <div className="space-y-6">
             <div className="space-x-4 flex">
@@ -251,9 +235,7 @@ const InvoiceDetail = () => {
                 sendEmailMutation.mutate({
                   customerName: invoiceDetail.customer.name,
                   invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
-                  invoiceViewUrl: `${getBaseUrl()}/invoices/${
-                    invoiceDetail.id
-                  }/preview`,
+                  invoiceViewUrl: `http://localhost:3000/invoices/${invoiceDetail.id}/preview`,
                 })
               }>
               Send Invoice to Email

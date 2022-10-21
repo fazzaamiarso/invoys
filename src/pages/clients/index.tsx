@@ -108,7 +108,7 @@ const ClientsIndex: NextPage = () => {
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
-      enabled: Boolean(sorting) || false,
+      enabled: Boolean(sorting.length) || false,
       getNextPageParam: lastPage => lastPage.nextCursor,
     }
   );

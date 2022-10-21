@@ -18,6 +18,7 @@ export const sendInvoice = async ({
   invoiceViewUrl: string;
 }) => {
   try {
+    console.log(invoiceViewUrl);
     const { requestId } = await courierClient.send({
       message: {
         to: {
@@ -32,6 +33,7 @@ export const sendInvoice = async ({
       },
     });
     return requestId;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     throw new Error(e);
   }
