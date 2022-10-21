@@ -2,7 +2,53 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { t } from '../trpc';
 
+const sortSchema = z.enum(['asc', 'desc']).optional();
+
+const parseSort = (sortObject: Record<string, any>) => {
+  for (const key in sortObject) {
+    if (!key) continue;
+    const splitted = key.split('_');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const init = { [splitted.pop()!]: sortObject[key] };
+    return splitted.length > 1
+      ? splitted.reduceRight((acc, k) => ({ [k]: acc }), init)
+      : init;
+  }
+};
+
 export const customerRouter = t.router({
+  infiniteClients: t.procedure
+    .input(
+      z.object({
+        cursor: z.string().optional(),
+        limit: z.number().min(10).optional(),
+        query: z.string(),
+        sort: z
+          .object({
+            name: sortSchema,
+            email: sortSchema,
+          })
+          .optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const query = { contains: input?.query };
+      const sort = parseSort(input?.sort ?? {});
+
+      const customer = await ctx.prisma.customer.findMany({
+        skip: input?.cursor ? 1 : 0,
+        take: input?.limit ?? 10,
+        where: {
+          OR: [{ name: query }, { email: query }],
+        },
+        cursor: input?.cursor ? { id: input.cursor } : undefined,
+        orderBy: sort,
+      });
+
+      const nextCursor = customer?.at(-1)?.id;
+
+      return { customer, nextCursor };
+    }),
   getAll: t.procedure
     .input(z.object({ limit: z.number().optional() }))
     .query(async ({ ctx, input }) => {

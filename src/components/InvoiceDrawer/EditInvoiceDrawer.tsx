@@ -57,7 +57,7 @@ export const EditInvoiceDrawer = ({
     onSuccess: data => {
       onClose();
       utils.invoice.getSingle.invalidate({ invoiceId: data.id });
-      return utils.invoice.getAll.invalidate();
+      return utils.invoice.infiniteInvoices.invalidate();
     },
   });
 

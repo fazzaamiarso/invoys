@@ -43,7 +43,7 @@ export const NewInvoiceDrawer = () => {
       router.push(`/invoices/${data.id}`);
       reset();
       setIsOpen(false);
-      return utils.invoice.getAll.invalidate();
+      return utils.invoice.infiniteInvoices.invalidate();
     },
   });
 

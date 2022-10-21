@@ -53,7 +53,7 @@ const InvoiceDetail = () => {
 
   const deleteMutation = trpc.invoice.delete.useMutation({
     onSuccess() {
-      utils.invoice.getAll.invalidate();
+      utils.invoice.infiniteInvoices.invalidate();
       router.replace('/invoices');
     },
   });
@@ -350,7 +350,7 @@ const StatusSelect = ({
   const utils = trpc.useContext();
   const mutation = trpc.invoice.updateStatus.useMutation({
     onSuccess() {
-      utils.invoice.getAll.invalidate(undefined);
+      utils.invoice.infiniteInvoices.invalidate(undefined);
       utils.invoice.getSingle.invalidate({ invoiceId });
     },
   });

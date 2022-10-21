@@ -24,7 +24,6 @@ import { Listbox } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { useInView } from 'react-intersection-observer';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
@@ -131,34 +130,40 @@ const Invoices = () => {
     undefined
   );
   const [sorting, setSorting] = useState<SortingState>([]);
-  const { ref, inView } = useInView();
 
   const tableParentRef = useRef<HTMLDivElement>(null);
 
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
-  const { data, refetch, fetchNextPage, hasNextPage } =
-    trpc.invoice.infiniteInvoice.useInfiniteQuery(
-      {
-        status: statusFilter,
-        query: debouncedQuery,
-        sort: sorting.length
-          ? {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
-            }
-          : undefined,
-      },
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        keepPreviousData: true,
-        enabled:
-          prevStatus !== statusFilter || Boolean(sorting.length) || false,
-        getNextPageParam: lastPage => lastPage.nextCursor,
-      }
-    );
+  const {
+    data,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = trpc.invoice.infiniteInvoices.useInfiniteQuery(
+    {
+      status: statusFilter,
+      query: debouncedQuery,
+      sort: sorting.length
+        ? {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
+          }
+        : undefined,
+    },
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: prevStatus !== statusFilter || Boolean(sorting.length) || false,
+      getNextPageParam: lastPage => lastPage.nextCursor,
+    }
+  );
+
+  const { ref, inView } = useInView();
 
   const flatData = useMemo(() => {
     return data?.pages.flatMap(page => page.invoices) ?? [];
@@ -169,8 +174,10 @@ const Invoices = () => {
   }, [refetch]);
 
   useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, fetchNextPage, hasNextPage]);
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
 
   const table = useReactTable({
     columns,
@@ -184,12 +191,6 @@ const Invoices = () => {
     filterFns: { fuzzy: fuzzyFilter },
     manualSorting: true,
   });
-
-  // const virtual = useVirtualizer({
-  //   count: table.getRowModel().rows.length,
-  //   getScrollElement: () => tableParentRef.current,
-  //   estimateSize: () => 200,
-  // });
 
   return (
     <Layout title="Invoices">
@@ -210,6 +211,7 @@ const Invoices = () => {
             placeholder="search for client, invoice number, or projects"
             className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full"
             required
+            autoComplete="off"
           />
           <button type="submit" className="">
             <MagnifyingGlassIcon className="h-4" />{' '}
@@ -253,27 +255,29 @@ const Invoices = () => {
           </Button>
         </div>
       </div>
-      <div ref={tableParentRef} className="w-full h-[550px] overflow-y-scroll">
-        <table className="w-full ring-1 ring-gray-300 rounded-sm">
-          <thead className="border-b-2 border-b-gray-300">
-            <tr className="">
-              {table.getFlatHeaders().map(header => (
-                <th
-                  key={header.id}
-                  scope="col"
-                  className="text-start px-4 p-2 text-sm first:w-[12%]">
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="">
-            {table.getRowModel().rows.map(row => {
-              return (
-                <tr key={row.id} className="">
+      {!isLoading && (
+        <div
+          ref={tableParentRef}
+          className="w-full h-[550px] overflow-y-scroll rounded-sm">
+          <table className="w-full ring-1 ring-gray-300">
+            <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
+              <tr className="">
+                {table.getFlatHeaders().map(header => (
+                  <th
+                    key={header.id}
+                    scope="col"
+                    className="text-start px-4 p-3 text-sm first:w-[12%]">
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="">
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="border-t-[1px] border-gray-200">
                   {row.getVisibleCells().map(cell => {
                     return (
                       <td key={cell.id} className="p-4 py-4 text-sm">
@@ -285,12 +289,12 @@ const Invoices = () => {
                     );
                   })}
                 </tr>
-              );
-            })}
-            <tr ref={ref} className="w-full h-8" />
-          </tbody>
-        </table>
-      </div>
+              ))}
+              <tr ref={ref} className="h-4 w-full "></tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </Layout>
   );
 };

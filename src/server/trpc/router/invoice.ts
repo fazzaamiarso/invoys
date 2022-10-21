@@ -25,7 +25,7 @@ const parseSort = (sortObject: Record<string, any>) => {
 };
 
 export const invoiceRouter = t.router({
-  infiniteInvoice: t.procedure
+  infiniteInvoices: t.procedure
     .input(
       z.object({
         cursor: z.string().optional(),
@@ -46,7 +46,7 @@ export const invoiceRouter = t.router({
 
       const invoices = await ctx.prisma.invoice.findMany({
         skip: input?.cursor ? 1 : 0,
-        take: input?.limit ?? 5,
+        take: input?.limit ?? 10,
         include: { orders: true, customer: true },
         where: {
           status: input?.status,
