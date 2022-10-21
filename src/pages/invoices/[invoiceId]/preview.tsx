@@ -26,7 +26,6 @@ const InvoicePreview: NextPage = () => {
     },
     {
       staleTime: Infinity,
-      refetchOnWindowFocus: false,
       keepPreviousData: true,
       enabled: router.isReady,
     }

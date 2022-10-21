@@ -34,6 +34,7 @@ import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
 import { useInView } from 'react-intersection-observer';
 import { FunnelIcon } from '@heroicons/react/24/outline';
+import { capitalize } from '@utils/display';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -156,7 +157,6 @@ const Invoices = () => {
     },
     {
       refetchOnMount: false,
-      refetchOnWindowFocus: false,
       keepPreviousData: true,
       enabled: prevStatus !== statusFilter || Boolean(sorting.length) || false,
       getNextPageParam: lastPage => lastPage.nextCursor,
@@ -222,10 +222,7 @@ const Invoices = () => {
           <div className="relative ml-8">
             <Listbox.Button as={Fragment}>
               <Button variant="outline" Icon={FunnelIcon}>
-                {statusFilter
-                  ? statusFilter.charAt(0).toUpperCase() +
-                    statusFilter.slice(1).toLowerCase()
-                  : 'All Status'}
+                {statusFilter ? capitalize(statusFilter) : 'All Status'}
               </Button>
             </Listbox.Button>
             <Listbox.Options className="absolute bottom-0 py-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
@@ -240,8 +237,7 @@ const Invoices = () => {
                     key={status}
                     value={status}
                     className="py-2 px-3 text-sm cursor-pointer">
-                    {status.charAt(0).toUpperCase() +
-                      status.slice(1).toLowerCase()}
+                    {capitalize(status)}
                   </Listbox.Option>
                 );
               })}

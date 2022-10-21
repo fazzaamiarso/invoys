@@ -25,7 +25,7 @@ const ClientDetails: NextPage = () => {
   const utils = trpc.useContext();
   const { data: clientDetail } = trpc.customer.getSingle.useQuery(
     { customerId: clientId },
-    { refetchOnWindowFocus: false }
+    {}
   );
   const deleteMutation = trpc.customer.delete.useMutation({
     onSuccess() {

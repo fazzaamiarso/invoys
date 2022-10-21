@@ -20,7 +20,6 @@ export const RecipientCombobox = ({
   const { data: searchedClients } = trpc.customer.search.useQuery(
     { query: debouncedQuery },
     {
-      refetchOnWindowFocus: false,
       enabled: Boolean(debouncedQuery),
       keepPreviousData: true,
     }
@@ -29,7 +28,6 @@ export const RecipientCombobox = ({
   const { data: initialClients } = trpc.customer.getAll.useQuery(
     { limit: 10 },
     {
-      refetchOnWindowFocus: false,
       staleTime: Infinity,
       keepPreviousData: true,
       initialData: () => {
