@@ -18,13 +18,14 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@components/Button';
 import { Listbox } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
-import { assert } from 'console';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useInView } from 'react-intersection-observer';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -88,6 +89,7 @@ const columns = [
   }),
   columnHelper.accessor('orders', {
     sortingFn: orderTotalSort,
+    enableSorting: false,
     header: props => (
       <span className="flex items-center">
         <span>Amount</span>
@@ -129,37 +131,50 @@ const Invoices = () => {
     undefined
   );
   const [sorting, setSorting] = useState<SortingState>([]);
+  const { ref, inView } = useInView();
+
+  const tableParentRef = useRef<HTMLDivElement>(null);
 
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
-  const { data: invoices, refetch } = trpc.invoice.getAll.useQuery(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    {
-      status: statusFilter,
-      query: debouncedQuery,
-      sort: sorting.length
-        ? {
-            [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
-          }
-        : undefined,
-    },
-    {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      enabled: prevStatus !== statusFilter || Boolean(sorting) || false,
-    }
-  );
+  const { data, refetch, fetchNextPage, hasNextPage } =
+    trpc.invoice.infiniteInvoice.useInfiniteQuery(
+      {
+        status: statusFilter,
+        query: debouncedQuery,
+        sort: sorting.length
+          ? {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
+            }
+          : undefined,
+      },
+      {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+        enabled:
+          prevStatus !== statusFilter || Boolean(sorting.length) || false,
+        getNextPageParam: lastPage => lastPage.nextCursor,
+      }
+    );
+
+  const flatData = useMemo(() => {
+    return data?.pages.flatMap(page => page.invoices) ?? [];
+  }, [data]);
 
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  //TODO: Change column sort to server
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, fetchNextPage, hasNextPage]);
+
   const table = useReactTable({
     columns,
-    data: invoices ?? [],
+    data: flatData,
     state: {
       sorting,
     },
@@ -169,6 +184,12 @@ const Invoices = () => {
     filterFns: { fuzzy: fuzzyFilter },
     manualSorting: true,
   });
+
+  // const virtual = useVirtualizer({
+  //   count: table.getRowModel().rows.length,
+  //   getScrollElement: () => tableParentRef.current,
+  //   estimateSize: () => 200,
+  // });
 
   return (
     <Layout title="Invoices">
@@ -232,7 +253,7 @@ const Invoices = () => {
           </Button>
         </div>
       </div>
-      <div className="w-full h-[550px] overflow-y-scroll">
+      <div ref={tableParentRef} className="w-full h-[550px] overflow-y-scroll">
         <table className="w-full ring-1 ring-gray-300 rounded-sm">
           <thead className="border-b-2 border-b-gray-300">
             <tr className="">
@@ -266,6 +287,7 @@ const Invoices = () => {
                 </tr>
               );
             })}
+            <tr ref={ref} className="w-full h-8" />
           </tbody>
         </table>
       </div>

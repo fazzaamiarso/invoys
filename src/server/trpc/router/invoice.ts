@@ -25,6 +25,45 @@ const parseSort = (sortObject: Record<string, any>) => {
 };
 
 export const invoiceRouter = t.router({
+  infiniteInvoice: t.procedure
+    .input(
+      z.object({
+        cursor: z.string().optional(),
+        limit: z.number().min(10).optional(),
+        status: z.nativeEnum(InvoiceStatus).optional(),
+        query: z.string(),
+        sort: z
+          .object({
+            customer_name: sortSchema,
+            dueDate: sortSchema,
+          })
+          .optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const query = { contains: input?.query };
+      const sort = parseSort(input?.sort ?? {});
+
+      const invoices = await ctx.prisma.invoice.findMany({
+        skip: input?.cursor ? 1 : 0,
+        take: input?.limit ?? 5,
+        include: { orders: true, customer: true },
+        where: {
+          status: input?.status,
+          OR: [
+            { invoiceNumber: query },
+            { name: query },
+            { customer: { name: query } },
+          ],
+        },
+        cursor: input?.cursor ? { id: input.cursor } : undefined,
+        orderBy: { ...sort },
+      });
+
+      const nextCursor = invoices?.at(-1)?.id;
+
+      return { invoices, nextCursor };
+    }),
   getAll: t.procedure
     .input(
       z
@@ -42,6 +81,7 @@ export const invoiceRouter = t.router({
     )
     .query(async ({ ctx, input }) => {
       const query = { contains: input?.query };
+      const sort = parseSort(input?.sort ?? {});
 
       const invoices = await ctx.prisma.invoice.findMany({
         include: { orders: true, customer: true },
@@ -53,7 +93,7 @@ export const invoiceRouter = t.router({
             { customer: { name: query } },
           ],
         },
-        orderBy: parseSort(input?.sort ?? {}),
+        orderBy: sort,
       });
 
       return invoices;

@@ -22,6 +22,7 @@
     "@tanstack/match-sorter-utils": "^8.5.14",
     "@tanstack/react-query": "^4.10.0",
     "@tanstack/react-table": "^8.5.15",
+    "@tanstack/react-virtual": "3.0.0-beta.18",
     "@tanstack/table-core": "^8.5.15",
     "@trpc/client": "10.0.0-proxy-beta.15",
     "@trpc/next": "10.0.0-proxy-beta.15",
@@ -39,6 +40,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.37.0",
+    "react-intersection-observer": "^9.4.0",
     "superjson": "1.9.1",
     "zod": "^3.18.0"
   },
