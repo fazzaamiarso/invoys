@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { t } from '../trpc';
+import { protectedProcedure, t } from '../trpc';
 
 const sortSchema = z.enum(['asc', 'desc']).optional();
 
@@ -17,7 +17,7 @@ const parseSort = (sortObject: Record<string, any>) => {
 };
 
 export const customerRouter = t.router({
-  infiniteClients: t.procedure
+  infiniteClients: protectedProcedure
     .input(
       z.object({
         cursor: z.string().optional(),
@@ -49,12 +49,12 @@ export const customerRouter = t.router({
 
       return { customer, nextCursor };
     }),
-  getAll: t.procedure
+  getAll: protectedProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.customer.findMany({ take: input.limit });
     }),
-  search: t.procedure
+  search: protectedProcedure
     .input(
       z.object({
         limit: z.number().optional(),
@@ -69,7 +69,7 @@ export const customerRouter = t.router({
         },
       });
     }),
-  getSingle: t.procedure
+  getSingle: protectedProcedure
     .input(z.object({ customerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const client = await ctx.prisma.customer.findUnique({
@@ -88,7 +88,7 @@ export const customerRouter = t.router({
       });
       return client;
     }),
-  create: t.procedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
@@ -112,7 +112,7 @@ export const customerRouter = t.router({
       });
       return createdClient;
     }),
-  edit: t.procedure
+  edit: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -130,7 +130,7 @@ export const customerRouter = t.router({
       });
       return updatedClient;
     }),
-  delete: t.procedure
+  delete: protectedProcedure
     .input(
       z.object({
         clientId: z.string(),

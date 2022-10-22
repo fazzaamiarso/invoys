@@ -1,4 +1,4 @@
-import { t } from '../trpc';
+import { protectedProcedure, t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
@@ -25,7 +25,7 @@ const parseSort = (sortObject: Record<string, any>) => {
 };
 
 export const invoiceRouter = t.router({
-  infiniteInvoices: t.procedure
+  infiniteInvoices: protectedProcedure
     .input(
       z.object({
         cursor: z.string().optional(),
@@ -64,7 +64,7 @@ export const invoiceRouter = t.router({
 
       return { invoices, nextCursor };
     }),
-  getAll: t.procedure
+  getAll: protectedProcedure
     .input(
       z
         .object({
@@ -98,7 +98,7 @@ export const invoiceRouter = t.router({
 
       return invoices;
     }),
-  getSingle: t.procedure
+  getSingle: protectedProcedure
     .input(z.object({ invoiceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const invoice = await ctx.prisma.invoice.findUnique({
@@ -107,7 +107,7 @@ export const invoiceRouter = t.router({
       });
       return invoice;
     }),
-  create: t.procedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
@@ -148,7 +148,7 @@ export const invoiceRouter = t.router({
       });
       return createdInvoice;
     }),
-  edit: t.procedure
+  edit: protectedProcedure
     .input(
       z.object({
         invoiceId: z.string(),
@@ -178,7 +178,7 @@ export const invoiceRouter = t.router({
 
       return updatedInvoice;
     }),
-  delete: t.procedure
+  delete: protectedProcedure
     .input(z.object({ invoiceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const deletedInvoice = await ctx.prisma.invoice.delete({
@@ -186,7 +186,7 @@ export const invoiceRouter = t.router({
       });
       return deletedInvoice;
     }),
-  updateStatus: t.procedure
+  updateStatus: protectedProcedure
     .input(
       z.object({ invoiceId: z.string(), status: z.nativeEnum(InvoiceStatus) })
     )
@@ -197,7 +197,7 @@ export const invoiceRouter = t.router({
       });
       return updatedStatus;
     }),
-  sendEmail: t.procedure
+  sendEmail: protectedProcedure
     .input(
       z.object({
         customerName: z.string(),

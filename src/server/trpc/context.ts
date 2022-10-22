@@ -1,7 +1,9 @@
 // src/server/router/context.ts
-import * as trpc from "@trpc/server";
-import * as trpcNext from "@trpc/server/adapters/next";
-import { prisma } from "../db/client";
+import * as trpc from '@trpc/server';
+import * as trpcNext from '@trpc/server/adapters/next';
+import { prisma } from '../db/client';
+import { unstable_getServerSession as getSession } from 'next-auth/next';
+import { authOptions } from 'pages/api/auth/[...nextauth]';
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -23,9 +25,14 @@ export const createContextInner = async (opts: CreateContextOptions) => {
  * @link https://trpc.io/docs/context
  **/
 export const createContext = async (
-  opts: trpcNext.CreateNextContextOptions,
+  opts: trpcNext.CreateNextContextOptions
 ) => {
-  return await createContextInner({});
+  const req = opts.req;
+  const res = opts.res;
+  const session = await getSession(req, res, authOptions);
+
+  const innerCtx = await createContextInner({});
+  return { ...innerCtx, session };
 };
 
 export type Context = trpc.inferAsyncReturnType<typeof createContext>;
