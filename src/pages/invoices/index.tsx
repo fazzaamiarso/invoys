@@ -135,10 +135,10 @@ const Invoices = () => {
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
-  const sortValue =
+  const sortValue: { [colId: string]: 'asc' | 'desc' } | undefined =
     sorting.length && sorting[0]
       ? {
-          [sorting[0].id]: sorting[0]?.desc ? 'desc' : 'asc',
+          [sorting[0].id]: sorting[0].desc ? 'desc' : 'asc',
         }
       : undefined;
 

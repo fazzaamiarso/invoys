@@ -1,13 +1,14 @@
 import Button from '@components/Button';
 import StatusBadge from '@components/Invoices/StatusBadge';
 import Layout from '@components/Layout';
-import { Dialog, Listbox, Transition } from '@headlessui/react';
+import { Listbox, Transition } from '@headlessui/react';
 import {
   CalendarDaysIcon,
   EnvelopeIcon,
   ExclamationTriangleIcon,
   EyeIcon,
   FolderIcon,
+  PaperAirplaneIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -26,6 +27,12 @@ import { EditInvoiceDrawer } from '@components/InvoiceDrawer/EditInvoiceDrawer';
 import { capitalize } from '@utils/display';
 import { calculateOrderAmount, downloadPdf } from '@utils/invoice';
 import invariant from 'tiny-invariant';
+import {
+  Modal,
+  ModalTitle,
+  ModalDescription,
+  ModalAction,
+} from '@components/Modal';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -64,6 +71,24 @@ const InvoiceDetail = () => {
     },
   });
   const sendEmailMutation = trpc.invoice.sendEmail.useMutation({});
+
+  const confirmDelete = () => {
+    if (deleteMutation.isLoading || !invoiceDetail) return;
+    deleteMutation.mutate({ invoiceId: invoiceDetail.id });
+  };
+
+  const sendInvoiceEmail = () => {
+    const baseUrl =
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000'
+        : process.env.VERCEL_URL;
+    if (!invoiceDetail || sendEmailMutation.isLoading) return;
+    sendEmailMutation.mutate({
+      customerName: invoiceDetail.customer.name,
+      invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
+      invoiceViewUrl: `${baseUrl}/invoices/${invoiceDetail.id}/preview`,
+    });
+  };
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () =>
@@ -221,13 +246,8 @@ const InvoiceDetail = () => {
                 </div>
                 <Button
                   variant="primary"
-                  onClick={() =>
-                    sendEmailMutation.mutate({
-                      customerName: invoiceDetail.customer.name,
-                      invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
-                      invoiceViewUrl: `http://localhost:3000/invoices/${invoiceDetail.id}/preview`,
-                    })
-                  }>
+                  Icon={PaperAirplaneIcon}
+                  onClick={sendInvoiceEmail}>
                   Send Invoice to Email
                 </Button>
               </div>
@@ -241,17 +261,31 @@ const InvoiceDetail = () => {
               isOpen={isEditing}
             />
           )}
-          <DeleteModal
-            isOpen={isDeleting}
-            onClose={hideDeleteModal}
-            onConfirm={() =>
-              !deleteMutation.isLoading &&
-              deleteMutation.mutate({ invoiceId: invoiceDetail.id })
-            }
-            title={`Delete Invoice ${invoiceDetail.invoiceNumber}?`}
-            description="Are you sure you want to delete this Invoice? Data will be
-      permanently removed. This action cannot be undone."
-          />
+          <Modal isOpen={isDeleting} onClose={hideDeleteModal}>
+            <div className="flex gap-6">
+              <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <ExclamationTriangleIcon
+                  className="h-6 w-6 text-red-600"
+                  aria-hidden="true"
+                />
+              </div>
+              <div>
+                <ModalTitle>{`Delete Invoice ${invoiceDetail.invoiceNumber}?`}</ModalTitle>
+                <ModalDescription>
+                  Are you sure you want to delete this Invoice? Data will be
+                  permanently removed. This action cannot be undone.
+                </ModalDescription>
+              </div>
+            </div>
+            <ModalAction>
+              <Button variant="outline" onClick={hideDeleteModal}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={confirmDelete}>
+                Confirm
+              </Button>
+            </ModalAction>
+          </Modal>
         </>
       )}
     </Layout>
@@ -259,58 +293,6 @@ const InvoiceDetail = () => {
 };
 
 export default InvoiceDetail;
-
-type DeleteModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  description?: string;
-};
-const DeleteModal = ({
-  onClose,
-  onConfirm,
-  isOpen,
-  title,
-  description,
-}: DeleteModalProps) => {
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
-  };
-
-  return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <div className="fixed inset-0 z-50 bg-gray-500 bg-opacity-75 transition-opacity" />
-      <Dialog.Panel className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="relative bg-white p-6 rounded-md flex flex-col space-y-8 max-w-md">
-          <div className="flex gap-6">
-            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-              <ExclamationTriangleIcon
-                className="h-6 w-6 text-red-600"
-                aria-hidden="true"
-              />
-            </div>
-            <div>
-              <Dialog.Title className="font-semibold text-lg pb-1">
-                {title}
-              </Dialog.Title>
-              <p className="text-gray-500 text-sm">{description ?? ''}</p>
-            </div>
-          </div>
-          <div className="space-x-4 ml-auto">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={handleConfirm}>
-              Confirm
-            </Button>
-          </div>
-        </div>
-      </Dialog.Panel>
-    </Dialog>
-  );
-};
 
 const StatusSelect = ({
   status,
