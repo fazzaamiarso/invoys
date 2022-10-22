@@ -1,20 +1,49 @@
-// src/pages/_app.tsx
 import '../styles/globals.css';
-import type { AppType } from 'next/app';
+import type { AppProps } from 'next/app';
 import { trpc } from '@utils/trpc';
 import { DefaultSeo } from 'next-seo';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, signIn, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+import { NextPage } from 'next';
 
-const MyApp: AppType = ({
+export type NextPageWithAuth = AppProps & {
+  Component: NextPage & { isAuth?: boolean };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pageProps: any;
+};
+
+const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}: NextPageWithAuth) => {
+  const isAuth = Component.isAuth ?? true; //all page default to need auth
+
   return (
     <SessionProvider session={session}>
       <DefaultSeo titleTemplate="%s | Invoys" defaultTitle="Invoys" />
-      <Component {...pageProps} />
+      {isAuth ? (
+        <Auth>
+          <Component {...pageProps} />
+        </Auth>
+      ) : (
+        <Component {...pageProps} />
+      )}
     </SessionProvider>
   );
 };
 
 export default trpc.withTRPC(MyApp);
+
+function Auth({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const isUser = !!session?.user;
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!isUser) signIn();
+  }, [isUser, status]);
+
+  if (isUser) {
+    return <>{children}</>;
+  }
+  return null;
+}

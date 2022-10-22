@@ -17,6 +17,7 @@ const createRandomInvoices = (
     dueDate: faker.date.future(),
     status: faker.helpers.arrayElement(Object.values(InvoiceStatus)),
     invoiceNumber: `${prefix}-${index.toString().padStart(4, '0')}`,
+    isDraft: Math.random() > 0.9,
   };
 };
 
@@ -36,16 +37,16 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
     phoneNumber: faker.phone.number(),
     address: faker.address.streetAddress(true),
     invoicePrefix: prefix,
-    invoices: {
-      createMany: {
-        data:
-          invoicesCount > 0
-            ? Array.from({ length: invoicesCount }).map((_, idx) =>
+    invoices:
+      invoicesCount > 0
+        ? {
+            createMany: {
+              data: Array.from({ length: invoicesCount }).map((_, idx) =>
                 createRandomInvoices(prefix, idx + 1)
-              )
-            : [],
-      },
-    },
+              ),
+            },
+          }
+        : undefined,
   };
 };
 

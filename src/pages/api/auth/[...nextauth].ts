@@ -4,6 +4,7 @@ import EmailProvider from 'next-auth/providers/email';
 import { prisma } from '../../../server/db/client';
 
 export const authOptions: NextAuthOptions = {
+  secret: 'averysecret',
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -18,6 +19,6 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM,
     }),
   ],
-  pages: { signIn: '/login' },
+  // pages: { signIn: '/login' },
 };
 export default NextAuth(authOptions);

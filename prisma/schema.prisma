@@ -28,6 +28,7 @@ model Invoice {
     notes         String?       @db.Text
     invoiceNumber String
     status        InvoiceStatus @default(PENDING)
+    isDraft       Boolean       @default(false)
 
     orders     OrderItem[]
     customer   Customer    @relation(fields: [customerId], references: [id])
@@ -48,7 +49,7 @@ model OrderItem {
 }
 
 model Customer {
-    id            String    @id @default(cuid())
+    id            String    @id @default(uuid())
     createdAt     DateTime  @default(now())
     name          String
     email         String    @unique
