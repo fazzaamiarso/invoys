@@ -41,7 +41,8 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
           className={clsx(
             'px-4 py-2 rounded-md font-semibold text-sm',
             props.Icon ? 'flex items-center gap-2' : '',
-            props.variant ? v[props.variant] : v.primary
+            props.variant ? v[props.variant] : v.primary,
+            props.className
           )}>
           {props.Icon && <props.Icon className="aspect-square h-4" />}
           {props.children}

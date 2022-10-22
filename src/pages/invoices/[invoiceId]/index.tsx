@@ -4,6 +4,7 @@ import Layout from '@components/Layout';
 import { Listbox, Transition } from '@headlessui/react';
 import {
   CalendarDaysIcon,
+  CheckIcon,
   EnvelopeIcon,
   ExclamationTriangleIcon,
   EyeIcon,
@@ -33,6 +34,7 @@ import {
   ModalDescription,
   ModalAction,
 } from '@components/Modal';
+import clsx from 'clsx';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -155,7 +157,7 @@ const InvoiceDetail = () => {
                     </div>
                     <div className="ring-1 ring-inset ring-gray-300 rounded-b-md">
                       <ul className="flex flex-col px-3">
-                        {invoiceDetail?.orders.map(order => {
+                        {invoiceDetail.orders.map(order => {
                           return (
                             <>
                               <li
@@ -327,11 +329,24 @@ const StatusSelect = ({
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0">
-          <Listbox.Options className="absolute z-50 bg-white w-max right-0 translate-y-1">
+          <Listbox.Options className="absolute z-50 bg-white w-full p-1 right-0 translate-y-1">
             {Object.values(InvoiceStatus).map(stat => {
               return (
-                <Listbox.Option key={stat} value={stat} className="p-2 text-sm">
-                  {capitalize(stat)}
+                <Listbox.Option as={Fragment} key={stat} value={stat}>
+                  {({ active, selected }) => {
+                    return (
+                      <li
+                        className={clsx(
+                          active && 'bg-[#f5f7f9]',
+                          'p-2 rounded-md text-sm cursor-pointer flex items-center'
+                        )}>
+                        <span>{capitalize(stat)}</span>
+                        {selected && (
+                          <CheckIcon className="h-4 text-gray-700 aspect-square ml-auto" />
+                        )}
+                      </li>
+                    );
+                  }}
                 </Listbox.Option>
               );
             })}

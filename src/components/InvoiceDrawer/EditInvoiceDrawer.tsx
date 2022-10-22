@@ -14,6 +14,8 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { RecipientCombobox } from './RecipientCombobox';
+import { calculateOrderAmount } from '@utils/invoice';
+import { OrderItem } from '@prisma/client';
 
 export type InvoiceGetSingleOutput =
   InferProcedures['invoice']['getSingle']['output'];
@@ -125,7 +127,7 @@ export const EditInvoiceDrawer = ({
         <TextArea name="notes" label="Additional notes" register={register} />
         <div className="flex items-center justify-between w-full border-t-[1px] border-t-gray-300 py-4">
           <button type="button" className="text-sm">
-            PREVIEW
+            DRAFT
           </button>
           <Button
             type="submit"
@@ -142,10 +144,7 @@ export const EditInvoiceDrawer = ({
 const TotalAmount = ({ control }: { control: Control<EditInvoiceInput> }) => {
   const watchedOrders = useWatch({ name: 'orders', control });
 
-  const totalAmount = watchedOrders.reduce(
-    (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
-    0
-  );
+  const totalAmount = calculateOrderAmount(watchedOrders as OrderItem[]);
 
   return (
     <div className="space-x-2">
