@@ -5,36 +5,37 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  HeaderContext,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { fuzzyFilter, fuzzySort } from '@utils/tableHelper';
+import { fuzzyFilter } from '@utils/tableHelper';
 import { InferProcedures, trpc } from '@utils/trpc';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import {
-  ChevronUpDownIcon,
+  CheckIcon,
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
-import clsx from 'clsx';
 import {
+  FormEvent,
   Fragment,
-  PropsWithChildren,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import Button from '@components/Button';
-import { Listbox } from '@headlessui/react';
+import { Listbox, Transition } from '@headlessui/react';
 import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
 import { useInView } from 'react-intersection-observer';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import { capitalize } from '@utils/display';
+import { calculateOrderAmount } from '@utils/invoice';
+import SortableHeader from '@components/Table/SortableHeader';
+import clsx from 'clsx';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -55,7 +56,6 @@ const columns = [
     ),
   }),
   columnHelper.accessor('customer.name', {
-    sortingFn: fuzzySort,
     header: props => (
       <SortableHeader headerProps={props}>Client</SortableHeader>
     ),
@@ -81,13 +81,7 @@ const columns = [
     header: props => (
       <SortableHeader headerProps={props}>Amount</SortableHeader>
     ),
-    cell: props =>
-      `$${props
-        .getValue()
-        .reduce(
-          (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
-          0
-        )}`,
+    cell: props => `$${calculateOrderAmount(props.getValue())}`,
   }),
   columnHelper.display({
     id: 'actions',
@@ -101,34 +95,13 @@ const columns = [
   }),
 ];
 
-const SortableHeader = ({
-  headerProps,
-  children,
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-PropsWithChildren<{ headerProps: HeaderContext<any, any> }>) => {
-  return (
-    <span className="flex items-center">
-      <span>{children}</span>
-      <button
-        className=""
-        onClick={headerProps.column.getToggleSortingHandler()}>
-        <ChevronUpDownIcon
-          className={clsx(
-            'w-4 aspect-square ml-1',
-            headerProps.column.getIsSorted() && 'text-purple-500'
-          )}
-        />
-      </button>
-    </span>
-  );
-};
-
 const Invoices = () => {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
     undefined
   );
   const [sorting, setSorting] = useState<SortingState>([]);
+  const { ref, inView } = useInView();
   const tableParentRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(query, 200);
@@ -163,21 +136,9 @@ const Invoices = () => {
     }
   );
 
-  const { ref, inView } = useInView();
-
   const flatData = useMemo(() => {
     return data?.pages.flatMap(page => page.invoices) ?? [];
   }, [data]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
 
   const table = useReactTable({
     columns,
@@ -192,56 +153,84 @@ const Invoices = () => {
     manualSorting: true,
   });
 
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
+
+  const onSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (prevQuery === debouncedQuery) return;
+    refetch();
+  };
+
   return (
     <Layout title="Invoices">
       <h2 className="text-lg font-bold pb-6">Invoices</h2>
       <div className="w-full flex items-center pb-6">
         <form
-          onSubmit={e => {
-            if (prevQuery === debouncedQuery) return;
-            e.preventDefault();
-            refetch();
-          }}
-          className="flex items-center gap-4 w-80">
+          onSubmit={onSearch}
+          className="relative flex items-center gap-4 w-80">
+          <MagnifyingGlassIcon className="absolute text-gray-500 aspect-square z-20 h-5 left-2" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             type="search"
             id="query"
             placeholder="search for client, invoice number, or projects"
-            className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full"
+            className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full pl-9"
             required
             autoComplete="off"
           />
-          <button type="submit" className="">
-            <MagnifyingGlassIcon className="h-4" />{' '}
-          </button>
         </form>
         {/* FILTER */}
         <Listbox onChange={setStatusFilter} value={statusFilter}>
           <div className="relative ml-8">
             <Listbox.Button as={Fragment}>
               <Button variant="outline" Icon={FunnelIcon}>
-                {statusFilter ? capitalize(statusFilter) : 'All Status'}
+                {statusFilter === undefined
+                  ? 'All Status'
+                  : capitalize(statusFilter)}
               </Button>
             </Listbox.Button>
-            <Listbox.Options className="absolute bottom-0 py-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
-              <Listbox.Option
-                value={undefined}
-                className="px-3 py-2 text-sm cursor-pointer">
-                All Status
-              </Listbox.Option>
-              {Object.values(InvoiceStatus).map(status => {
-                return (
-                  <Listbox.Option
-                    key={status}
-                    value={status}
-                    className="py-2 px-3 text-sm cursor-pointer">
-                    {capitalize(status)}
-                  </Listbox.Option>
-                );
-              })}
-            </Listbox.Options>
+            <Transition
+              as={Fragment}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0">
+              <Listbox.Options className="absolute bottom-0 p-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
+                {Object.values({ ALL_STATUS: undefined, ...InvoiceStatus }).map(
+                  status => {
+                    return (
+                      <Listbox.Option
+                        as={Fragment}
+                        key={status ?? 'all'}
+                        value={status}>
+                        {({ active, selected }) => {
+                          return (
+                            <li
+                              className={clsx(
+                                active && 'bg-[#f5f7f9]',
+                                'p-2 rounded-md text-sm cursor-pointer flex items-center'
+                              )}>
+                              <span>{capitalize(status ?? 'All Status')}</span>
+                              {selected && (
+                                <CheckIcon className="h-4 text-gray-700 aspect-square ml-auto" />
+                              )}
+                            </li>
+                          );
+                        }}
+                      </Listbox.Option>
+                    );
+                  }
+                )}
+              </Listbox.Options>
+            </Transition>
           </div>
         </Listbox>
         {/* FILTER END */}

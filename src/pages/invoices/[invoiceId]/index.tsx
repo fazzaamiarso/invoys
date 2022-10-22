@@ -91,14 +91,15 @@ const InvoiceDetail = () => {
   };
 
   //TODO: handle case when the screen size is not full
-  const handleDownloadPdf = async () =>
-    await downloadPdf(pdfRef, `Invoice #${invoiceDetail?.invoiceNumber}.pdf`);
+  const handleDownloadPdf = async () => {
+    if (!invoiceDetail) return;
+    await downloadPdf(pdfRef, `Invoice #${invoiceDetail.invoiceNumber}.pdf`);
+  };
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
       {invoiceDetail && (
         <>
-          {' '}
           <div className="flex justify-between items-center ">
             <div>
               <button

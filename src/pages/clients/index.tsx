@@ -1,8 +1,8 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
+import SortableHeader from '@components/Table/SortableHeader';
 import {
-  ChevronUpDownIcon,
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -17,12 +17,11 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { fuzzyFilter, fuzzySort } from '@utils/tableHelper';
+import { fuzzyFilter } from '@utils/tableHelper';
 import { trpc } from '@utils/trpc';
-import clsx from 'clsx';
 import { NextPage } from 'next';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 const columnHelper = createColumnHelper<Customer>();
@@ -31,37 +30,11 @@ const columns = [
     header: 'Prefix',
   }),
   columnHelper.accessor('name', {
-    sortingFn: fuzzySort,
-    header: props => (
-      <span className="flex items-center">
-        <span>Name</span>
-        <button className="" onClick={props.column.getToggleSortingHandler()}>
-          <ChevronUpDownIcon
-            className={clsx(
-              'w-4 aspect-square ml-1',
-              props.column.getIsSorted() && 'text-purple-500'
-            )}
-          />
-        </button>
-      </span>
-    ),
+    header: props => <SortableHeader headerProps={props}>Name</SortableHeader>,
     cell: props => props.getValue(),
   }),
   columnHelper.accessor('email', {
-    sortingFn: fuzzySort,
-    header: props => (
-      <span className="flex items-center">
-        <span>Email</span>
-        <button className="" onClick={props.column.getToggleSortingHandler()}>
-          <ChevronUpDownIcon
-            className={clsx(
-              'w-4 aspect-square ml-1',
-              props.column.getIsSorted() && 'text-purple-500'
-            )}
-          />
-        </button>
-      </span>
-    ),
+    header: props => <SortableHeader headerProps={props}>Email</SortableHeader>,
   }),
   columnHelper.accessor('phoneNumber', {
     header: 'Phone Number',
@@ -80,14 +53,18 @@ const columns = [
 
 const ClientsIndex: NextPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebounce(query, 300);
-
   const [sorting, setSorting] = useState<SortingState>([]);
-
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
+
+  const debouncedQuery = useDebounce(query, 300);
+  const sort: { [colId: string]: 'asc' | 'desc' } | undefined =
+    sorting.length && sorting[0]
+      ? {
+          [sorting[0].id]: sorting[0].desc ? 'desc' : 'asc',
+        }
+      : undefined;
 
   const {
     data: clients,
@@ -98,12 +75,7 @@ const ClientsIndex: NextPage = () => {
   } = trpc.customer.infiniteClients.useInfiniteQuery(
     {
       query: debouncedQuery,
-      sort: sorting.length
-        ? {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            [sorting[0]!.id]: sorting[0]?.desc ? 'desc' : 'asc',
-          }
-        : undefined,
+      sort,
     },
     {
       keepPreviousData: true,
@@ -117,16 +89,6 @@ const ClientsIndex: NextPage = () => {
     [clients]
   );
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
-
   const table = useReactTable({
     columns,
     state: {
@@ -139,6 +101,21 @@ const ClientsIndex: NextPage = () => {
     manualSorting: true,
   });
 
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
+
+  const onSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    refetch();
+  };
+
   return (
     <Layout title="Clients">
       <div className="flex gap-4 items-center pb-6">
@@ -147,24 +124,19 @@ const ClientsIndex: NextPage = () => {
       <section className="w-full space-y-6">
         <div className="w-full flex items-center">
           <form
-            onSubmit={e => {
-              e.preventDefault();
-              refetch();
-            }}
-            className="flex items-center gap-4 w-80">
+            onSubmit={onSearch}
+            className="relative flex items-center gap-4 w-80">
+            <MagnifyingGlassIcon className="absolute text-gray-500 aspect-square z-20 h-5 left-2" />
             <input
-              type="search"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              name="searchClient"
-              id="searchClient"
+              type="search"
+              id="query"
               required
-              placeholder="search for name, prefix, or email"
-              className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full"
+              autoComplete="off"
+              placeholder="search for client, invoice number, or projects"
+              className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full pl-9"
             />
-            <button className="">
-              <MagnifyingGlassIcon className="h-4" />{' '}
-            </button>
           </form>
           <div className="ml-auto flex items-center gap-4">
             <Button Icon={DocumentArrowDownIcon} variant="outline">

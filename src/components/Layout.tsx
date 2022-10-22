@@ -12,7 +12,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import Button from './Button';
-import { Worker } from '@react-pdf-viewer/core';
 import {
   invoiceDrawerStateAtom,
   NewInvoiceDrawer,
@@ -104,9 +103,7 @@ const Layout = ({
               <div className="aspect-square w-10 rounded-full bg-gradient-to-bl from-pink-500 via-red-500 to-yellow-500" />
             </div>
           </header>
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
-            <div className="content-layout py-8">{children}</div>
-          </Worker>
+          <div className="content-layout py-8">{children}</div>
         </section>
         <NewInvoiceDrawer />
       </main>
