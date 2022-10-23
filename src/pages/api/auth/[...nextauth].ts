@@ -1,10 +1,9 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth, { DefaultSession, NextAuthOptions } from 'next-auth';
 import EmailProvider from 'next-auth/providers/email';
 import { prisma } from '../../../server/db/client';
 
 export const authOptions: NextAuthOptions = {
-  secret: 'averysecret',
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -19,6 +18,17 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM,
     }),
   ],
-  // pages: { signIn: '/login' },
+  pages: {
+    signIn: '/auth/login',
+    verifyRequest: '/auth/verify',
+  },
 };
 export default NextAuth(authOptions);
+
+declare module 'next-auth' {
+  interface Session {
+    user: DefaultSession['user'] & {
+      gradient?: string;
+    };
+  }
+}

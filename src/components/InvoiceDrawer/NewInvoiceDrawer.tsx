@@ -15,6 +15,9 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { RecipientCombobox } from './RecipientCombobox';
+import { Switch } from '@headlessui/react';
+import clsx from 'clsx';
+import { Fragment } from 'react';
 
 type NewInvoiceInput = InferProcedures['invoice']['create']['input'];
 
@@ -26,6 +29,7 @@ export const NewInvoiceDrawer = () => {
 
   const { register, handleSubmit, reset, control } = useForm<NewInvoiceInput>({
     defaultValues: {
+      isDraft: false,
       orders: [{ amount: 0, quantity: 1, name: '' }],
     },
   });
@@ -49,10 +53,7 @@ export const NewInvoiceDrawer = () => {
 
   const onSubmit: SubmitHandler<NewInvoiceInput> = async fieldValues => {
     if (!fieldValues.recipientEmail) return;
-    mutation.mutate({
-      ...fieldValues,
-      recipientEmail: fieldValues.recipientEmail,
-    });
+    mutation.mutate(fieldValues);
   };
 
   return (
@@ -112,9 +113,38 @@ export const NewInvoiceDrawer = () => {
         </div>
         <TextArea name="notes" label="Additional notes" register={register} />
         <div className="flex items-center justify-between w-full border-t-[1px] border-t-gray-300 py-4">
-          <button type="button" className="text-sm">
-            DRAFT
-          </button>
+          <Controller
+            control={control}
+            name="isDraft"
+            render={({ field }) => (
+              <Switch.Group>
+                <div className="flex items-center gap-2">
+                  <Switch.Label className="text-sm">Save as draft</Switch.Label>
+                  <Switch
+                    as={Fragment}
+                    checked={field.value}
+                    onChange={field.onChange}>
+                    {({ checked }) => (
+                      <button
+                        className={clsx(
+                          checked ? 'bg-pink-500' : 'bg-[#e4e7eb]',
+                          'relative inline-flex h-[24px] w-[48px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75'
+                        )}>
+                        <span
+                          aria-hidden="true"
+                          className={`${
+                            checked ? 'translate-x-[24px]' : 'translate-x-0'
+                          }
+                  pointer-events-none inline-block aspect-square h-[20px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+                        />
+                      </button>
+                    )}
+                  </Switch>
+                </div>
+              </Switch.Group>
+            )}
+          />
+
           <Button
             type="submit"
             isLoading={mutation.isLoading}

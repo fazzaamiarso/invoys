@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOnRectangleIcon,
   BanknotesIcon,
   Cog6ToothIcon,
   PlusIcon,
@@ -7,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
+import { signOut, useSession } from 'next-auth/react';
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -40,7 +42,7 @@ const NavigationPane = () => {
   const router = useRouter();
   return (
     <div className="p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
-      <h1 className="text-xl font-bold">LOGO</h1>
+      <h1 className="text-xl font-bold flex flex-col justify-between">LOGO</h1>
       <nav className="">
         <ul className="space-y-8">
           {navigations.map(nav => {
@@ -74,6 +76,18 @@ const NavigationPane = () => {
           })}
         </ul>
       </nav>
+      <ul className="">
+        <li key="logout" className="w-full ">
+          <button
+            // onClick={() => signOut()}
+            className="hover:text-blue-500 flex gap-4 items-center">
+            <ArrowLeftOnRectangleIcon
+              className={clsx('h-5 aspect-square text-gray-600')}
+            />
+            <span className={clsx('text-sm  text-gray-600')}>Logout</span>
+          </button>
+        </li>
+      </ul>
     </div>
   );
 };
@@ -87,6 +101,7 @@ const Layout = ({
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setDrawerOpen] = useAtom(invoiceDrawerStateAtom);
+  const session = useSession();
 
   return (
     <>
@@ -99,7 +114,9 @@ const Layout = ({
               New Invoice
             </Button>
             <div className="ml-auto flex items-center gap-4">
-              <div className="font-semibold">Gojo Satoru</div>
+              <div className="font-semibold">
+                {session.data?.user?.email ?? 'Gojo Satoru@jujutsu.com'}
+              </div>
               <div className="aspect-square w-10 rounded-full bg-gradient-to-bl from-pink-500 via-red-500 to-yellow-500" />
             </div>
           </header>
