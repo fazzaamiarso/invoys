@@ -39,7 +39,18 @@ const ClientDetails: NextPage = () => {
   const utils = trpc.useContext();
   const { data: clientDetail } = trpc.customer.getSingle.useQuery(
     { customerId: clientId as string },
-    {}
+    {
+      keepPreviousData: true,
+      enabled: router.isReady,
+      initialData: () => {
+        const clients = utils.customer.infiniteClients.getInfiniteData({
+          query: '',
+        });
+        return clients?.pages
+          .flatMap(p => p.customer)
+          .find(client => client.id === clientId);
+      },
+    }
   );
   const deleteMutation = trpc.customer.delete.useMutation({
     onSuccess() {

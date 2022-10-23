@@ -4,6 +4,8 @@ import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/trpc/router';
 import type { GetInferenceHelpers } from '@trpc/server';
 import superjson from 'superjson';
+import { QueryCache } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 export const getBaseUrl = () => {
   if (typeof window !== 'undefined') return ''; // browser should use relative url
@@ -15,6 +17,13 @@ export const trpc = createTRPCNext<AppRouter>({
   config() {
     return {
       queryClientConfig: {
+        queryCache: new QueryCache({
+          onError: (error: any, query) => {
+            if (query.state.data !== undefined) {
+              toast.error(`Something went wrong: ${error.message}`);
+            }
+          },
+        }),
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: process.env.NODE_ENV === 'production',

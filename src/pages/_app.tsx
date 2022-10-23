@@ -5,6 +5,7 @@ import { DefaultSeo } from 'next-seo';
 import { SessionProvider, signIn, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { NextPage } from 'next';
+import { Toaster } from 'react-hot-toast';
 
 export type NextPageWithAuth = AppProps & {
   Component: NextPage & { isAuth?: boolean };
@@ -28,6 +29,7 @@ const MyApp = ({
       ) : (
         <Component {...pageProps} />
       )}
+      <Toaster />
     </SessionProvider>
   );
 };

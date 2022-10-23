@@ -43,6 +43,7 @@ export const customerRouter = t.router({
         },
         cursor: input?.cursor ? { id: input.cursor } : undefined,
         orderBy: sort,
+        include: { invoices: true },
       });
 
       const nextCursor = customer?.at(-1)?.id;
@@ -75,15 +76,7 @@ export const customerRouter = t.router({
       const client = await ctx.prisma.customer.findUnique({
         where: { id: input.customerId },
         include: {
-          invoices: {
-            select: {
-              createdAt: true,
-              id: true,
-              invoiceNumber: true,
-              status: true,
-              name: true,
-            },
-          },
+          invoices: true,
         },
       });
       return client;

@@ -35,6 +35,7 @@ import {
   ModalAction,
 } from '@components/Modal';
 import clsx from 'clsx';
+import Spinner from '@components/Spinner';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -56,13 +57,21 @@ const InvoiceDetail = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useContext();
-  const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
+  const { data: invoiceDetail, status } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId: invoiceId as string,
     },
     {
       keepPreviousData: true,
       enabled: router.isReady,
+      initialData: () => {
+        const invoices = utils.invoice.infiniteInvoices.getInfiniteData({
+          query: '',
+        });
+        return invoices?.pages
+          .flatMap(p => p.invoices)
+          .find(invoice => invoice.id === invoiceId);
+      },
     }
   );
 
@@ -100,6 +109,11 @@ const InvoiceDetail = () => {
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
+      {status === 'loading' && (
+        <div className="w-full flex items-center justify-center pt-40">
+          <Spinner />
+        </div>
+      )}
       {invoiceDetail && (
         <>
           <div className="flex justify-between items-center ">
