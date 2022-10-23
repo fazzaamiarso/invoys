@@ -7,6 +7,7 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { twGradients } from 'data/gradients';
 import { useAtom } from 'jotai';
 import { signOut, useSession } from 'next-auth/react';
 import { NextSeo } from 'next-seo';
@@ -102,6 +103,9 @@ const Layout = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setDrawerOpen] = useAtom(invoiceDrawerStateAtom);
   const session = useSession();
+  const gradient = session.data?.user.gradient
+    ? twGradients[session.data.user.gradient]
+    : '';
 
   return (
     <>
@@ -117,7 +121,9 @@ const Layout = ({
               <div className="font-semibold">
                 {session.data?.user?.email ?? 'Gojo Satoru@jujutsu.com'}
               </div>
-              <div className="aspect-square w-10 rounded-full bg-gradient-to-bl from-pink-500 via-red-500 to-yellow-500" />
+              <div
+                className={clsx(gradient, 'aspect-square w-10 rounded-full')}
+              />
             </div>
           </header>
           <div className="content-layout py-8">{children}</div>

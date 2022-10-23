@@ -18,6 +18,8 @@ import { RecipientCombobox } from './RecipientCombobox';
 import { Switch } from '@headlessui/react';
 import clsx from 'clsx';
 import { Fragment } from 'react';
+import { calculateOrderAmount } from '@utils/invoice';
+import { OrderItem } from '@prisma/client';
 
 type NewInvoiceInput = InferProcedures['invoice']['create']['input'];
 
@@ -160,10 +162,7 @@ export const NewInvoiceDrawer = () => {
 const TotalAmount = ({ control }: { control: Control<NewInvoiceInput> }) => {
   const watchedOrders = useWatch({ name: 'orders', control });
 
-  const totalAmount = watchedOrders.reduce(
-    (acc, currOrder) => acc + currOrder.amount * currOrder.quantity,
-    0
-  );
+  const totalAmount = calculateOrderAmount(watchedOrders as OrderItem[]);
 
   return (
     <div className="space-x-2">

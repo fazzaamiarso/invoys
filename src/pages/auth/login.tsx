@@ -13,7 +13,7 @@ export const getServerSideProps = async ({
   res,
 }: GetServerSidePropsContext) => {
   const session = await unstable_getServerSession(req, res, authOptions);
-  if (!session?.user) return {};
+  if (!session?.user) return { props: {} };
   return {
     redirect: {
       destination: '/',

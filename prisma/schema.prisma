@@ -19,6 +19,11 @@ enum InvoiceStatus {
     OVERDUE
 }
 
+enum UserRole {
+    SUPER_ADMIN
+    ADMIN
+}
+
 model Invoice {
     id            String        @id @default(cuid())
     createdAt     DateTime      @default(now())
@@ -62,6 +67,14 @@ model Customer {
     @@fulltext([email, name])
 }
 
+model Settings {
+    id              String @id @default("settings")
+    businessName    String @default("")
+    businessAddress String @default("")
+    businessPhone   String @default("")
+    businessEmail   String @default("")
+}
+
 //NEXT AUTH STUFF
 model Account {
     id                String  @id @default(cuid())
@@ -96,6 +109,8 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    gradient      String?
+    role          UserRole  @default(ADMIN)
     accounts      Account[]
     sessions      Session[]
 }

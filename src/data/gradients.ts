@@ -1,5 +1,5 @@
 // Gradients come from https://hypercolor.dev/
-export const twGradients = {
+export const twGradients: Record<string, string> = {
   hyper: 'bg-gradient-to-bl from-pink-500 via-red-500 to-yellow-500',
   oceanic: 'bg-gradient-to-bl from-green-300 via-blue-500 to-purple-600',
   cottonCandy: 'bg-gradient-to-bl from-pink-300 via-purple-300 to-indigo-400',

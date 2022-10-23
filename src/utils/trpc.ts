@@ -15,7 +15,11 @@ export const trpc = createTRPCNext<AppRouter>({
   config() {
     return {
       queryClientConfig: {
-        defaultOptions: { queries: {} },
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: process.env.NODE_ENV === 'production',
+          },
+        },
       },
       transformer: superjson,
       links: [
