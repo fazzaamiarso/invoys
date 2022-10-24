@@ -160,6 +160,7 @@ export const invoiceRouter = t.router({
         notes: z.string().optional(),
         recipientEmail: z.string(),
         orders: z.array(orderItemSchema),
+        isDraft: z.boolean(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -175,6 +176,7 @@ export const invoiceRouter = t.router({
           issuedOn: new Date(input.issuedOn),
           notes: input.notes,
           orders: { createMany: { data: input.orders } },
+          isDraft: input.isDraft,
         },
       });
 

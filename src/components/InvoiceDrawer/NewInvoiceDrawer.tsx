@@ -158,7 +158,6 @@ export const NewInvoiceDrawer = () => {
               </Switch.Group>
             )}
           />
-
           <Button
             type="submit"
             isLoading={mutation.isLoading}
