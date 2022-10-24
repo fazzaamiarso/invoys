@@ -37,6 +37,9 @@ export const RecipientCombobox = ({
         });
         return data?.customer.length ? data.customer : undefined;
       },
+      onSuccess(data) {
+        data[0] && onSelectClient(data[0].email);
+      },
     }
   );
 

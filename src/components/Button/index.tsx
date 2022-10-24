@@ -57,6 +57,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
       onClick,
       isLoading,
       loadingContent,
+      disabled,
     } = props;
 
     return (
@@ -64,6 +65,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
         ref={ref}
         type={type ?? 'button'}
         onClick={onClick}
+        disabled={disabled}
         className={clsx(
           'px-4 py-2 rounded-md font-semibold text-sm',
           Icon ? 'flex items-center gap-2' : '',

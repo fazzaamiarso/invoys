@@ -36,6 +36,7 @@ import {
 import clsx from 'clsx';
 import Spinner from '@components/Spinner';
 import InvoicePdf from '@components/Invoices/InvoicePdf';
+import toast from 'react-hot-toast';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -81,7 +82,11 @@ const InvoiceDetail = () => {
       router.replace('/invoices');
     },
   });
-  const sendEmailMutation = trpc.invoice.sendEmail.useMutation({});
+  const sendEmailMutation = trpc.invoice.sendEmail.useMutation({
+    onSuccess() {
+      toast.success('Email sent!');
+    },
+  });
 
   const confirmDelete = () => {
     if (deleteMutation.isLoading || !invoiceDetail) return;
@@ -124,8 +129,21 @@ const InvoiceDetail = () => {
               <h2 className="text-lg font-semibold">
                 Invoice {invoiceDetail.invoiceNumber}
               </h2>
+              {invoiceDetail.isDraft && (
+                <div className="p-2 rounded-md ring-1 ring-gray-300 text-sm">
+                  Draft
+                </div>
+              )}
             </div>
-            <div className="space-x-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                Icon={EyeIcon}
+                href={`/invoices/${invoiceId}/preview`}
+                target="_blank"
+                rel="noReferrer">
+                Preview
+              </Button>
               <Button variant="outline" onClick={showEditDrawer}>
                 Edit
               </Button>
@@ -179,28 +197,19 @@ const InvoiceDetail = () => {
                   </p>
                 </div>
               </div>
-              <div className="space-y-6">
-                <div className="space-x-4 flex">
-                  <Button
-                    variant="outline"
-                    Icon={EyeIcon}
-                    href={`/invoices/${invoiceId}/preview`}
-                    target="_blank"
-                    rel="noReferrer">
-                    Preview
-                  </Button>
-                  <Button
-                    Icon={ArrowDownTrayIcon}
-                    variant="outline"
-                    onClick={handleDownloadPdf}>
-                    Download PDF
-                  </Button>
-                </div>
+              <div className="space-x-4 flex justify-center ">
+                <Button
+                  Icon={ArrowDownTrayIcon}
+                  variant="outline"
+                  onClick={handleDownloadPdf}>
+                  Download PDF
+                </Button>
                 <Button
                   variant="primary"
                   Icon={PaperAirplaneIcon}
-                  onClick={sendInvoiceEmail}>
-                  Send Invoice to Email
+                  onClick={sendInvoiceEmail}
+                  disabled={invoiceDetail.isDraft}>
+                  Send to Email
                 </Button>
               </div>
             </div>
