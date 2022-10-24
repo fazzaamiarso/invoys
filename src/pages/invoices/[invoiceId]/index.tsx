@@ -58,6 +58,10 @@ const InvoiceDetail = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useContext();
+  const { data: settings } = trpc.setting.get.useQuery(undefined, {
+    keepPreviousData: true,
+    staleTime: Infinity,
+  });
   const { data: invoiceDetail, status } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId: invoiceId as string,
@@ -119,7 +123,7 @@ const InvoiceDetail = () => {
           <Spinner />
         </div>
       )}
-      {invoiceDetail && (
+      {invoiceDetail && settings && (
         <>
           <div className="flex justify-between items-center ">
             <div className="flex items-center gap-2">
@@ -156,7 +160,7 @@ const InvoiceDetail = () => {
             {/* LEFT SECTION */}
             <div className="basis-2/3 pr-8 ">
               <div className="bg-[#f4f9fa] p-4 rounded-md">
-                <InvoicePdf invoiceDetail={invoiceDetail} />
+                <InvoicePdf invoiceDetail={invoiceDetail} settings={settings} />
               </div>
             </div>
             {/* LEFT SECTION END */}

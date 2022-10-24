@@ -19,6 +19,11 @@ const InvoicePreview: NextPage = () => {
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
+  const utils = trpc.useContext();
+  const { data: settings } = trpc.setting.get.useQuery(undefined, {
+    keepPreviousData: true,
+    staleTime: Infinity,
+  });
   const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId: invoiceId as string,
@@ -27,6 +32,12 @@ const InvoicePreview: NextPage = () => {
       staleTime: Infinity,
       keepPreviousData: true,
       enabled: router.isReady,
+      initialData: () => {
+        const invoice = utils.invoice.getSingle.getData({
+          invoiceId: invoiceId as string,
+        });
+        return invoice;
+      },
     }
   );
 
@@ -37,9 +48,9 @@ const InvoicePreview: NextPage = () => {
     <>
       <main className="w-10/12 mx-auto max-w-xl space-y-6 py-12">
         <h2 className="text-lg font-bold">Preview</h2>
-        {invoiceDetail && (
+        {invoiceDetail && settings && (
           <div className="ring-1 ring-gray-200 rounded-md">
-            <InvoicePdf invoiceDetail={invoiceDetail} />
+            <InvoicePdf invoiceDetail={invoiceDetail} settings={settings} />
           </div>
         )}
         <div>

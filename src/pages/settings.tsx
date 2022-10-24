@@ -9,15 +9,21 @@ type SettingsOutput = InferProcedures['setting']['get']['output'];
 type SettingsUpdateInput = InferProcedures['setting']['update']['input'];
 
 const Settings: NextPage = () => {
+  const utils = trpc.useContext();
   const { data } = trpc.setting.get.useQuery();
   const updateMutation = trpc.setting.update.useMutation();
 
-  const { register, handleSubmit } = useForm<SettingsOutput>({
+  const { register, handleSubmit } = useForm<SettingsUpdateInput>({
     defaultValues: data,
   });
 
-  const onSubmit: SubmitHandler<SettingsOutput> = fieldValues => {
-    updateMutation.mutate(fieldValues);
+  const onSubmit: SubmitHandler<SettingsUpdateInput> = fieldValues => {
+    if (updateMutation.isLoading) return;
+    updateMutation.mutate(fieldValues, {
+      onSuccess() {
+        return utils.setting.invalidate();
+      },
+    });
   };
 
   return (
@@ -27,6 +33,7 @@ const Settings: NextPage = () => {
         <section className="grid w-full grid-cols-3">
           <div className="col-span-1">
             <h3 className="text-2xl font-semibold">Invoice</h3>
+            <p className="text-sm">Informations to use on invoice</p>
           </div>
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -51,7 +58,11 @@ const Settings: NextPage = () => {
               name="businessAddress"
               label="Business address"
             />
-            <Button type="submit" variant="primary">
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={updateMutation.isLoading}
+              loadingContent="Saving...">
               Save
             </Button>
           </form>

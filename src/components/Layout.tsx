@@ -96,9 +96,11 @@ const NavigationPane = () => {
 const Layout = ({
   children,
   title,
+  breakLayout = false,
 }: {
   children: ReactNode;
   title?: string;
+  breakLayout?: boolean;
 }) => {
   const setDrawerOpen = useSetAtom(invoiceDrawerStateAtom);
   const session = useSession();
@@ -111,7 +113,7 @@ const Layout = ({
       <NextSeo title={title} />
       <main className="w-screen min-h-screen flex">
         <NavigationPane />
-        <section className="basis-[85%]">
+        <section className="basis-[85%] relative ">
           <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
             <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
               New Invoice
@@ -125,7 +127,9 @@ const Layout = ({
               />
             </div>
           </header>
-          <div className="content-layout py-8">{children}</div>
+          <div className={clsx(breakLayout ? '' : 'content-layout py-8')}>
+            {children}
+          </div>
         </section>
         <NewInvoiceDrawer />
       </main>
