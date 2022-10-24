@@ -1,9 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
 @layer base {
+    body {
+        @apply font-inter;
+    }
     .content-layout {
         @apply mx-auto w-11/12;
     }

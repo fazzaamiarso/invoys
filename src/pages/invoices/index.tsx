@@ -31,11 +31,14 @@ import { InvoiceStatus } from '@prisma/client';
 import useDebounce from '@hooks/useDebounce';
 import usePrevious from '@hooks/usePrevious';
 import { useInView } from 'react-intersection-observer';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { DocumentPlusIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { capitalize } from '@utils/display';
 import { calculateOrderAmount } from '@utils/invoice';
 import SortableHeader from '@components/Table/SortableHeader';
 import clsx from 'clsx';
+import { useSetAtom } from 'jotai';
+import { invoiceDrawerStateAtom } from '@components/InvoiceDrawer/NewInvoiceDrawer';
+import Spinner from '@components/Spinner';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -44,7 +47,7 @@ const columns = [
   columnHelper.accessor('invoiceNumber', {
     header: 'No.',
     cell: props => (
-      <span className="font-semibold">{`#${props.getValue()}`}</span>
+      <span className="font-semibold text-xs">{`#${props.getValue()}`}</span>
     ),
   }),
   columnHelper.accessor('name', {
@@ -65,16 +68,16 @@ const columns = [
       </span>
     ),
   }),
-  columnHelper.accessor('status', {
-    header: 'Status',
-    cell: props => <StatusBadge status={props.getValue()} />,
-  }),
   columnHelper.accessor('dueDate', {
     sortingFn: 'datetime',
     header: props => (
       <SortableHeader headerProps={props}>Due Date</SortableHeader>
     ),
     cell: props => dayjs(props.getValue()).format('LL'),
+  }),
+  columnHelper.accessor('status', {
+    header: 'Status',
+    cell: props => <StatusBadge status={props.getValue()} />,
   }),
   columnHelper.accessor('orders', {
     enableSorting: false,
@@ -88,14 +91,15 @@ const columns = [
     cell: props => (
       <Link
         href={`/invoices/${props.row.original.id}`}
-        className="underline text-blue-500">
-        See Details
+        className="font-semibold">
+        View
       </Link>
     ),
   }),
 ];
 
 const Invoices = () => {
+  const setInvoiceDrawerOpen = useSetAtom(invoiceDrawerStateAtom);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>(
     undefined
@@ -121,7 +125,7 @@ const Invoices = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
+    status,
   } = trpc.invoice.infiniteInvoices.useInfiniteQuery(
     {
       status: statusFilter,
@@ -240,46 +244,61 @@ const Invoices = () => {
           </Button>
         </div>
       </div>
-      {!isLoading && (
-        <div
-          ref={tableParentRef}
-          className="w-full h-[550px] overflow-y-scroll rounded-sm">
-          <table className="w-full ring-1 ring-gray-300">
-            <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
-              <tr className="">
-                {table.getFlatHeaders().map(header => (
-                  <th
-                    key={header.id}
-                    scope="col"
-                    className="text-start px-4 p-3 text-sm first:w-[12%]">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="">
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="border-t-[1px] border-gray-200">
-                  {row.getVisibleCells().map(cell => {
-                    return (
-                      <td key={cell.id} className="p-4 py-4 text-sm">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-              <tr ref={ref} className="h-4 w-full "></tr>
-            </tbody>
-          </table>
+      {status === 'loading' && (
+        <div className="w-full flex items-center justify-center pt-20">
+          <Spinner />
         </div>
       )}
+      {status !== 'loading' &&
+        (table.getRowModel().rows.length === 0 ? (
+          <div
+            onClick={() => setInvoiceDrawerOpen(true)}
+            className="w-full p-8 flex items-center justify-center border-2 border-dashed rounded-md h-[400px] hover:cursor-pointer hover:border-gray-500 transition-all">
+            <div className="flex flex-col item-center gap-2">
+              <DocumentPlusIcon className="h-10 aspect-square text-gray-400" />
+              <p className="text-gray-700">Add a New Invoice</p>
+            </div>
+          </div>
+        ) : (
+          <div
+            ref={tableParentRef}
+            className="w-full h-[550px] overflow-y-scroll rounded-sm">
+            <table className="w-full ring-1 ring-gray-300">
+              <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
+                <tr className="">
+                  {table.getFlatHeaders().map(header => (
+                    <th
+                      key={header.id}
+                      scope="col"
+                      className="text-start px-4 p-3 text-sm first:w-[12%]">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="">
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="border-t-[1px] border-gray-200">
+                    {row.getVisibleCells().map(cell => {
+                      return (
+                        <td key={cell.id} className="p-4 py-4 text-sm">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+                <tr ref={ref} className="h-4 w-full "></tr>
+              </tbody>
+            </table>
+          </div>
+        ))}
     </Layout>
   );
 };

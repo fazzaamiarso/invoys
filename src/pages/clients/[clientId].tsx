@@ -71,18 +71,15 @@ const ClientDetails: NextPage = () => {
           <div className="w-full ">
             <div className="flex justify-between items-center ">
               <div>
-                <button
-                  className="text-sm flex font-semibold items-center gap-2"
-                  onClick={() => router.back()}>
-                  <ArrowLeftIcon className="h-3" />
-                  Go Back
-                </button>
-                <div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => router.back()}>
+                    <ArrowLeftIcon className="h-5" />
+                  </button>
                   <h2 className="text-xl font-bold">{clientDetail.name}</h2>
-                  <p className="text-sm">
-                    Created on {dayjs(clientDetail.createdAt).format('LL')}
-                  </p>
                 </div>
+                <p className="text-sm ml-7">
+                  Created on {dayjs(clientDetail.createdAt).format('LL')}
+                </p>
               </div>
               <div className="space-x-4">
                 <Button variant="outline" onClick={showEditDrawer}>
@@ -131,7 +128,7 @@ const ClientDetails: NextPage = () => {
                           key={invoice.id}
                           className="flex w-full justify-between text-sm gap-4">
                           <Link href={`/invoices/${invoice.id}`}>
-                            <span className="line-clamp-1">
+                            <span className="line-clamp-1 underline hover:no-underline">
                               #{invoice.invoiceNumber} - {invoice.name}
                             </span>
                           </Link>

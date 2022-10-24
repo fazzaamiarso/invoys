@@ -1,7 +1,9 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
+import Spinner from '@components/Spinner';
 import SortableHeader from '@components/Table/SortableHeader';
+import { UserPlusIcon } from '@heroicons/react/24/outline';
 import {
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
@@ -44,8 +46,8 @@ const columns = [
     cell: props => (
       <Link
         href={`/clients/${props.row.original.id}`}
-        className="underline text-blue-500">
-        See Details
+        className="font-semibold">
+        View
       </Link>
     ),
   }),
@@ -72,6 +74,7 @@ const ClientsIndex: NextPage = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    status,
   } = trpc.customer.infiniteClients.useInfiniteQuery(
     {
       query: debouncedQuery,
@@ -147,46 +150,65 @@ const ClientsIndex: NextPage = () => {
             </Button>
           </div>
         </div>
-        <div
-          ref={tableContainerRef}
-          className="w-full h-[550px] overflow-y-scroll rounded-sm">
-          <table className="w-full ring-1 ring-gray-300 rounded-sm">
-            <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
-              <tr className="">
-                {table.getFlatHeaders().map(header => (
-                  <th
-                    key={header.id}
-                    scope="col"
-                    className="text-start p-4 text-sm">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="">
-              {table.getRowModel().rows.map(row => {
-                return (
-                  <tr key={row.id} className="border-t-[1px] border-gray-200">
-                    {row.getVisibleCells().map(cell => {
-                      return (
-                        <td key={cell.id} className="p-4  text-sm">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
+        {status === 'loading' && (
+          <div className="w-full flex items-center justify-center pt-24">
+            <Spinner />
+          </div>
+        )}
+        {status !== 'loading' &&
+          (table.getRowModel().rows.length === 0 ? (
+            <div
+              onClick={() => setIsDrawerOpen(true)}
+              className="w-full p-8 flex items-center justify-center border-2 border-dashed rounded-md h-[400px] hover:cursor-pointer hover:border-gray-500 transition-all">
+              <div className="flex flex-col item-center gap-2">
+                <UserPlusIcon className="h-10 aspect-square text-gray-400" />
+                <p className="text-gray-700">Add a New Client</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              ref={tableContainerRef}
+              className="w-full h-[550px] overflow-y-scroll rounded-sm">
+              <table className="w-full ring-1 ring-gray-300 rounded-sm">
+                <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
+                  <tr className="">
+                    {table.getFlatHeaders().map(header => (
+                      <th
+                        key={header.id}
+                        scope="col"
+                        className="text-start p-4 text-sm">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
                   </tr>
-                );
-              })}
-              <tr ref={ref} className="h-4 w-full"></tr>
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="">
+                  {table.getRowModel().rows.map(row => {
+                    return (
+                      <tr
+                        key={row.id}
+                        className="border-t-[1px] border-gray-200">
+                        {row.getVisibleCells().map(cell => {
+                          return (
+                            <td key={cell.id} className="p-4  text-sm">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                  <tr ref={ref} className="h-4 w-full"></tr>
+                </tbody>
+              </table>
+            </div>
+          ))}
       </section>
       <NewClientDrawer
         isOpen={isDrawerOpen}

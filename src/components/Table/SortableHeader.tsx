@@ -10,7 +10,7 @@ const SortableHeader = ({
 PropsWithChildren<{ headerProps: HeaderContext<any, any> }>) => {
   return (
     <span className="flex items-center">
-      <span>{children}</span>
+      <span className="">{children}</span>
       <button
         className=""
         onClick={headerProps.column.getToggleSortingHandler()}>

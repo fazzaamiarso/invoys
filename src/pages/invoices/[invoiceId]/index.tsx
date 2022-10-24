@@ -18,7 +18,6 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/24/solid';
 import { trpc } from '@utils/trpc';
-import { BUSINESS_ADDRESS, BUSINESS_NAME } from 'data/businessInfo';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -36,6 +35,7 @@ import {
 } from '@components/Modal';
 import clsx from 'clsx';
 import Spinner from '@components/Spinner';
+import InvoicePdf from '@components/Invoices/InvoicePdf';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -117,14 +117,12 @@ const InvoiceDetail = () => {
       {invoiceDetail && (
         <>
           <div className="flex justify-between items-center ">
-            <div>
-              <button
-                className="text-sm flex font-semibold items-center gap-2"
-                onClick={() => router.back()}>
-                <ArrowLeftIcon className="h-3" /> Back to invoices
+            <div className="flex items-center gap-2">
+              <button onClick={() => router.back()}>
+                <ArrowLeftIcon className="h-5" />
               </button>
-              <h2 className="text-xl font-bold">
-                Invoice {invoiceDetail?.invoiceNumber}
+              <h2 className="text-lg font-semibold">
+                Invoice {invoiceDetail.invoiceNumber}
               </h2>
             </div>
             <div className="space-x-4">
@@ -140,70 +138,7 @@ const InvoiceDetail = () => {
             {/* LEFT SECTION */}
             <div className="basis-2/3 pr-8 ">
               <div className="bg-[#f4f9fa] p-4 rounded-md">
-                <div
-                  ref={pdfRef}
-                  className="w-full space-y-6  rounded-md p-4 bg-white">
-                  <div className="w-full">
-                    <h3 className="font-semibold">
-                      Invoice #{invoiceDetail?.invoiceNumber}
-                    </h3>
-                    <p className="text-sm">
-                      Issued on {dayjs(invoiceDetail.issuedOn).format('LL')} -
-                      Due on {dayjs(invoiceDetail.dueDate).format('LL')}
-                    </p>
-                  </div>
-                  <div className="w-full flex items-start justify-between gap-12">
-                    <div className="basis-1/2 text-sm">
-                      <span className="font-semibold">from</span>
-                      <p>{BUSINESS_NAME}</p>
-                      <address>{BUSINESS_ADDRESS}</address>
-                    </div>
-                    <div className="basis-1/2 text-sm">
-                      <span className="font-semibold">to</span>
-                      <p>{invoiceDetail.customer.name}</p>
-                      <address>{invoiceDetail.customer.address}</address>
-                    </div>
-                  </div>
-                  <div className="bg-gray-200 w-full h-px my-2" />
-                  <div className="w-full ">
-                    <div className="w-full py-2 px-3 bg-[#787dee] rounded-t-md">
-                      <h3 className="text-white font-bold">Cost Breakdown</h3>
-                    </div>
-                    <div className="ring-1 ring-inset ring-gray-300 rounded-b-md">
-                      <ul className="flex flex-col px-3">
-                        {invoiceDetail.orders.map(order => {
-                          return (
-                            <>
-                              <li
-                                key={order.id}
-                                className="flex gap-4 py-4 border-b-[1px] border-gray-200">
-                                <h4 className="font-semibold">{order.name}</h4>
-                                <div className="">x {order.quantity}</div>
-                                <div className="ml-auto">
-                                  ${order.quantity * order.amount}
-                                </div>
-                              </li>
-                            </>
-                          );
-                        })}
-                      </ul>
-                      <div className="w-full flex justify-between px-3 py-5">
-                        <div className="text-lg">Amount Due</div>
-                        <div className="font-bold text-xl">
-                          ${calculateOrderAmount(invoiceDetail.orders)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {invoiceDetail.notes && (
-                    <div className="">
-                      <h4 className="text-sm font-semibold">
-                        Additional notes
-                      </h4>
-                      <p className="text-sm">{invoiceDetail.notes}</p>
-                    </div>
-                  )}
-                </div>
+                <InvoicePdf invoiceDetail={invoiceDetail} />
               </div>
             </div>
             {/* LEFT SECTION END */}
@@ -211,7 +146,7 @@ const InvoiceDetail = () => {
             <div className="basis-1/3 space-y-6">
               <div className=" rounded-md ring-1 ring-gray-200 p-4 flex items-center justify-between">
                 <span className="text-xl font-bold">
-                  ${calculateOrderAmount(invoiceDetail?.orders)}
+                  ${calculateOrderAmount(invoiceDetail.orders)}
                 </span>
                 <StatusSelect
                   status={invoiceDetail.status}
@@ -225,8 +160,8 @@ const InvoiceDetail = () => {
                   <p className="text-sm">{invoiceDetail.customer.name}</p>
                   <Link
                     href={`/clients/${invoiceDetail.customerId}`}
-                    className="absolute z-20 text-xs right-0 bg-white text-blue-500 underline hover:no-underline">
-                    View Detail
+                    className="absolute z-20 text-xs right-0 bg-white font-semibold">
+                    View
                   </Link>
                 </div>
                 <div className="flex items-center gap-2 pb-3 text-gray-600">

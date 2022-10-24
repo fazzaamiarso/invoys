@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { twGradients } from 'data/gradients';
-import { useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { signOut, useSession } from 'next-auth/react';
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ const navigations = [
 const NavigationPane = () => {
   const router = useRouter();
   return (
-    <div className="p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
+    <div className="bg-[#f2f4f7] p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
       <h1 className="text-xl font-bold flex flex-col justify-between">LOGO</h1>
       <nav className="">
         <ul className="space-y-8">
@@ -100,8 +100,7 @@ const Layout = ({
   children: ReactNode;
   title?: string;
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setDrawerOpen] = useAtom(invoiceDrawerStateAtom);
+  const setDrawerOpen = useSetAtom(invoiceDrawerStateAtom);
   const session = useSession();
   const gradient = session.data?.user.gradient
     ? twGradients[session.data.user.gradient]
@@ -113,7 +112,7 @@ const Layout = ({
       <main className="w-screen min-h-screen flex">
         <NavigationPane />
         <section className="basis-[85%]">
-          <header className="bg-white flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
+          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
             <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
               New Invoice
             </Button>
