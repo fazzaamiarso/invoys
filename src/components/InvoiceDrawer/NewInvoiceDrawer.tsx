@@ -20,6 +20,7 @@ import clsx from 'clsx';
 import { Fragment } from 'react';
 import { calculateOrderAmount } from '@utils/invoice';
 import { OrderItem } from '@prisma/client';
+import { dayjs } from '@lib/dayjs';
 
 type NewInvoiceInput = InferProcedures['invoice']['create']['input'];
 
@@ -29,9 +30,17 @@ export const NewInvoiceDrawer = () => {
   const [isOpen, setIsOpen] = useAtom(invoiceDrawerStateAtom);
   const router = useRouter();
 
-  const { register, handleSubmit, reset, control } = useForm<NewInvoiceInput>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<NewInvoiceInput>({
+    shouldUseNativeValidation: false,
     defaultValues: {
       isDraft: false,
+      issuedOn: dayjs().format('YYYY-MM-DD'),
       orders: [{ amount: 0, quantity: 1, name: '' }],
     },
   });
@@ -81,6 +90,7 @@ export const NewInvoiceDrawer = () => {
           name="name"
           label="Project / Description"
           register={register}
+          errors={errors}
         />
         <div className="flex gap-8 w-full">
           <TextInput
@@ -88,12 +98,14 @@ export const NewInvoiceDrawer = () => {
             label="Issued on"
             type="date"
             register={register}
+            errors={errors}
           />
           <TextInput
             name="dueDate"
             label="Due on"
             type="date"
             register={register}
+            errors={errors}
           />
         </div>
         <div className="w-full">

@@ -16,6 +16,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^2.0.12",
+    "@hookform/error-message": "^2.0.0",
     "@next-auth/prisma-adapter": "^1.0.5",
     "@prisma/client": "^4.4.0",
     "@react-pdf-viewer/core": "3.7.0",

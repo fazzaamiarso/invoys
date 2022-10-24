@@ -54,7 +54,7 @@ const ClientDetails: NextPage = () => {
   );
   const deleteMutation = trpc.customer.delete.useMutation({
     onSuccess() {
-      utils.customer.getAll.invalidate();
+      utils.customer.infiniteClients.invalidate();
       router.replace('/clients');
     },
   });

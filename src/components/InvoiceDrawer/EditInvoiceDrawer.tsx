@@ -43,14 +43,14 @@ export const EditInvoiceDrawer = ({
       issuedOn: dayjs(invoiceDetails.issuedOn).format('YYYY-MM-DD'),
       notes: invoiceDetails.notes ?? '',
       recipientEmail: invoiceDetails.customer.email,
-      orders: [{ amount: 0, quantity: 0, name: '' }],
+      orders: invoiceDetails.orders,
     },
   });
+
   const { fields, append, remove } = useFieldArray<EditInvoiceInput>({
     name: 'orders',
     control,
   });
-
   const addOrderField = () => append({ amount: 0, quantity: 0, name: '' });
   const removeOrderField = (fieldIdx: number) => remove(fieldIdx);
 

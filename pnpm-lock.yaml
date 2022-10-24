@@ -6,6 +6,7 @@ specifiers:
   '@faker-js/faker': ^7.6.0
   '@headlessui/react': ^1.7.3
   '@heroicons/react': ^2.0.12
+  '@hookform/error-message': ^2.0.0
   '@next-auth/prisma-adapter': ^1.0.5
   '@prisma/client': ^4.4.0
   '@react-pdf-viewer/core': 3.7.0
@@ -63,6 +64,7 @@ specifiers:
 dependencies:
   '@headlessui/react': 1.7.3_biqbaboplfbrettd7655fr4n2y
   '@heroicons/react': 2.0.12_react@18.2.0
+  '@hookform/error-message': 2.0.0_dypxw35ipayx7eb3b5gspqqa6q
   '@next-auth/prisma-adapter': 1.0.5_f6johzj7om6s3zhjvbbzqeonqy
   '@prisma/client': 4.4.0_prisma@4.4.0
   '@react-pdf-viewer/core': 3.7.0_lfku7m6ailhq3rltx5yfbbeg2m
@@ -367,6 +369,18 @@ packages:
       react: '>= 16'
     dependencies:
       react: 18.2.0
+    dev: false
+
+  /@hookform/error-message/2.0.0_dypxw35ipayx7eb3b5gspqqa6q:
+    resolution: {integrity: sha512-Y90nHzjgL2MP7GFy75kscdvxrCTjtyxGmOLLxX14nd08OXRIh9lMH/y9Kpdo0p1IPowJBiZMHyueg7p+yrqynQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+      react-hook-form: ^7.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-hook-form: 7.37.0_react@18.2.0
     dev: false
 
   /@humanwhocodes/config-array/0.10.7:
