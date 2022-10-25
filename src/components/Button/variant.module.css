@@ -3,7 +3,7 @@
 } */
 
 .primary {
-    @apply bg-pink-500 text-white hover:bg-pink-400 transition-all disabled:bg-pink-300;
+    @apply bg-primary text-white hover:bg-[#393bc3] transition-all disabled:bg-[#292b91] ;
 }
 
 .outline {
@@ -11,7 +11,7 @@
 }
 
 .danger {
-    @apply bg-red-600 text-white hover:bg-red-500 transition-all
+    @apply bg-red-600 text-white hover:bg-red-700 transition-all
 }
 
 .ghost{

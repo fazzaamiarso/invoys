@@ -6,6 +6,9 @@ module.exports = {
       fontFamily: {
         inter: 'Inter, sans-serif',
       },
+      colors: {
+        primary: '#4549f4',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/line-clamp')],

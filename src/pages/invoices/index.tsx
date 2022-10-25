@@ -91,7 +91,7 @@ const columns = [
     cell: props => (
       <Link
         href={`/invoices/${props.row.original.id}`}
-        className="font-semibold">
+        className="text-primary font-semibold">
         View
       </Link>
     ),

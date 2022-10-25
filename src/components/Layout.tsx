@@ -44,15 +44,15 @@ const navigations = [
 const NavigationPane = () => {
   const router = useRouter();
   return (
-    <div className="bg-[#f2f4f7] p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
-      <div className="w-28">
+    <div className="py-4 space-y-6 h-screen border-r-gray-300 border-r-[1px] grow">
+      <div className="w-20">
         <Image src={logo} alt="logo" />
       </div>
       <h1 className="text-xl font-bold flex flex-col justify-between sr-only">
         Invoys
       </h1>
       <nav className="">
-        <ul className="space-y-8">
+        <ul className="">
           {navigations.map(nav => {
             const currPath = router.pathname;
             const href = nav.href;
@@ -61,20 +61,25 @@ const NavigationPane = () => {
               (currPath !== '/' && href !== '/' && currPath.startsWith(href));
 
             return (
-              <li key={nav.name} className="w-full">
+              <li
+                key={nav.name}
+                className={clsx(
+                  isActive && 'bg-[#eff3ff]  border-l-primary ',
+                  'w-full border-l-4'
+                )}>
                 <Link
                   href={nav.href}
-                  className="hover:text-blue-500 flex gap-4 items-center">
+                  className={clsx('flex gap-4 items-center p-4 ')}>
                   <nav.Icon
                     className={clsx(
-                      'h-5 aspect-square text-gray-600',
-                      isActive && 'text-purple-600'
+                      isActive && 'text-primary',
+                      'h-5 aspect-square text-gray-600'
                     )}
                   />
                   <span
                     className={clsx(
-                      'text-sm  text-gray-600',
-                      isActive && 'text-black'
+                      isActive && 'text-primary',
+                      'text-sm  text-gray-600'
                     )}>
                     {nav.name}
                   </span>
@@ -88,7 +93,7 @@ const NavigationPane = () => {
         <li key="logout" className="w-full ">
           <button
             onClick={() => signOut()}
-            className="hover:text-blue-500 flex gap-4 items-center">
+            className="hover:text-blue-500 flex gap-4 items-center p-4 border-l-4">
             <ArrowLeftOnRectangleIcon
               className={clsx('h-5 aspect-square text-gray-600')}
             />
