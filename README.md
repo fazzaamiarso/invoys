@@ -24,10 +24,10 @@ Checkout the [contributing guide](CONTRIBUTING.MD) for setup guide.
 Any contributions is welcomed and encouraged. If you are interested, see the [contributing guide](CONTRIBUTING.MD). 
 
 ## Improvements 
-- [] Dashboard analytics.
-- [] Recurring and scheduled invoice sending.
-- [] Invoice due date reminder.
-- [] Setup CI workflow for testing.
-- [] Table virtualization with @tanstack-virtual.
-- [] UI/UX.
-- [] E2E testing with Playwright (or cypress?).
+- [ ] Dashboard analytics.
+- [ ] Recurring and scheduled invoice sending.
+- [ ] Invoice due date reminder.
+- [ ] Setup CI workflow for testing.
+- [ ] Table virtualization with @tanstack-virtual.
+- [ ] UI/UX.
+- [ ] E2E testing with Playwright (or cypress?).

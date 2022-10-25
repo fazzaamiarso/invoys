@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
 import { sendInvoice } from '@lib/courier';
+import { parseSort } from '@utils/prisma';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -11,18 +12,6 @@ const orderItemSchema = z.object({
 });
 
 const sortSchema = z.enum(['asc', 'desc']).optional();
-
-const parseSort = (sortObject: Record<string, any>) => {
-  for (const key in sortObject) {
-    if (!key) continue;
-    const splitted = key.split('_');
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const init = { [splitted.pop()!]: sortObject[key] };
-    return splitted.length > 1
-      ? splitted.reduceRight((acc, k) => ({ [k]: acc }), init)
-      : init;
-  }
-};
 
 export const invoiceRouter = t.router({
   infiniteInvoices: protectedProcedure
