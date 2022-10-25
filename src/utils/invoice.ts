@@ -1,4 +1,3 @@
-import { OrderItem } from '@prisma/client';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { RefObject } from 'react';
@@ -14,7 +13,7 @@ const ALPHABET = 'ABCDHIJKLMNOPQRSTUVWXYZ';
  */
 export const generatePrefix = (value?: string) => {
   let [first, second, third] = value
-    ? value.toUpperCase().split(/[A-Z]/gi, 3)
+    ? value.toUpperCase().split(/[^A-Z]+/g, 3)
     : [];
 
   third = third ? third.charAt(0) : getRandomIndexValue(ALPHABET);
@@ -24,7 +23,11 @@ export const generatePrefix = (value?: string) => {
   return `${first}${second}${third}`;
 };
 
-export const calculateOrderAmount = (orders: OrderItem[]) => {
+export const calculateOrderAmount = <
+  T extends { amount: number; quantity: number }
+>(
+  orders: T[]
+) => {
   return orders.reduce((acc, curr) => acc + curr.amount * curr.quantity, 0);
 };
 

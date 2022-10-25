@@ -45,8 +45,10 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
             props.variant ? v[props.variant] : v.primary,
             props.className
           )}>
-          {props.Icon && <props.Icon className="aspect-square h-4" />}
-          {props.children}
+          <>
+            {props.Icon && <props.Icon className="aspect-square h-4" />}
+            {props.children}
+          </>
         </Link>
       );
 

@@ -16,7 +16,9 @@
     "incremental": true,
     "noUncheckedIndexedAccess": true,
     "baseUrl": "./src",
+    "types": ["vitest/globals"],
     "paths": {
+      "@": ["/*"],
       "@components/*": ["components/*"],
       "@utils/*": ["utils/*"],
       "@lib/*": ["lib/*"],
