@@ -50,7 +50,11 @@ const InvoicePreview: NextPage = () => {
         <h2 className="text-lg font-bold">Preview</h2>
         {invoiceDetail && settings && (
           <div className="ring-1 ring-gray-200 rounded-md">
-            <InvoicePdf invoiceDetail={invoiceDetail} settings={settings} />
+            <InvoicePdf
+              invoiceDetail={invoiceDetail}
+              settings={settings}
+              ref={pdfRef}
+            />
           </div>
         )}
         <div>

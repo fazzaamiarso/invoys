@@ -4,21 +4,25 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import Button from '@components/Button';
 import { InferProcedures, trpc } from '@utils/trpc';
 import TextInput from '@components/Form/TextInput';
+import { useEffect } from 'react';
 
-type SettingsOutput = InferProcedures['setting']['get']['output'];
 type SettingsUpdateInput = InferProcedures['setting']['update']['input'];
 
 const Settings: NextPage = () => {
   const utils = trpc.useContext();
-  const { data } = trpc.setting.get.useQuery();
+  const { data } = trpc.setting.get.useQuery(undefined, {
+    keepPreviousData: true,
+    staleTime: Infinity,
+  });
   const updateMutation = trpc.setting.update.useMutation();
 
-  const { register, handleSubmit } = useForm<SettingsUpdateInput>({
-    defaultValues: data,
-  });
+  const { register, handleSubmit, reset, formState } =
+    useForm<SettingsUpdateInput>({
+      defaultValues: data,
+    });
 
   const onSubmit: SubmitHandler<SettingsUpdateInput> = fieldValues => {
-    if (updateMutation.isLoading) return;
+    if (updateMutation.isLoading || !formState.isDirty) return;
     updateMutation.mutate(fieldValues, {
       onSuccess() {
         return utils.setting.invalidate();
@@ -26,6 +30,11 @@ const Settings: NextPage = () => {
     });
   };
 
+  useEffect(() => {
+    if (data) {
+      reset(data);
+    }
+  }, [data, reset]);
   return (
     <>
       <Layout title="Settings">

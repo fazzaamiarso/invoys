@@ -1,7 +1,7 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
 import NewClientDrawer from '@components/NewClientDrawer';
-import Spinner from '@components/Spinner';
+import { LoadingSpinner } from '@components/Spinner';
 import SortableHeader from '@components/Table/SortableHeader';
 import { UserPlusIcon } from '@heroicons/react/24/outline';
 import {
@@ -151,8 +151,8 @@ const ClientsIndex: NextPage = () => {
           </div>
         </div>
         {status === 'loading' && (
-          <div className="w-full flex items-center justify-center pt-24">
-            <Spinner />
+          <div className="w-full flex items-center justify-center pt-28">
+            <LoadingSpinner twWidth="w-20" />
           </div>
         )}
         {status !== 'loading' &&

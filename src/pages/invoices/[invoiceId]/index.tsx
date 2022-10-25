@@ -102,16 +102,18 @@ const InvoiceDetail = () => {
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000'
         : process.env.VERCEL_URL;
-    if (!invoiceDetail || sendEmailMutation.isLoading) return;
+    if (!invoiceDetail || !settings || sendEmailMutation.isLoading) return;
     sendEmailMutation.mutate({
       customerName: invoiceDetail.customer.name,
       invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
       invoiceViewUrl: `${baseUrl}/invoices/${invoiceDetail.id}/preview`,
+      businessName: settings.businessName,
     });
   };
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
+    console.log(pdfRef);
     if (!invoiceDetail) return;
     await downloadPdf(pdfRef, `Invoice #${invoiceDetail.invoiceNumber}.pdf`);
   };
@@ -160,7 +162,11 @@ const InvoiceDetail = () => {
             {/* LEFT SECTION */}
             <div className="basis-2/3 pr-8 ">
               <div className="bg-[#f4f9fa] p-4 rounded-md">
-                <InvoicePdf invoiceDetail={invoiceDetail} settings={settings} />
+                <InvoicePdf
+                  invoiceDetail={invoiceDetail}
+                  settings={settings}
+                  ref={pdfRef}
+                />
               </div>
             </div>
             {/* LEFT SECTION END */}
@@ -212,7 +218,9 @@ const InvoiceDetail = () => {
                   variant="primary"
                   Icon={PaperAirplaneIcon}
                   onClick={sendInvoiceEmail}
-                  disabled={invoiceDetail.isDraft}>
+                  disabled={invoiceDetail.isDraft}
+                  isLoading={sendEmailMutation.isLoading}
+                  loadingContent="Sending...">
                   Send to Email
                 </Button>
               </div>

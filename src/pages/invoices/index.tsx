@@ -38,7 +38,7 @@ import SortableHeader from '@components/Table/SortableHeader';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { invoiceDrawerStateAtom } from '@components/InvoiceDrawer/NewInvoiceDrawer';
-import Spinner from '@components/Spinner';
+import Spinner, { LoadingSpinner } from '@components/Spinner';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 
@@ -245,8 +245,8 @@ const Invoices = () => {
         </div>
       </div>
       {status === 'loading' && (
-        <div className="w-full flex items-center justify-center pt-20">
-          <Spinner />
+        <div className="w-full flex items-center justify-center pt-28">
+          <LoadingSpinner twWidth="w-20" />
         </div>
       )}
       {status !== 'loading' &&

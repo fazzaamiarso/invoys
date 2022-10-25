@@ -15,6 +15,7 @@ Made to be free of cost.
 - Next-auth
 - Prisma
 - Planetscale (MySQL)
+- Tailwind CSS
 - Courier
 
 ## Use

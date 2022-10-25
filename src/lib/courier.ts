@@ -12,10 +12,12 @@ export const sendInvoice = async ({
   customerName,
   invoiceNumber,
   invoiceViewUrl,
+  businessName,
 }: {
   customerName: string;
   invoiceNumber: string;
   invoiceViewUrl: string;
+  businessName: string;
 }) => {
   try {
     console.log(invoiceViewUrl);
@@ -25,10 +27,12 @@ export const sendInvoice = async ({
           email: 'fazzarazaq1@gmail.com',
         },
         template: INVOICE_TEMPLATE_ID,
+        // Data is needed for courier email desginer
         data: {
           customerName,
           invoiceNumber,
           invoiceViewUrl,
+          businessName,
         },
       },
     });

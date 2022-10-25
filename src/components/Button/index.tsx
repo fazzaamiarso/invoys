@@ -73,7 +73,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
           'px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2',
           variant ? v[variant] : v.primary
         )}>
-        {isLoading && <LoadingSpinner twWidth="w-4" />}
+        {isLoading && <LoadingSpinner twWidth="w-5" />}
         {isLoading && loadingContent}
         {!isLoading && Icon && <Icon className="aspect-square h-4" />}
         {!isLoading && children}

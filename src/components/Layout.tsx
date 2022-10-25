@@ -87,7 +87,7 @@ const NavigationPane = () => {
       <ul className="">
         <li key="logout" className="w-full ">
           <button
-            // onClick={() => signOut()}
+            onClick={() => signOut()}
             className="hover:text-blue-500 flex gap-4 items-center">
             <ArrowLeftOnRectangleIcon
               className={clsx('h-5 aspect-square text-gray-600')}
@@ -126,7 +126,7 @@ const Layout = ({
               New Invoice
             </Button>
             <div className="ml-auto flex items-center gap-4">
-              <div className="font-semibold">
+              <div className="font-semibold text-sm">
                 {session.data?.user?.email ?? 'Gojo Satoru@jujutsu.com'}
               </div>
               <div
