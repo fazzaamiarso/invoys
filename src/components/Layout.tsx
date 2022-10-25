@@ -11,6 +11,7 @@ import { twGradients } from 'data/gradients';
 import { useSetAtom } from 'jotai';
 import { signOut, useSession } from 'next-auth/react';
 import { NextSeo } from 'next-seo';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
@@ -19,6 +20,7 @@ import {
   invoiceDrawerStateAtom,
   NewInvoiceDrawer,
 } from './InvoiceDrawer/NewInvoiceDrawer';
+import logo from '@assets/invoys.webp';
 
 const navigations = [
   {
@@ -43,7 +45,12 @@ const NavigationPane = () => {
   const router = useRouter();
   return (
     <div className="bg-[#f2f4f7] p-4 space-y-12 h-screen border-r-gray-300 border-r-[1px] grow">
-      <h1 className="text-xl font-bold flex flex-col justify-between">LOGO</h1>
+      <div className="w-28">
+        <Image src={logo} alt="logo" />
+      </div>
+      <h1 className="text-xl font-bold flex flex-col justify-between sr-only">
+        Invoys
+      </h1>
       <nav className="">
         <ul className="space-y-8">
           {navigations.map(nav => {
