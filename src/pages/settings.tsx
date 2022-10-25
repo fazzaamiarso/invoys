@@ -41,7 +41,7 @@ const Settings: NextPage = () => {
         <h2 className="text-lg font-bold pb-8">Settings</h2>
         <section className="grid w-full grid-cols-3">
           <div className="col-span-1">
-            <h3 className="text-2xl font-semibold">Invoice</h3>
+            <h3 className="text-lg font-semibold">Invoice</h3>
             <p className="text-sm">Informations to use on invoice</p>
           </div>
           <form

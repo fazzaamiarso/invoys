@@ -38,7 +38,7 @@ import SortableHeader from '@components/Table/SortableHeader';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { invoiceDrawerStateAtom } from '@components/InvoiceDrawer/NewInvoiceDrawer';
-import Spinner, { LoadingSpinner } from '@components/Spinner';
+import { LoadingSpinner } from '@components/Spinner';
 
 type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
 

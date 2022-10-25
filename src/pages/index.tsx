@@ -3,12 +3,21 @@ import Layout from '@components/Layout';
 import { ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { trpc } from '@utils/trpc';
+import { LoadingSpinner } from '@components/Spinner';
 
 const Home: NextPage = () => {
   const { data: settings } = trpc.setting.get.useQuery(undefined, {
     keepPreviousData: true,
     staleTime: Infinity,
   });
+
+  const { data: statistics, isLoading } = trpc.general.statistics.useQuery(
+    undefined,
+    {
+      keepPreviousData: true,
+      staleTime: 60 * 1000,
+    }
+  );
 
   return (
     <>
@@ -52,8 +61,52 @@ const Home: NextPage = () => {
             </div>
           </div>
         )}
-        <div className="content-layout py-8">
+        <div className="content-layout py-8 space-y-8">
           <h2 className="text-lg font-bold">Dashboard</h2>
+          <section className="w-full">
+            <div className="grid grid-cols-4 gap-6 w-full">
+              <div className="ring-gray-300 w-full rounded-md ring-1 p-5 space-y-1 shadow-sm">
+                <h3 className="text-sm text-gray-500">Clients</h3>
+                <div className="text-3xl font-semibold">
+                  {isLoading ? (
+                    <LoadingSpinner twWidth="w-6" />
+                  ) : (
+                    statistics?.client.count
+                  )}
+                </div>
+              </div>
+              <div className="ring-gray-300 w-full rounded-md ring-1 p-5 space-y-1 shadow-sm">
+                <h3 className="text-sm text-gray-500">Invoices</h3>
+                <div className="text-3xl font-semibold">
+                  {isLoading ? (
+                    <LoadingSpinner twWidth="w-6" />
+                  ) : (
+                    statistics?.invoice.count
+                  )}
+                </div>
+              </div>
+              <div className="ring-gray-300 w-full rounded-md ring-1 p-5 space-y-1 shadow-sm">
+                <h3 className="text-sm text-gray-500">Paid</h3>
+                <div className="text-3xl font-semibold">
+                  {isLoading ? (
+                    <LoadingSpinner twWidth="w-6" />
+                  ) : (
+                    `$${statistics?.invoice.paid}`
+                  )}
+                </div>
+              </div>
+              <div className="ring-gray-300 w-full rounded-md ring-1 p-5 space-y-1 shadow-sm">
+                <h3 className="text-sm text-gray-500">Issued</h3>
+                <div className="text-3xl font-semibold">
+                  {isLoading ? (
+                    <LoadingSpinner twWidth="w-6" />
+                  ) : (
+                    `$${statistics?.invoice.issued}`
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </Layout>
     </>
