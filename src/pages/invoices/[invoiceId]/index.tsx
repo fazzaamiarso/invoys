@@ -98,7 +98,7 @@ const InvoiceDetail = () => {
   };
 
   const sendInvoiceEmail = () => {
-    const baseUrl =
+    const hostUrl =
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000'
         : process.env.VERCEL_URL;
@@ -106,8 +106,9 @@ const InvoiceDetail = () => {
     sendEmailMutation.mutate({
       customerName: invoiceDetail.customer.name,
       invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
-      invoiceViewUrl: `${baseUrl}/invoices/${invoiceDetail.id}/preview`,
+      invoiceViewUrl: `${hostUrl}/invoices/${invoiceDetail.id}/preview`,
       businessName: settings.businessName,
+      emailTo: invoiceDetail.customer.email,
     });
   };
 

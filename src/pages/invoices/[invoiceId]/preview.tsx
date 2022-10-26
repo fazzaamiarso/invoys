@@ -7,6 +7,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import invariant from 'tiny-invariant';
 import { downloadPdf } from '@utils/invoice';
 import InvoicePdf from '@components/Invoices/InvoicePdf';
+import { LoadingSpinner } from '@components/Spinner';
 
 const InvoicePreview: NextPage = () => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const InvoicePreview: NextPage = () => {
     keepPreviousData: true,
     staleTime: Infinity,
   });
-  const { data: invoiceDetail } = trpc.invoice.getSingle.useQuery(
+  const { data: invoiceDetail, isLoading } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId: invoiceId as string,
     },
@@ -48,6 +49,11 @@ const InvoicePreview: NextPage = () => {
     <>
       <main className="w-10/12 mx-auto max-w-xl space-y-6 py-12">
         <h2 className="text-lg font-bold">Preview</h2>
+        {isLoading && (
+          <div className="py-6">
+            <LoadingSpinner twWidth="w-12" />
+          </div>
+        )}
         {invoiceDetail && settings && (
           <div className="ring-1 ring-gray-200 rounded-md">
             <InvoicePdf

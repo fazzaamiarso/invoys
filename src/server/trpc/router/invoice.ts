@@ -197,6 +197,7 @@ export const invoiceRouter = t.router({
         invoiceNumber: z.string(),
         invoiceViewUrl: z.string(),
         businessName: z.string(),
+        emailTo: z.string(),
       })
     )
     .mutation(async ({ input }) => {

@@ -2,7 +2,6 @@ import { CourierClient } from '@trycourier/courier';
 
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
 const authToken = process.env.COURIER_AUTH_TOKEN;
-if (!authToken) throw new Error(`Courier authToken not found!`);
 
 const courierClient = CourierClient({
   authorizationToken: authToken,
@@ -13,18 +12,22 @@ export const sendInvoice = async ({
   invoiceNumber,
   invoiceViewUrl,
   businessName,
+  emailTo,
 }: {
   customerName: string;
   invoiceNumber: string;
   invoiceViewUrl: string;
   businessName: string;
+  emailTo: string;
 }) => {
   try {
-    console.log(invoiceViewUrl);
     const { requestId } = await courierClient.send({
       message: {
         to: {
-          email: 'fazzarazaq1@gmail.com',
+          email:
+            process.env.NODE_ENV === 'production'
+              ? emailTo
+              : process.env.COURIER_TEST_EMAIL,
         },
         template: INVOICE_TEMPLATE_ID,
         // Data is needed for courier email desginer
