@@ -10,7 +10,7 @@ export const LoadingSpinner = ({ twWidth }: { twWidth?: string }) => {
     <div
       aria-label="Loading..."
       role="status"
-      className={clsx('w-12 aspect-square', twWidth)}>
+      className={clsx('aspect-square', twWidth)}>
       <svg className=" animate-spin" viewBox="3 3 18 18">
         <path
           className="fill-gray-200"

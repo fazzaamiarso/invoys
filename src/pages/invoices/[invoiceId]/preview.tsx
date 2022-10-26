@@ -1,4 +1,3 @@
-import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { trpc } from '@utils/trpc';
 import { useRef } from 'react';
@@ -9,7 +8,7 @@ import { downloadPdf } from '@utils/invoice';
 import InvoicePdf from '@components/Invoices/InvoicePdf';
 import { LoadingSpinner } from '@components/Spinner';
 
-const InvoicePreview: NextPage = () => {
+const InvoicePreview = () => {
   const router = useRouter();
   const { invoiceId } = router.query;
 
@@ -76,4 +75,5 @@ const InvoicePreview: NextPage = () => {
   );
 };
 
+InvoicePreview.isAuth = false;
 export default InvoicePreview;
