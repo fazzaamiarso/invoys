@@ -16,6 +16,7 @@ type CommonProps = {
   Icon?: HeroIconProps;
   disabled?: boolean;
   onClick?: () => void;
+  className?: string;
 };
 
 type ButtonProps = CommonProps & {
@@ -61,6 +62,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
       isLoading,
       loadingContent,
       disabled,
+      className,
     } = props;
 
     return (
@@ -71,7 +73,8 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
         disabled={disabled}
         className={clsx(
           'px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2',
-          variant ? v[variant] : v.primary
+          variant ? v[variant] : v.primary,
+          className
         )}>
         {isLoading && <LoadingSpinner twWidth="w-5" />}
         {isLoading && loadingContent}

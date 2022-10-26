@@ -15,6 +15,7 @@ type InputProps<T extends FieldValues> = {
   required?: boolean;
   disabled?: boolean;
   errors?: FieldErrors;
+  placeholder?: string;
 };
 
 const TextInput = <T extends FieldValues>({
@@ -25,6 +26,7 @@ const TextInput = <T extends FieldValues>({
   required = true,
   disabled,
   errors,
+  placeholder,
 }: InputProps<T>) => (
   <div className="flex flex-col gap-2 mb-2 w-full">
     <label htmlFor={name} className="text-sm text-gray-500 font-semibold">
@@ -39,6 +41,7 @@ const TextInput = <T extends FieldValues>({
       })}
       id={name}
       name={name}
+      placeholder={placeholder}
       className="rounded-sm text-sm text-gray-700 border-gray-300 w-full"
     />
     {errors && (
