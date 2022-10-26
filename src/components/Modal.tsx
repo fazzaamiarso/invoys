@@ -56,5 +56,5 @@ export const ModalDescription = ({ children }: { children: ReactNode }) => {
 };
 
 export const ModalAction = ({ children }: { children: ReactNode }) => {
-  return <div className="space-x-4 ml-auto">{children}</div>;
+  return <div className="space-x-4 ml-auto flex items-center">{children}</div>;
 };

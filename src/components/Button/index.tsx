@@ -76,7 +76,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
           variant ? v[variant] : v.primary,
           className
         )}>
-        {isLoading && <LoadingSpinner twWidth="w-5" />}
+        {isLoading && <LoadingSpinner twWidth="w-6" />}
         {isLoading && loadingContent}
         {!isLoading && Icon && <Icon className="aspect-square h-4" />}
         {!isLoading && children}

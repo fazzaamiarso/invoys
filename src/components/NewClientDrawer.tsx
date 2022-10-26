@@ -1,5 +1,6 @@
 import { generatePrefix } from '@utils/invoice';
 import { trpc } from '@utils/trpc';
+import { useRouter } from 'next/router';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Button from './Button';
 import Drawer from './Drawer';
@@ -18,6 +19,7 @@ type FormFields = {
   invoicePrefix: string;
 };
 const NewClientDrawer = ({ onClose, isOpen }: Props) => {
+  const router = useRouter();
   const utils = trpc.useContext();
   const mutation = trpc.customer.create.useMutation();
   const {
@@ -32,8 +34,9 @@ const NewClientDrawer = ({ onClose, isOpen }: Props) => {
 
   const onSubmit: SubmitHandler<FormFields> = formValues => {
     mutation.mutate(formValues, {
-      onSuccess: () => {
+      onSuccess: data => {
         utils.customer.infiniteClients.invalidate();
+        router.push(`/clients/${data.id}`);
         onClose();
         reset();
       },
