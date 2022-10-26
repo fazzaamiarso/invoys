@@ -32,3 +32,4 @@ Any contributions is welcomed and encouraged. If you are interested, see the [co
 - [ ] Table virtualization with @tanstack-virtual.
 - [ ] UI/UX.
 - [ ] E2E testing with Playwright (or cypress?).
+- [ ] Setup Docker for development database and test?
