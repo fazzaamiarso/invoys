@@ -36,7 +36,7 @@ model Invoice {
     isDraft       Boolean       @default(false)
 
     orders     OrderItem[]
-    customer   Customer    @relation(fields: [customerId], references: [id])
+    customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
     customerId String
 
     @@fulltext([name, invoiceNumber])
@@ -49,7 +49,7 @@ model OrderItem {
     amount    Int
     quantity  Int
 
-    invoice   Invoice @relation(fields: [invoiceId], references: [id])
+    invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
     invoiceId String
 }
 

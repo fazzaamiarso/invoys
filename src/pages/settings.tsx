@@ -16,13 +16,12 @@ const Settings: NextPage = () => {
   });
   const updateMutation = trpc.setting.update.useMutation();
 
-  const { register, handleSubmit, reset, formState } =
-    useForm<SettingsUpdateInput>({
-      defaultValues: data,
-    });
+  const { register, handleSubmit, reset } = useForm<SettingsUpdateInput>({
+    defaultValues: data,
+  });
 
   const onSubmit: SubmitHandler<SettingsUpdateInput> = fieldValues => {
-    if (updateMutation.isLoading || !formState.isDirty) return;
+    if (updateMutation.isLoading) return;
     updateMutation.mutate(fieldValues, {
       onSuccess() {
         return utils.setting.invalidate();
