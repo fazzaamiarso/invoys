@@ -87,7 +87,7 @@ export const invoiceRouter = t.router({
 
       return invoices;
     }),
-  getSingle: protectedProcedure
+  getSingle: t.procedure
     .input(z.object({ invoiceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const invoice = await ctx.prisma.invoice.findUnique({
