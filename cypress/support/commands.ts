@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 import { signIn } from 'next-auth/react';
+import '@testing-library/cypress/add-commands';
+
 
 // ***********************************************
 // This example commands.ts shows you how to

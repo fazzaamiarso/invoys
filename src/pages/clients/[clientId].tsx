@@ -81,7 +81,9 @@ const ClientDetails: NextPage = () => {
                   Created on {dayjs(clientDetail.createdAt).format('LL')}
                 </p>
               </div>
-              <div className="space-x-4 flex items-center">
+              <div
+                className="space-x-4 flex items-center"
+                data-cy="button-group">
                 <Button variant="outline" onClick={showEditDrawer}>
                   Edit
                 </Button>

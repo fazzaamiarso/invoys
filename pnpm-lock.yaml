@@ -19,6 +19,7 @@ specifiers:
   '@tanstack/react-table': ^8.5.15
   '@tanstack/react-virtual': 3.0.0-beta.18
   '@tanstack/table-core': ^8.5.15
+  '@testing-library/cypress': ^8.0.3
   '@testing-library/react': ^13.4.0
   '@trpc/client': 10.0.0-proxy-beta.15
   '@trpc/next': 10.0.0-proxy-beta.15
@@ -117,6 +118,7 @@ devDependencies:
   '@playwright/test': 1.27.1
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.1.8
   '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.1.8
+  '@testing-library/cypress': 8.0.3_cypress@10.11.0
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
   '@types/node': 18.0.0
   '@types/react': 18.0.14
@@ -1315,6 +1317,17 @@ packages:
     resolution: {integrity: sha512-tcXutY05NpN9lp3+AXI9Sn85RxSPV0EJC0XMim9oeQj/E7bjXoL0qZ4Er4wwnvIbv/hZjC91EmbIQGjgdr6nZg==}
     engines: {node: '>=12'}
     dev: false
+
+  /@testing-library/cypress/8.0.3_cypress@10.11.0:
+    resolution: {integrity: sha512-nY2YaSbmuPo5k6kL0iLj/pGPPfka3iwb3kpTx8QN/vOCns92Saz9wfACqB8FJzcR7+lfA4d5HUOWqmTddBzczg==}
+    engines: {node: '>=12', npm: '>=6'}
+    peerDependencies:
+      cypress: ^2.1.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@testing-library/dom': 8.19.0
+      cypress: 10.11.0
+    dev: true
 
   /@testing-library/dom/8.19.0:
     resolution: {integrity: sha512-6YWYPPpxG3e/xOo6HIWwB/58HukkwIVTOaZ0VwdMVjhRUX/01E4FtQbck9GazOOj7MXHc5RBzMrU86iBJHbI+A==}
