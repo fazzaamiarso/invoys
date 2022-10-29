@@ -11,6 +11,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../../../server/db/client';
 
 export const authOptions: NextAuthOptions = {
+  secret: 'verysecretthing',
   session: { strategy: process.env.APP_ENV === 'test' ? 'jwt' : 'database' },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -27,11 +28,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: process.env.NODE_ENV === 'test' ? undefined : '/auth/login',
+    signIn: process.env.APP_ENV === 'test' ? undefined : '/auth/login',
     verifyRequest: '/auth/verify',
   },
   callbacks: {
-    session: async ({ user, session }) => {
+    async jwt({ token, account, profile }) {
+      if (account) {
+        token.email = profile?.email;
+      }
+      return token;
+    },
+    session: async ({ user, session, token }) => {
+      if (process.env.APP_ENV === 'test') {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            email: token.email,
+            gradient: 'flamingo',
+            role: 'admin',
+          },
+        };
+      }
       return {
         ...session,
         user: { ...session.user, gradient: user.gradient, role: user.role },

@@ -5,6 +5,7 @@ export default defineConfig({
     video: false,
     baseUrl: 'http://localhost:8080',
     screenshotOnRunFailure: false,
+    chromeWebSecurity: false,
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },

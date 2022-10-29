@@ -14,7 +14,7 @@ import { signIn } from 'next-auth/react';
 //
 // -- This is a parent command --
 Cypress.Commands.add('login', () => {
-  return cy.wrap(signIn('credentials', { redirect: false, callbackUrl: '/' }));
+  return cy.wrap(signIn('credentials', { redirect: false }));
 });
 //
 //

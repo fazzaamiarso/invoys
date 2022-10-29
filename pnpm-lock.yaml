@@ -38,6 +38,7 @@ specifiers:
   eslint: 8.22.0
   eslint-config-next: 12.3.1
   eslint-config-prettier: ^8.5.0
+  eslint-plugin-cypress: ^2.12.1
   eslint-plugin-jsx-a11y: ^6.6.1
   html-to-image: ^1.10.8
   husky: ^8.0.0
@@ -127,6 +128,7 @@ devDependencies:
   eslint: 8.22.0
   eslint-config-next: 12.3.1_yv3nvntfnealqm77uomj2fi4ki
   eslint-config-prettier: 8.5.0_eslint@8.22.0
+  eslint-plugin-cypress: 2.12.1_eslint@8.22.0
   eslint-plugin-jsx-a11y: 6.6.1_eslint@8.22.0
   husky: 8.0.1
   lint-staged: 13.0.3
@@ -3116,6 +3118,15 @@ packages:
       - supports-color
     dev: true
 
+  /eslint-plugin-cypress/2.12.1_eslint@8.22.0:
+    resolution: {integrity: sha512-c2W/uPADl5kospNDihgiLc7n87t5XhUbFDoTl6CfVkmG+kDAb5Ux10V9PoLPu9N+r7znpc+iQlcmAqT1A/89HA==}
+    peerDependencies:
+      eslint: '>= 3.2.1'
+    dependencies:
+      eslint: 8.22.0
+      globals: 11.12.0
+    dev: true
+
   /eslint-plugin-import/2.26.0_q4brmuik2q4s5ajvp5b2ufh23e:
     resolution: {integrity: sha512-hYfi3FXaM8WPLf4S1cikh/r4IxnO6zrhZbEGz2b660EJRbuxgpDS5gkCuYgGWg2xxh2rBuIr4Pvhve/7c31koA==}
     engines: {node: '>=4'}
@@ -3738,7 +3749,6 @@ packages:
   /globals/11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
     engines: {node: '>=4'}
-    dev: false
 
   /globals/13.17.0:
     resolution: {integrity: sha512-1C+6nQRb1GwGMKm2dH/E7enFAMxGTmGI7/dEdhy/DNelv85w9B72t3uc5frtMNXIbzrarJJ/lTCjcaZwbLJmyw==}
