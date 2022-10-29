@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  images: mysql:8.0
+  container_name: papabear-mysql
+  environment:
+    - MYSQL_DATABASE: invoys-test
+    - MYSQL_ROOT_PASSWORD: secret
+  

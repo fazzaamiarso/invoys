@@ -7,9 +7,11 @@ import NextAuth, {
   DefaultUser,
 } from 'next-auth';
 import EmailProvider from 'next-auth/providers/email';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../../../server/db/client';
 
 export const authOptions: NextAuthOptions = {
+  session: { strategy: process.env.APP_ENV === 'test' ? 'jwt' : 'database' },
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -25,7 +27,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/auth/login',
+    signIn: process.env.NODE_ENV === 'test' ? undefined : '/auth/login',
     verifyRequest: '/auth/verify',
   },
   callbacks: {
@@ -57,6 +59,30 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+if (process.env.APP_ENV === 'test') {
+  authOptions.providers.push(
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: {
+          label: 'Email',
+          name: 'email',
+          value: 'mock@e2e.com',
+        },
+      },
+      async authorize(credentials) {
+        return {
+          email: credentials?.email,
+          role: 'ADMIN',
+          id: 'anything',
+          gradient: 'flamingo',
+        };
+      },
+    })
+  );
+}
+
 export default NextAuth(authOptions);
 
 declare module 'next-auth' {
