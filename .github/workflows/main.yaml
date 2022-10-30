@@ -1,6 +1,6 @@
 name: Testing with Cypress + Vitest
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
  vitest:
