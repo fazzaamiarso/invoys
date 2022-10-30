@@ -5,21 +5,23 @@
   "author": "Fazza Razaq Amiarso <fazzaamiarso@gmail.com> (https://fazzaamiarso.me/)",
   "scripts": {
     "build": "next build",
+    "build:ci": "APP_ENV=test next build",
     "dev": "next dev",
-    "dev:test": "NODE_ENV=test next dev -p 8080",
+    "dev:test": "next dev -p 8080",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
+    "start:ci": "next start -p 8080",
     "prepare": "husky install",
     "db:push": "prisma db push",
     "db:seed": "prisma migrate reset --skip-generate --skip-seed && prisma db push && prisma db seed",
     "db:seed-test": "prisma migrate reset --skip-generate --skip-seed --force && prisma db push && prisma db seed",
+    "db:studio": "prisma studio",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "cy:test": "run-p dev:test cy:open",
+    "cy:test": "start-server-and-test dev:test 8080 cy:open",
     "test:unit": "vitest",
-    "test:e2e": "playwright test",
-    "test:dev": "start-server-and-test 'next dev' 3000 test:e2e"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.3",
