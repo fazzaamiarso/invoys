@@ -5,6 +5,7 @@ const StatusBadge = ({ status }: { status: InvoiceStatus }) => {
   const statusText = status.charAt(0) + status.slice(1).toLowerCase();
   return (
     <div
+      data-cy="invoice-status"
       className={clsx(
         'text-xs rounded-md py-2 w-max font-semibold',
         status === 'PAID' && 'bg-[#dcfde7] text-[#176434]',

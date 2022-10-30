@@ -79,8 +79,10 @@ const runSeed = async () => {
   invoices.forEach(async i => {
     await prisma.orderItem.createMany({
       data: Array.from({
-        length: getRandomDigit(1, 2),
-      }).map(() => createRandomOrders(i.id)),
+        length: getRandomDigit(2, 3),
+      }).map(() => {
+        return createRandomOrders(i.id);
+      }),
     });
   });
 };

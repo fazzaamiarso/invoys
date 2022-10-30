@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
-    exclude: [...configDefaults.exclude, '**/playwright/**'],
+    exclude: [...configDefaults.exclude, '**/cypress/**'],
     globals: true,
     environment: 'jsdom',
   },
