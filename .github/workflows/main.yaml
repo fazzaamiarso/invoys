@@ -18,10 +18,13 @@ jobs:
           node-version: 16
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+          run_install: true
 
       - name: Run Vitest
-        run: npm run test:unit
+        run: pnpm run test:unit
 
   cypress-run:
     name: Cypress
@@ -42,7 +45,10 @@ jobs:
           node-version: 16
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+          run_install: true
 
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
@@ -52,5 +58,5 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4 
         with:
-          build: npm run build:ci
-          start: npm start:ci
+          build: pnpm run build:ci
+          start: pnpm start:ci
