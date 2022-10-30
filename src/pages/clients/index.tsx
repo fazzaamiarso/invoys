@@ -33,7 +33,7 @@ const columns = [
   }),
   columnHelper.accessor('name', {
     header: props => <SortableHeader headerProps={props}>Name</SortableHeader>,
-    cell: props => props.getValue(),
+    cell: props => <span data-cy="client-name">{props.getValue()}</span>,
   }),
   columnHelper.accessor('email', {
     header: props => <SortableHeader headerProps={props}>Email</SortableHeader>,

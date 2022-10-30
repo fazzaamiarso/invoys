@@ -1,22 +1,48 @@
+import { faker } from '@faker-js/faker';
+
 // before(() => {
 //   cy.exec('pnpm db:seed-test');
 // });
-
-import { faker } from '@faker-js/faker';
 
 beforeEach(() => {
   cy.login();
   cy.visit('/');
 });
-describe('client', () => {
-  it.skip('sort correctly', () => {
-    cy.findByRole('table');
+
+describe('Clients', () => {
+  beforeEach(() => {
+    cy.visit('/clients');
+  });
+  it('sort correctly', () => {
+    cy.intercept('/api/trpc/customer.infiniteClients*').as('sorting');
+    cy.findByRole('table').within(() => {
+      cy.findByRole('columnheader', { name: /name/i })
+        .findByRole('button')
+        .as('sort-name')
+        .click();
+      cy.wait('@sorting');
+
+      //find a better selector? feels bad to use data-cy
+      cy.get('span[data-cy="client-name"]')
+        .should('have.length', 10)
+        .should($items => {
+          expect($items.first().text().charCodeAt(0)).lt(
+            $items.last().text().charCodeAt(0)
+          );
+        });
+
+      cy.get('@sort-name').click();
+      cy.wait('@sorting');
+      cy.get('span[data-cy="client-name"]')
+        .should('have.length', 10)
+        .should($items => {
+          expect($items.first().text().charCodeAt(0)).gt(
+            $items.last().text().charCodeAt(0)
+          );
+        });
+    });
   });
   it('can add a new client', () => {
-    cy.get('h2')
-      .should('exist')
-      .contains(/dashboard/i);
-    cy.visit('/clients');
     cy.get('button')
       .contains(/add client/gi)
       .click();
@@ -37,7 +63,6 @@ describe('client', () => {
   });
 
   it('can edit a client', () => {
-    cy.visit('/clients');
     cy.get('table').find('a').contains(/view/i).click();
 
     cy.get("div[data-cy='button-group']").contains('button', /edit/i).click();
@@ -58,7 +83,6 @@ describe('client', () => {
   });
 
   it('can delete a client', () => {
-    cy.visit('/clients');
     cy.get('table').find('a').contains(/view/gi).click();
     cy.get("div[data-cy='button-group']")
       .contains('button', /delete/i)
@@ -67,4 +91,13 @@ describe('client', () => {
     cy.findByRole('button', { name: /confirm/gi }).click();
     cy.findByRole('heading', { name: /clients/gi, level: 2 });
   });
+});
+
+describe('Invoices', () => {
+  it('can add a new invoice');
+  it('can delete an invoice');
+  it('can edit an invoice');
+  it('can download a pdf');
+  it('can preview an invoice');
+  it('can sort correctly');
 });
