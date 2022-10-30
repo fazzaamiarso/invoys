@@ -1,9 +1,8 @@
 name: Testing with Cypress + Vitest
-
 on: [push, pull_request]
 
 jobs:
- vitest:
+  vitest:
     name:  Vitest
     runs-on: ubuntu-latest
     steps:
