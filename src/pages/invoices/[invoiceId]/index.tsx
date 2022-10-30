@@ -114,7 +114,6 @@ const InvoiceDetail = () => {
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
-    console.log(pdfRef);
     if (!invoiceDetail) return;
     await downloadPdf(pdfRef, `Invoice #${invoiceDetail.invoiceNumber}.pdf`);
   };
@@ -142,7 +141,7 @@ const InvoiceDetail = () => {
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-4">
+            <div data-cy="button-group" className="flex items-center space-x-4">
               <Button
                 variant="outline"
                 Icon={EyeIcon}

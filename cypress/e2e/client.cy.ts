@@ -94,10 +94,115 @@ describe('Clients', () => {
 });
 
 describe('Invoices', () => {
-  it('can add a new invoice');
-  it('can delete an invoice');
-  it('can edit an invoice');
-  it('can download a pdf');
-  it('can preview an invoice');
+  beforeEach(() => {
+    cy.visit('/invoices');
+  });
+
+  it('can add a new invoice as draft', () => {
+    cy.findByRole('banner')
+      .findByRole('button', { name: /new invoice/gi })
+      .click();
+
+    const projectName = faker.name.jobArea();
+    const notes = faker.lorem.sentences();
+    const dueDate = new Date(faker.date.future());
+
+    cy.findByRole('dialog').within(() => {
+      cy.intercept('/api/trpc/invoice.create*').as('create-invoice');
+      cy.findByLabelText(/project/gi).type(projectName);
+      cy.get("td > input[id='orders.0.name']").type(faker.commerce.product());
+      cy.get("td > input[id='orders.0.quantity']")
+        .clear()
+        .type(faker.commerce.price());
+      cy.get("td > input[id='orders.0.amount']")
+        .clear()
+        .type(faker.random.numeric(3));
+
+      cy.findByLabelText(/due on/i).type(
+        `${dueDate.getFullYear()}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, '0')}-${(dueDate.getDate() + 1)
+          .toString()
+          .padStart(2, '0')}`
+      );
+      cy.findByRole('textbox', { name: /notes/i }).type(notes);
+      cy.findByRole('switch', { name: /draft/gi }).click();
+      cy.findByRole('button', { name: /create invoice/gi }).click();
+    });
+    cy.wait('@create-invoice');
+    cy.findByRole('heading', { name: /projects detail/i }).should('exist');
+  });
+
+  it('can preview an invoice', () => {
+    cy.findByRole('table').find('a').contains(/view/i).first().click();
+    cy.findByRole('link', { name: /preview/i })
+      .invoke('removeAttr', 'target')
+      .click();
+    cy.url().should('include', 'preview');
+  });
+
+  it('can delete an invoice', () => {
+    cy.get('table').find('a').contains(/view/gi).click();
+
+    cy.get('div[data-cy="button-group"]')
+      .find('button')
+      .contains(/delete/i)
+      .click();
+
+    cy.findByRole('button', { name: /confirm/gi }).click();
+    cy.findByRole('heading', { name: /invoices/gi, level: 2 });
+  });
+
+  it('can edit an invoice', () => {
+    cy.intercept('/api/trpc/invoice.getSingle*').as('editing');
+    cy.findByRole('table').find('a').contains(/view/i).first().click();
+    cy.get('div[data-cy="button-group"]')
+      .find('button')
+      .contains(/edit/i)
+      .click();
+
+    const newProjectName = faker.name.jobArea();
+    const newOrderName = faker.commerce.product();
+    cy.findByRole('dialog').within(() => {
+      cy.findByLabelText(/project/gi).type(newProjectName);
+
+      cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
+      cy.get("td > input[id='orders.0.quantity']")
+        .clear()
+        .type(faker.commerce.price());
+      cy.get("td > input[id='orders.0.amount']")
+        .clear()
+        .type(faker.random.numeric(3));
+
+      cy.findByRole('button', { name: /save/gi }).click();
+    });
+
+    cy.wait('@editing').then(() => {
+      cy.get("h4[data-cy='order-name']")
+        .first()
+        .invoke('text')
+        .should('include', newOrderName);
+    });
+  });
+  it('can filter status correctly', () => {
+    cy.intercept('/api/trpc/invoice.infinite*').as('filtering');
+
+    cy.findByRole('button', { name: /all status/i }).click();
+    cy.get('li').focused().type('{downArrow}').type('{enter}');
+
+    cy.wait('@filtering');
+
+    cy.get('div[data-cy="invoice-status"]').each($item => {
+      expect($item.text()).contains('Pending');
+    });
+  });
+
   it('can sort correctly');
+
+  it.skip('can download a pdf', () => {
+    cy.findByRole('table').find('a').contains(/view/i).first().click();
+    cy.findByRole('heading', { level: 2 }).invoke('text').as('invoice');
+
+    cy.findByRole('button', { name: /download pdf/i });
+  });
 });

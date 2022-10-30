@@ -46,6 +46,7 @@ const TableInput = ({ type, rowIdx, columnId, table }: TableInputProps) => {
           valueAsNumber: type === 'number',
         }
       )}
+      id={`orders.${rowIdx}.${columnId}`}
       type={type}
       autoComplete="off"
       required

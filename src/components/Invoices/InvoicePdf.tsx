@@ -48,7 +48,9 @@ const InvoicePdf = forwardRef<HTMLDivElement, Props>(
                     <li
                       key={order.id}
                       className="flex gap-4 py-4 border-b-[1px] border-gray-200">
-                      <h4 className="font-semibold">{order.name}</h4>
+                      <h4 className="font-semibold" data-cy="order-name">
+                        {order.name}
+                      </h4>
                       <div className="">x {order.quantity}</div>
                       <div className="ml-auto">
                         ${order.quantity * order.amount}
