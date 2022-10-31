@@ -163,26 +163,29 @@ describe('Invoices', () => {
 
     const newProjectName = faker.name.jobArea();
     const newOrderName = faker.commerce.product();
-    cy.findByRole('dialog').within(() => {
-      cy.findByLabelText(/project/gi).type(newProjectName);
+    cy.findByRole('dialog')
+      .as('dialog')
+      .within(() => {
+        cy.findByLabelText(/project/gi).type(newProjectName);
 
-      cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
-      cy.get("td > input[id='orders.0.quantity']")
-        .clear()
-        .type(faker.commerce.price());
-      cy.get("td > input[id='orders.0.amount']")
-        .clear()
-        .type(faker.random.numeric(3));
+        cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
+        cy.get("td > input[id='orders.0.quantity']")
+          .clear()
+          .type(faker.commerce.price());
+        cy.get("td > input[id='orders.0.amount']")
+          .clear()
+          .type(faker.random.numeric(3));
 
-      cy.findByRole('button', { name: /save/gi }).click();
-    });
+        cy.findByRole('button', { name: /save/gi }).click();
+      });
 
-    cy.wait('@editing').then(() => {
-      cy.get("h4[data-cy='order-name']")
-        .first()
-        .invoke('text')
-        .should('include', newOrderName);
-    });
+    cy.wait('@editing');
+    cy.get('@dialog').should('not.exist');
+
+    cy.get("h4[data-cy='order-name']")
+      .first()
+      .invoke('text')
+      .should('include', newOrderName);
   });
   it('can filter status correctly', () => {
     cy.intercept('/api/trpc/invoice.infinite*').as('filtering');

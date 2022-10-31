@@ -5,9 +5,9 @@
   "author": "Fazza Razaq Amiarso <fazzaamiarso@gmail.com> (https://fazzaamiarso.me/)",
   "scripts": {
     "build": "next build",
-    "build:ci": "APP_ENV=test next build",
+    "build:ci": "cross-env APP_ENV=test next build",
     "dev": "next dev",
-    "dev:test": "next dev -p 8080",
+    "dev:test": "cross-env APP_ENV=test next dev -p 8080",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
@@ -20,6 +20,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "cy:test": "start-server-and-test dev:test 8080 cy:open",
+    "cy:test-run": "start-server-and-test dev:test 8080 cy:run",
     "test:unit": "vitest",
     "test:e2e": "playwright test"
   },
@@ -58,6 +59,7 @@
     "react-hook-form": "^7.37.0",
     "react-hot-toast": "^2.4.0",
     "react-intersection-observer": "^9.4.0",
+    "sharp": "^0.31.1",
     "superjson": "1.9.1",
     "tiny-invariant": "^1.3.1",
     "zod": "^3.18.0"
@@ -78,6 +80,7 @@
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "autoprefixer": "^10.4.7",
+    "cross-env": "^7.0.3",
     "cypress": "^10.11.0",
     "eslint": "8.22.0",
     "eslint-config-next": "12.3.1",
