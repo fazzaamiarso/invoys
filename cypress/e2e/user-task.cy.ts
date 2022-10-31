@@ -153,7 +153,7 @@ describe('Invoices', () => {
     cy.findByRole('heading', { name: /invoices/gi, level: 2 });
   });
 
-  it('can edit an invoice', () => {
+  it.only('can edit an invoice', () => {
     cy.intercept('/api/trpc/invoice.getSingle*').as('editing');
     cy.findByRole('table').find('a').contains(/view/i).first().click();
     cy.get('div[data-cy="button-group"]')
@@ -177,12 +177,12 @@ describe('Invoices', () => {
       cy.findByRole('button', { name: /save/gi }).click();
     });
 
-    cy.wait('@editing').then(() => {
-      cy.get("h4[data-cy='order-name']")
-        .first()
-        .invoke('text')
-        .should('include', newOrderName);
-    });
+    cy.wait('@editing');
+
+    cy.get("h4[data-cy='order-name']")
+      .first()
+      .invoke('text')
+      .should('include', newOrderName);
   });
   it('can filter status correctly', () => {
     cy.intercept('/api/trpc/invoice.infinite*').as('filtering');

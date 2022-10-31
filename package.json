@@ -20,6 +20,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "cy:test": "start-server-and-test dev:test 8080 cy:open",
+    "cy:test-run": "start-server-and-test dev:test 8080 cy:run",
     "test:unit": "vitest",
     "test:e2e": "playwright test"
   },
