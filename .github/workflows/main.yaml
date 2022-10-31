@@ -17,14 +17,28 @@ jobs:
         with:
           node-version: 16
 
-      - name: 📥 Download deps
+      - name: 📥 Download pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
           version: 7.14.x
-          run_install: |
-            - recursive: true
-              args: [--frozen-lockfile]
-            - args: [vite]
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Deps
+        run: pnpm install --frozen-lockfile vite
 
       - name: Run Vitest
         run: pnpm run test:unit
@@ -51,9 +65,24 @@ jobs:
         uses: pnpm/action-setup@v2.2.4
         with:
           version: 7.14.x
-          run_install: |
-            - recursive: true
-              args: [--frozen-lockfile]
+          run_install: false
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Deps
+        run: pnpm install --frozen-lockfile
 
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
