@@ -153,7 +153,7 @@ describe('Invoices', () => {
     cy.findByRole('heading', { name: /invoices/gi, level: 2 });
   });
 
-  it.only('can edit an invoice', () => {
+  it('can edit an invoice', () => {
     cy.intercept('/api/trpc/invoice.getSingle*').as('editing');
     cy.findByRole('table').find('a').contains(/view/i).first().click();
     cy.get('div[data-cy="button-group"]')
@@ -163,21 +163,24 @@ describe('Invoices', () => {
 
     const newProjectName = faker.name.jobArea();
     const newOrderName = faker.commerce.product();
-    cy.findByRole('dialog').within(() => {
-      cy.findByLabelText(/project/gi).type(newProjectName);
+    cy.findByRole('dialog')
+      .as('dialog')
+      .within(() => {
+        cy.findByLabelText(/project/gi).type(newProjectName);
 
-      cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
-      cy.get("td > input[id='orders.0.quantity']")
-        .clear()
-        .type(faker.commerce.price());
-      cy.get("td > input[id='orders.0.amount']")
-        .clear()
-        .type(faker.random.numeric(3));
+        cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
+        cy.get("td > input[id='orders.0.quantity']")
+          .clear()
+          .type(faker.commerce.price());
+        cy.get("td > input[id='orders.0.amount']")
+          .clear()
+          .type(faker.random.numeric(3));
 
-      cy.findByRole('button', { name: /save/gi }).click();
-    });
+        cy.findByRole('button', { name: /save/gi }).click();
+      });
 
     cy.wait('@editing');
+    cy.get('@dialog').should('not.exist');
 
     cy.get("h4[data-cy='order-name']")
       .first()
