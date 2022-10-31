@@ -1,6 +1,5 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { UserRole } from '@prisma/client';
-import { twGradients } from 'data/gradients';
 import NextAuth, {
   DefaultSession,
   NextAuthOptions,
@@ -9,10 +8,13 @@ import NextAuth, {
 import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../../../server/db/client';
+import { getRandomGradient } from '@utils/prisma';
+
+const __TEST__ = process.env.APP_ENV === 'test';
 
 export const authOptions: NextAuthOptions = {
-  secret: 'verysecretthing',
-  session: { strategy: process.env.APP_ENV === 'test' ? 'jwt' : 'database' },
+  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: __TEST__ ? 'jwt' : 'database' },
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -28,7 +30,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: process.env.APP_ENV === 'test' ? undefined : '/auth/login',
+    signIn: __TEST__ ? undefined : '/auth/login',
     verifyRequest: '/auth/verify',
   },
   callbacks: {
@@ -39,14 +41,14 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ user, session, token }) => {
-      if (process.env.APP_ENV === 'test') {
+      if (__TEST__) {
         return {
           ...session,
           user: {
             ...session.user,
             email: token.email,
             gradient: 'flamingo',
-            role: 'admin',
+            role: 'ADMIN',
           },
         };
       }
@@ -63,14 +65,11 @@ export const authOptions: NextAuthOptions = {
     },
     createUser: async message => {
       const isFirstUser = (await prisma.user.count()) < 1;
-      const gradientKeys = Object.keys(twGradients);
-      const randomGradient = gradientKeys.at(
-        Math.floor(Math.random() * gradientKeys.length)
-      );
+      const gradient = getRandomGradient();
       await prisma.user.update({
         where: { id: message.user.id },
         data: {
-          gradient: randomGradient,
+          gradient,
           role: isFirstUser ? 'SUPER_ADMIN' : 'ADMIN',
         },
       });
@@ -78,7 +77,7 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-if (process.env.APP_ENV === 'test') {
+if (__TEST__) {
   authOptions.providers.push(
     CredentialsProvider({
       name: 'credentials',
@@ -94,7 +93,6 @@ if (process.env.APP_ENV === 'test') {
           email: credentials?.email,
           role: 'ADMIN',
           id: 'anything',
-          gradient: 'flamingo',
         };
       },
     })
