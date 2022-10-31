@@ -21,8 +21,7 @@
     "cy:run": "cypress run",
     "cy:test": "start-server-and-test dev:test 8080 cy:open",
     "cy:test-run": "start-server-and-test dev:test 8080 cy:run",
-    "test:unit": "vitest",
-    "test:e2e": "playwright test"
+    "test:unit": "vitest"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.3",
@@ -49,7 +48,7 @@
     "jotai": "^1.8.5",
     "jsdom": "^20.0.1",
     "jspdf": "^2.5.1",
-    "next": "12.3.1",
+    "next": "13.0.1",
     "next-auth": "^4.14.0",
     "next-seo": "^5.5.0",
     "nodemailer": "^6.8.0",
@@ -83,7 +82,7 @@
     "cross-env": "^7.0.3",
     "cypress": "^10.11.0",
     "eslint": "8.22.0",
-    "eslint-config-next": "12.3.1",
+    "eslint-config-next": "13.0.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jsx-a11y": "^6.6.1",

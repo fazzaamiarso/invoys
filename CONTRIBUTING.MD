@@ -22,7 +22,8 @@ If you want to use other database for testing, just change the `DATABASE_URL` in
 ### Test
 Make sure all tests passes before you start to code.
 ```sh
-pnpm cy:test-run
+pnpm test:unit
+pnpm cy:test-run 
 ```
 
 ### Other Setup
