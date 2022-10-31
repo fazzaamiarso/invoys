@@ -1,5 +1,5 @@
 name: Testing with Cypress + Vitest
-on: [push, pull_request]
+on: [push]
 
 jobs:
   vitest:
@@ -83,7 +83,7 @@ jobs:
 
       - name: Install Deps
         run: pnpm install
-        
+
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
         env:
