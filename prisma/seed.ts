@@ -29,7 +29,6 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
       count: 3,
     },
   ]);
-  const invoicesCount = getRandomDigit(0, 3);
   return {
     id: faker.datatype.uuid(),
     name: companyName,
@@ -37,16 +36,13 @@ const createRandomClient = (): Prisma.CustomerCreateInput => {
     phoneNumber: faker.phone.number(),
     address: faker.address.streetAddress(true),
     invoicePrefix: prefix,
-    invoices:
-      invoicesCount > 0
-        ? {
-            createMany: {
-              data: Array.from({ length: invoicesCount }).map((_, idx) =>
-                createRandomInvoices(prefix, idx + 1)
-              ),
-            },
-          }
-        : undefined,
+    invoices: {
+      createMany: {
+        data: faker.datatype
+          .array(2)
+          .map((_, idx) => createRandomInvoices(prefix, idx + 1)),
+      },
+    },
   };
 };
 
@@ -73,18 +69,22 @@ const runSeed = async () => {
   console.log('✓ Creating clients successful!');
 
   console.log('🔍 Finding Invoices');
-  const invoices = await prisma.invoice.findMany({ select: { id: true } });
+  const invoiceCount = await prisma.invoice.count();
+  const invoices = await prisma.invoice.findMany({
+    take: invoiceCount,
+  });
 
   console.log('🧾 Creating Orders for Invoices!');
   invoices.forEach(async i => {
+    const arr = faker.datatype.array(3);
     await prisma.orderItem.createMany({
-      data: Array.from({
-        length: getRandomDigit(2, 3),
-      }).map(() => {
+      data: arr.map(() => {
         return createRandomOrders(i.id);
       }),
     });
   });
+
+  await prisma.invoice.deleteMany({ where: { orders: { none: {} } } });
 };
 
 runSeed()
