@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Deps
-        run: pnpm install --frozen-lockfile vite
+        run: pnpm install vite
 
       - name: Run Vitest
         run: pnpm run test:unit
@@ -82,8 +82,8 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Deps
-        run: pnpm install --frozen-lockfile
-
+        run: pnpm install
+        
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
         env:
