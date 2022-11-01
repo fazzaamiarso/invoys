@@ -121,9 +121,7 @@ describe('Invoices', () => {
       cy.findByLabelText(/due on/i).type(
         `${dueDate.getFullYear()}-${(dueDate.getMonth() + 1)
           .toString()
-          .padStart(2, '0')}-${(dueDate.getDate() + 1)
-          .toString()
-          .padStart(2, '0')}`
+          .padStart(2, '0')}-${dueDate.getDate().toString().padStart(2, '0')}`
       );
       cy.findByRole('textbox', { name: /notes/i }).type(notes);
       cy.findByRole('switch', { name: /draft/gi }).click();

@@ -15,7 +15,6 @@ export const settingsRouter = t.router({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Settings should exist, go check the settings table creation',
       });
-    console.log(settings);
     return settings;
   }),
   update: protectedProcedure
