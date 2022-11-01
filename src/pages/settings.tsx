@@ -139,7 +139,7 @@ const TeamSection = () => {
                   <li key={t.id} className="text-sm flex gap-4">
                     <div
                       className={clsx(
-                        twGradients[t.gradient!],
+                        t.gradient && twGradients[t.gradient],
                         'aspect-square h-8 rounded-full'
                       )}
                     />
@@ -173,6 +173,7 @@ const AccessSection = ({ access }: { access: SettingsOutput['access'] }) => {
       <h2 className="col-span-1">Access</h2>
       <RadioGroup
         value={access}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onChange={(val: any) => accessMutation.mutate({ access: val })}
         className="col-span-2 max-w-lg">
         <RadioGroup.Label className="sr-only">Access</RadioGroup.Label>

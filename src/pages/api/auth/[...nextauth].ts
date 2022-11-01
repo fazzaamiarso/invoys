@@ -7,8 +7,11 @@ import NextAuth, {
 } from 'next-auth';
 import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from '../../../server/db/client';
-import { getRandomGradient } from '@utils/prisma';
+import { prisma } from '@lib/prisma/client';
+import {
+  createSettings,
+  insertAdditionalUserData,
+} from '@lib/prisma/next-auth';
 
 const __TEST__ = process.env.APP_ENV === 'test';
 
@@ -60,19 +63,10 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     signIn: async () => {
-      const isSettingsExist = (await prisma.settings.count()) > 0;
-      if (!isSettingsExist) await prisma.settings.create({ data: {} });
+      await createSettings();
     },
     createUser: async message => {
-      const isFirstUser = (await prisma.user.count()) <= 1;
-      const gradient = getRandomGradient();
-      await prisma.user.update({
-        where: { id: message.user.id },
-        data: {
-          gradient,
-          role: isFirstUser ? 'SUPER_ADMIN' : 'ADMIN',
-        },
-      });
+      await insertAdditionalUserData({ userId: message.user.id });
     },
   },
 };
