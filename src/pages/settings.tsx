@@ -9,7 +9,8 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 import { RadioGroup } from '@headlessui/react';
 import clsx from 'clsx';
 import { twGradients } from 'data/gradients';
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 type SettingsUpdateInput = InferProcedures['setting']['update']['input'];
 type SettingsOutput = InferProcedures['setting']['get']['output'];
@@ -110,8 +111,29 @@ const access_data = [
 const TeamSection = () => {
   const utils = trpc.useContext();
   const { data: session } = useSession();
-  const { register, handleSubmit } = useForm<{ email: string }>({});
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<{ email: string }>({});
   const { data: teams } = trpc.user.getAll.useQuery();
+  const mutation = trpc.setting.sendInvite.useMutation({
+    onSuccess() {
+      utils.setting.invalidate();
+      utils.user.getAll.invalidate();
+    },
+  });
+
+  const onSubmit: SubmitHandler<{ email: string }> = async data => {
+    if (mutation.isLoading || isSubmitting) return;
+    const res = await signIn('email', {
+      callbackUrl: '/',
+      redirect: false,
+      email: data.email,
+    });
+    if (res?.error) return toast.error('Failed to send invite');
+    mutation.mutate({ email: data.email });
+  };
 
   return (
     <>
@@ -119,7 +141,7 @@ const TeamSection = () => {
         <h2 className="col-span-1">Team</h2>
         <div className="w-full max-w-lg  col-span-2 space-y-4">
           <form
-            onSubmit={handleSubmit(() => '')}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex items-center gap-2 ">
             <label htmlFor="email" className="w-full ">
               <input
@@ -129,11 +151,13 @@ const TeamSection = () => {
                 className="w-full rounded-sm border-gray-300 text-sm"
               />
             </label>
-            <Button Icon={PlusIcon}>Add</Button>
+            <Button type="submit" Icon={PlusIcon}>
+              Add
+            </Button>
           </form>
           <div className="space-y-4">
             <h3 className="text-sm font-semibold">Members</h3>
-            <ul>
+            <ul className="space-y-4">
               {teams?.map(t => {
                 return (
                   <li key={t.id} className="text-sm flex gap-4">

@@ -41,4 +41,11 @@ export const settingsRouter = t.router({
         data: input,
       });
     }),
+  sendInvite: protectedProcedure
+    .input(z.object({ email: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.email.create({
+        data: { settingsId: SETTINGS_ID, isPending: true, name: input.email },
+      });
+    }),
 });

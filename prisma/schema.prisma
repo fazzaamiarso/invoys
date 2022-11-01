@@ -79,6 +79,15 @@ model Settings {
     businessPhone   String        @default("")
     businessEmail   String        @default("")
     access          AccessOptions @default(UNRESTRICTED)
+    emails          Email[]
+}
+
+model Email {
+    id         String    @id @default(uuid())
+    isPending  Boolean   @default(false)
+    name       String
+    Settings   Settings @relation(fields: [settingsId], references: [id])
+    settingsId String
 }
 
 //NEXT AUTH STUFF
