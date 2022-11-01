@@ -9,6 +9,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@lib/prisma/client';
 import {
+  checkEmailExist,
   createSettings,
   insertAdditionalUserData,
 } from '@lib/prisma/next-auth';
@@ -37,6 +38,12 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: '/auth/verify',
   },
   callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return false;
+      const isEmailExist = await checkEmailExist(user.email);
+      if (isEmailExist) return false;
+      return true;
+    },
     async jwt({ token, account, profile }) {
       if (account) {
         token.email = profile?.email;

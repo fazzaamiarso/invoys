@@ -25,3 +25,8 @@ export const insertAdditionalUserData = async ({
     },
   });
 };
+
+export const checkEmailExist = async (email: string) => {
+  const findEmail = await prisma.email.findUnique({ where: { name: email } });
+  return Boolean(findEmail);
+};
