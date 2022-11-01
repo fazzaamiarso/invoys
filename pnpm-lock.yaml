@@ -28,6 +28,7 @@ specifiers:
   '@trycourier/courier': ^4.0.1
   '@types/node': 18.0.0
   '@types/react': 18.0.14
+  '@types/react-csv': ^1.1.3
   '@types/react-dom': 18.0.5
   '@types/testing-library__cypress': ^5.0.9
   '@typescript-eslint/eslint-plugin': ^5.33.0
@@ -60,6 +61,7 @@ specifiers:
   prettier-plugin-tailwindcss: ^0.1.13
   prisma: ^4.4.0
   react: 18.2.0
+  react-csv: ^2.2.2
   react-dom: 18.2.0
   react-hook-form: ^7.37.0
   react-hot-toast: ^2.4.0
@@ -106,6 +108,7 @@ dependencies:
   nodemailer: 6.8.0
   pdfjs-dist: 2.15.349
   react: 18.2.0
+  react-csv: 2.2.2
   react-dom: 18.2.0_react@18.2.0
   react-hook-form: 7.38.0_react@18.2.0
   react-hot-toast: 2.4.0_biqbaboplfbrettd7655fr4n2y
@@ -126,6 +129,7 @@ devDependencies:
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
   '@types/node': 18.0.0
   '@types/react': 18.0.14
+  '@types/react-csv': 1.1.3
   '@types/react-dom': 18.0.5
   '@types/testing-library__cypress': 5.0.9
   '@typescript-eslint/eslint-plugin': 5.42.0_n2s2dbqilupifq2xgcu4m4ie5i
@@ -1539,6 +1543,12 @@ packages:
     resolution: {integrity: sha512-taW5/WYqo36N7V39oYyHP9Ipfd5pNFvGTIQsNGj86xV88YQ7GnI30/yMfKDF7Zgin0m3e+ikX88FvImnK4RjGw==}
     dev: false
     optional: true
+
+  /@types/react-csv/1.1.3:
+    resolution: {integrity: sha512-dkEdyRvRpygSnNg4cyzYWSUjukIQ5lAtXJwc7BqyUfzww/Cv2dcAFGYd+sWTFpGiDNZMVPp6vVPLcAPvJID8Kg==}
+    dependencies:
+      '@types/react': 18.0.14
+    dev: true
 
   /@types/react-dom/18.0.5:
     resolution: {integrity: sha512-OWPWTUrY/NIrjsAPkAk1wW9LZeIjSvkXRhclsFO8CZcZGCOg2G0YZy4ft+rOyYxy8B7ui5iZzi9OkDebZ7/QSA==}
@@ -5651,6 +5661,10 @@ packages:
       ini: 1.3.8
       minimist: 1.2.7
       strip-json-comments: 2.0.1
+    dev: false
+
+  /react-csv/2.2.2:
+    resolution: {integrity: sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw==}
     dev: false
 
   /react-dom/18.2.0_react@18.2.0:

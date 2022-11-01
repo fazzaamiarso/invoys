@@ -86,8 +86,6 @@ jobs:
 
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
-        env:
-          DATABASE_URL: 'mysql://root:test@0.0.0.0:3306/test'
 
       - name: Cypress run
         uses: cypress-io/github-action@v4 

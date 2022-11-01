@@ -25,6 +25,7 @@ import { NextPage } from 'next';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { CSVLink } from 'react-csv';
 
 const columnHelper = createColumnHelper<Customer>();
 const columns = [
@@ -143,7 +144,7 @@ const ClientsIndex: NextPage = () => {
           </form>
           <div className="ml-auto flex items-center gap-4">
             <Button Icon={DocumentArrowDownIcon} variant="outline">
-              Download CSV
+              <CSVLink data={flatData}>Download CSV</CSVLink>
             </Button>
             <Button Icon={PlusIcon} onClick={() => setIsDrawerOpen(true)}>
               Add Client
