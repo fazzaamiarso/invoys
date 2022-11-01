@@ -63,9 +63,10 @@ const runSeed = async () => {
   console.log('🌱 Starting Seed!');
 
   console.log('👩🏼 Creating Clients with Invoices!');
-  clients.forEach(async c => {
+  for (const c of clients) {
     await prisma.customer.create({ data: c });
-  });
+  }
+
   console.log('✓ Creating clients successful!');
 
   console.log('🔍 Finding Invoices');
@@ -75,14 +76,14 @@ const runSeed = async () => {
   });
 
   console.log('🧾 Creating Orders for Invoices!');
-  invoices.forEach(async i => {
-    const arr = faker.datatype.array(3);
-    await prisma.orderItem.createMany({
-      data: arr.map(() => {
-        return createRandomOrders(i.id);
-      }),
+  for (const i of invoices) {
+    const orders = faker.datatype.array(3).map(() => {
+      return createRandomOrders(i.id);
     });
-  });
+    await prisma.orderItem.createMany({
+      data: orders,
+    });
+  }
 
   await prisma.invoice.deleteMany({ where: { orders: { none: {} } } });
 };

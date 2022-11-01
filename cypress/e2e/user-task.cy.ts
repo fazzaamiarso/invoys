@@ -142,6 +142,8 @@ describe('Invoices', () => {
   });
 
   it('can delete an invoice', () => {
+    cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+    cy.wait('@invoices');
     cy.get('table').find('a').contains(/view/gi).click();
 
     cy.get('div[data-cy="button-group"]')
