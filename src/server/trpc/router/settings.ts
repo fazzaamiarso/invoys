@@ -1,3 +1,4 @@
+import { AccessOptions } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { protectedProcedure, t } from '../trpc';
@@ -14,6 +15,7 @@ export const settingsRouter = t.router({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Settings should exist, go check the settings table creation',
       });
+    console.log(settings);
     return settings;
   }),
   update: protectedProcedure
@@ -31,5 +33,13 @@ export const settingsRouter = t.router({
         data: input,
       });
       return updatedSettings;
+    }),
+  changeAccess: protectedProcedure
+    .input(z.object({ access: z.nativeEnum(AccessOptions) }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.settings.update({
+        where: { id: SETTINGS_ID },
+        data: input,
+      });
     }),
 });

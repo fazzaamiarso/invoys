@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
       if (!isSettingsExist) await prisma.settings.create({ data: {} });
     },
     createUser: async message => {
-      const isFirstUser = (await prisma.user.count()) < 1;
+      const isFirstUser = (await prisma.user.count()) <= 1;
       const gradient = getRandomGradient();
       await prisma.user.update({
         where: { id: message.user.id },

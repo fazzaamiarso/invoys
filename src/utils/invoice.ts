@@ -12,15 +12,13 @@ const ALPHABET = 'ABCDHIJKLMNOPQRSTUVWXYZ';
  * Get 3 letter Invoice Number prefix
  */
 export const generatePrefix = (value?: string) => {
-  let [first, second, third] = value
-    ? value.toUpperCase().split(/[^A-Z]+/g, 3)
-    : [];
+  const [
+    first = getRandomIndexValue(ALPHABET),
+    second = getRandomIndexValue(ALPHABET),
+    third = getRandomIndexValue(ALPHABET),
+  ] = value ? value.toUpperCase().split(/[^A-Z]+/g, 3) : [];
 
-  third = third ? third.charAt(0) : getRandomIndexValue(ALPHABET);
-  second = second ? second.charAt(0) : getRandomIndexValue(ALPHABET);
-  first = first ? first.charAt(0) : getRandomIndexValue(ALPHABET);
-
-  return `${first}${second}${third}`;
+  return `${first.charAt(0)}${second.charAt(0)}${third.charAt(0)}`;
 };
 
 export const calculateOrderAmount = <
