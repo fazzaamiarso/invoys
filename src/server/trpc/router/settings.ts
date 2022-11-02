@@ -44,8 +44,16 @@ export const settingsRouter = t.router({
   sendInvite: protectedProcedure
     .input(z.object({ email: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.email.create({
-        data: { settingsId: SETTINGS_ID, isPending: true, name: input.email },
-      });
+      try {
+        const email = await ctx.prisma.email.create({
+          data: { settingsId: SETTINGS_ID, isPending: true, name: input.email },
+        });
+        return email;
+      } catch {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Email already exist!',
+        });
+      }
     }),
 });

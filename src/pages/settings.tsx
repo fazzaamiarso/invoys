@@ -114,13 +114,19 @@ const TeamSection = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { isSubmitting },
   } = useForm<{ email: string }>({});
   const { data: teams } = trpc.user.getAll.useQuery();
   const mutation = trpc.setting.sendInvite.useMutation({
-    onSuccess() {
+    onSuccess(data) {
+      reset();
       utils.setting.invalidate();
       utils.user.getAll.invalidate();
+      toast.success(`Invite sent to ${data.name}!`);
+    },
+    onError(err) {
+      toast.error(err.message);
     },
   });
 
@@ -151,14 +157,18 @@ const TeamSection = () => {
                 className="w-full rounded-sm border-gray-300 text-sm"
               />
             </label>
-            <Button type="submit" Icon={PlusIcon}>
+            <Button
+              type="submit"
+              Icon={PlusIcon}
+              isLoading={isSubmitting}
+              loadingContent={'Sending...'}>
               Add
             </Button>
           </form>
           <div className="space-y-4">
             <h3 className="text-sm font-semibold">Members</h3>
             <ul className="space-y-4">
-              {teams?.map(t => {
+              {teams?.users.map(t => {
                 return (
                   <li key={t.id} className="text-sm flex gap-4">
                     <div
@@ -178,6 +188,20 @@ const TeamSection = () => {
               })}
             </ul>
           </div>
+          {!!teams?.pendingUsers.length && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">Pending</h3>
+              <ul className="space-y-2">
+                {teams.pendingUsers.map(t => {
+                  return (
+                    <li key={t.id} className="text-sm flex gap-4">
+                      {t.name}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
     </>

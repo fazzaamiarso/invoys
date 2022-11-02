@@ -13,6 +13,7 @@ import {
   checkInviteOnly,
   createSettings,
   insertAdditionalUserData,
+  unPendingUserEmail,
 } from '@lib/prisma/next-auth';
 
 const __TEST__ = process.env.APP_ENV === 'test';
@@ -37,10 +38,11 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: __TEST__ ? undefined : '/auth/login',
     verifyRequest: '/auth/verify',
+    error: '/auth/error',
   },
   callbacks: {
-    async signIn({ user, email }) {
-      if (__TEST__ || email?.verificationRequest) return true;
+    async signIn({ user }) {
+      if (__TEST__ || user.emailVerified) return true;
       if (!user.email) return false;
       const isInviteOnly = await checkInviteOnly();
       const isEmailExist = await checkEmailExist(user.email);
@@ -75,6 +77,7 @@ export const authOptions: NextAuthOptions = {
     createUser: async message => {
       await createSettings();
       await insertAdditionalUserData({ userId: message.user.id });
+      await unPendingUserEmail(message.user.email!);
     },
   },
 };
@@ -110,6 +113,7 @@ declare module 'next-auth' {
     };
   }
   interface User extends DefaultUser {
+    emailVerified?: Date | null;
     gradient?: string;
     role: UserRole;
   }

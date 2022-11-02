@@ -40,3 +40,10 @@ export const checkInviteOnly = async () => {
   });
   return data?.access === 'INVITE';
 };
+
+export const unPendingUserEmail = async (email: string) => {
+  return await prisma.email.update({
+    where: { name: email },
+    data: { isPending: false },
+  });
+};
