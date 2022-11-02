@@ -39,8 +39,10 @@ import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { invoiceDrawerStateAtom } from '@components/InvoiceDrawer/NewInvoiceDrawer';
 import { LoadingSpinner } from '@components/Spinner';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
-type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
+type InvoiceGetAllOutput =
+  InferProcedures['invoice']['infiniteInvoices']['output']['invoices'];
 
 const columnHelper = createColumnHelper<InvoiceGetAllOutput[number]>();
 const columns = [
@@ -157,6 +159,26 @@ const Invoices = () => {
     manualSorting: true,
   });
 
+  const { rows } = table.getRowModel();
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableParentRef.current,
+    estimateSize: () => 80,
+    overscan: 2,
+  });
+  const paddingTop =
+    virtualizer.getVirtualItems().length > 0
+      ? virtualizer.getVirtualItems()?.[0]?.start || 0
+      : 0;
+  const paddingBottom =
+    virtualizer.getVirtualItems().length > 0
+      ? virtualizer.getTotalSize() -
+        (virtualizer.getVirtualItems()?.[
+          virtualizer.getVirtualItems().length - 1
+        ]?.end || 0)
+      : 0;
+
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -264,7 +286,7 @@ const Invoices = () => {
             ref={tableParentRef}
             className="w-full h-[550px] overflow-y-scroll rounded-sm">
             <table className="w-full ring-1 ring-gray-300">
-              <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
+              <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa] sticky top-0">
                 <tr className="">
                   {table.getFlatHeaders().map(header => (
                     <th
@@ -280,21 +302,34 @@ const Invoices = () => {
                 </tr>
               </thead>
               <tbody className="">
-                {table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className="border-t-[1px] border-gray-200">
-                    {row.getVisibleCells().map(cell => {
-                      return (
-                        <td key={cell.id} className="p-4 py-4 text-sm">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} />
                   </tr>
-                ))}
-                <tr ref={ref} className="h-4 w-full "></tr>
+                )}
+                {virtualizer.getVirtualItems().map(virtual => {
+                  const row = rows[virtual.index] as typeof rows[0];
+                  return (
+                    <tr key={row.id} className="border-t-[1px] border-gray-200">
+                      {row.getVisibleCells().map(cell => {
+                        return (
+                          <td key={cell.id} className="p-4 py-4 text-sm">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                <tr ref={ref} className="py-8 w-full "></tr>
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
