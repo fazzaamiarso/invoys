@@ -10,6 +10,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@lib/prisma/client';
 import {
   checkEmailExist,
+  checkInviteOnly,
   createSettings,
   insertAdditionalUserData,
 } from '@lib/prisma/next-auth';
@@ -38,10 +39,12 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: '/auth/verify',
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, email }) {
+      if (__TEST__ || email?.verificationRequest) return true;
       if (!user.email) return false;
+      const isInviteOnly = await checkInviteOnly();
       const isEmailExist = await checkEmailExist(user.email);
-      if (isEmailExist) return false;
+      if (isInviteOnly && !isEmailExist) return false;
       return true;
     },
     async jwt({ token, account, profile }) {
@@ -69,10 +72,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    signIn: async () => {
-      await createSettings();
-    },
     createUser: async message => {
+      await createSettings();
       await insertAdditionalUserData({ userId: message.user.id });
     },
   },

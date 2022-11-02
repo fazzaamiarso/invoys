@@ -7,7 +7,7 @@
     "build": "next build",
     "build:ci": "cross-env APP_ENV=test next build",
     "dev": "next dev",
-    "dev:test": "cross-env APP_ENV=test next dev -p 8080",
+    "dev:test": "cross-env APP_ENV=test NODE_ENV=test next dev -p 8080",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
