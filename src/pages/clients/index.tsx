@@ -93,6 +93,17 @@ const ClientsIndex: NextPage = () => {
     [clients]
   );
 
+  const csvData = useMemo(
+    () =>
+      flatData.map(data => ({
+        name: data.name,
+        email: data.email,
+        phone: data.phoneNumber,
+        address: data.address,
+      })),
+    [flatData]
+  );
+
   const table = useReactTable({
     columns,
     state: {
@@ -143,9 +154,11 @@ const ClientsIndex: NextPage = () => {
             />
           </form>
           <div className="ml-auto flex items-center gap-4">
-            <Button Icon={DocumentArrowDownIcon} variant="outline">
-              <CSVLink data={flatData}>Download CSV</CSVLink>
-            </Button>
+            <CSVLink data={csvData} filename={'clients.csv'}>
+              <Button Icon={DocumentArrowDownIcon} variant="outline">
+                Download CSV
+              </Button>
+            </CSVLink>
             <Button Icon={PlusIcon} onClick={() => setIsDrawerOpen(true)}>
               Add Client
             </Button>

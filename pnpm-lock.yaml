@@ -35,6 +35,7 @@ specifiers:
   '@typescript-eslint/parser': ^5.33.0
   '@vitejs/plugin-react': ^2.1.0
   autoprefixer: ^10.4.7
+  chart.js: ^3.9.1
   clsx: ^1.2.1
   cross-env: ^7.0.3
   cypress: ^10.11.0
@@ -61,6 +62,7 @@ specifiers:
   prettier-plugin-tailwindcss: ^0.1.13
   prisma: ^4.4.0
   react: 18.2.0
+  react-chartjs-2: ^4.3.1
   react-csv: ^2.2.2
   react-dom: 18.2.0
   react-hook-form: ^7.37.0
@@ -96,6 +98,7 @@ dependencies:
   '@trpc/server': 10.0.0-proxy-beta.15
   '@trycourier/courier': 4.1.0
   '@vitejs/plugin-react': 2.2.0
+  chart.js: 3.9.1
   clsx: 1.2.1
   dayjs: 1.11.6
   html-to-image: 1.10.8
@@ -108,6 +111,7 @@ dependencies:
   nodemailer: 6.8.0
   pdfjs-dist: 2.15.349
   react: 18.2.0
+  react-chartjs-2: 4.3.1_2unjvz6v6rskedwoxtmbfw2rje
   react-csv: 2.2.2
   react-dom: 18.2.0_react@18.2.0
   react-hook-form: 7.38.0_react@18.2.0
@@ -2225,6 +2229,10 @@ packages:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
     dev: true
+
+  /chart.js/3.9.1:
+    resolution: {integrity: sha512-Ro2JbLmvg83gXF5F4sniaQ+lTbSv18E+TIf2cOeiH1Iqd2PGFOtem+DUufMZsCJwFE7ywPOpfXFBwRTGq7dh6w==}
+    dev: false
 
   /check-error/1.0.2:
     resolution: {integrity: sha512-BrgHpW9NURQgzoNyjfq0Wu6VFO6D7IZEmJNdtgNqpzGG8RuNFHt2jQxWlAs4HMe119chBnv+34syEZtc6IhLtA==}
@@ -5661,6 +5669,16 @@ packages:
       ini: 1.3.8
       minimist: 1.2.7
       strip-json-comments: 2.0.1
+    dev: false
+
+  /react-chartjs-2/4.3.1_2unjvz6v6rskedwoxtmbfw2rje:
+    resolution: {integrity: sha512-5i3mjP6tU7QSn0jvb8I4hudTzHJqS8l00ORJnVwI2sYu0ihpj83Lv2YzfxunfxTZkscKvZu2F2w9LkwNBhj6xA==}
+    peerDependencies:
+      chart.js: ^3.5.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      chart.js: 3.9.1
+      react: 18.2.0
     dev: false
 
   /react-csv/2.2.2:

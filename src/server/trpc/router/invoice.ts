@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { protectedProcedure, t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
 import { sendInvoice } from '@lib/courier';
 import { parseSort } from '@utils/prisma';
+import { dayjs } from '@lib/dayjs';
+import { calculateOrderAmount } from '@utils/invoice';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -53,39 +56,42 @@ export const invoiceRouter = t.router({
 
       return { invoices, nextCursor };
     }),
-  getAll: protectedProcedure
+  getSales: protectedProcedure
     .input(
       z
         .object({
           status: z.nativeEnum(InvoiceStatus).optional(),
-          query: z.string(),
-          sort: z
-            .object({
-              customer_name: sortSchema,
-              dueDate: sortSchema,
-            })
-            .optional(),
         })
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      const query = { contains: input?.query };
-      const sort = parseSort(input?.sort ?? {});
-
       const invoices = await ctx.prisma.invoice.findMany({
-        include: { orders: true, customer: true },
+        include: { orders: true },
         where: {
           status: input?.status,
-          OR: [
-            { invoiceNumber: query },
-            { name: query },
-            { customer: { name: query } },
-          ],
         },
-        orderBy: sort,
+        orderBy: { issuedOn: 'asc' },
+      });
+      const arr: { issued: number; paid: number }[] = [];
+      invoices.forEach(i => {
+        const totalAmount = calculateOrderAmount(i.orders);
+        const monthIdx = Number(dayjs(i.dueDate).format('M')) - 1;
+        if (!arr[monthIdx]) arr[monthIdx] = { paid: 0, issued: 0 };
+        if (!arr[monthIdx]) return;
+        if (i.status === 'PAID') {
+          arr[monthIdx]! = {
+            ...arr[monthIdx]!,
+            paid: (arr[monthIdx]?.paid ?? 0) + totalAmount,
+          };
+        } else {
+          arr[monthIdx]! = {
+            ...arr[monthIdx]!,
+            issued: (arr[monthIdx]?.issued ?? 0) + totalAmount,
+          };
+        }
       });
 
-      return invoices;
+      return arr;
     }),
   getSingle: t.procedure
     .input(z.object({ invoiceId: z.string() }))

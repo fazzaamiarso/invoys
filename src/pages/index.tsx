@@ -4,11 +4,33 @@ import { ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { trpc } from '@utils/trpc';
 import { LoadingSpinner } from '@components/Spinner';
+import { Bar } from 'react-chartjs-2';
+import '@lib/react-chart';
+
+const monthsLabel = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 const Home: NextPage = () => {
   const { data: settings } = trpc.setting.get.useQuery(undefined, {
     keepPreviousData: true,
     staleTime: Infinity,
+  });
+
+  const { data: sales } = trpc.invoice.getSales.useQuery(undefined, {
+    keepPreviousData: true,
+    staleTime: 60 * 1000,
   });
 
   const { data: statistics, isLoading } = trpc.general.statistics.useQuery(
@@ -22,45 +44,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Layout title="Dashboard" breakLayout>
-        {settings?.businessName === '' && (
-          <div className=" bg-indigo-600">
-            <div className="mx-auto py-3 mb-6 px-3 sm:px-6 lg:px-8">
-              <div className="flex flex-wrap items-center justify-between">
-                <div className="flex w-0 flex-1 items-center">
-                  <span className="flex rounded-lg bg-indigo-800 p-2">
-                    <ExclamationCircleIcon
-                      className="h-6 w-6 text-white"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <p className="ml-3 truncate font-medium text-white">
-                    <span className="hidden md:inline">
-                      Welcome! Please setup your business info in setting!
-                    </span>
-                  </p>
-                </div>
-                <div className="order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto">
-                  <Link
-                    href="/settings"
-                    className="py-2 px-4 rounded-md text-sm font-semibold bg-white">
-                    Go to settings
-                  </Link>
-                </div>
-                <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-3">
-                  <button
-                    type="button"
-                    className="-mr-1 flex rounded-md p-2 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-white sm:-mr-2">
-                    <span className="sr-only">Dismiss</span>
-                    <XMarkIcon
-                      className="h-6 w-6 text-white"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {settings?.businessName === '' && <NoSettingsBanner />}
         <div className="content-layout py-8 space-y-8">
           <h2 className="text-lg font-bold">Dashboard</h2>
           <section className="w-full">
@@ -107,6 +91,26 @@ const Home: NextPage = () => {
               </div>
             </div>
           </section>
+          <div className="">
+            <Bar
+              options={{ responsive: true }}
+              data={{
+                labels: monthsLabel,
+                datasets: [
+                  {
+                    label: 'Sales',
+                    data: monthsLabel.map((_, idx) => sales?.at(idx)?.paid),
+                    backgroundColor: '#4549f4',
+                  },
+                  {
+                    label: 'Issued',
+                    data: monthsLabel.map((_, idx) => sales?.at(idx)?.issued),
+                    backgroundColor: '#FF6464',
+                  },
+                ],
+              }}
+            />
+          </div>
         </div>
       </Layout>
     </>
@@ -114,3 +118,42 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+const NoSettingsBanner = () => {
+  return (
+    <div className=" bg-indigo-600">
+      <div className="mx-auto py-3 mb-6 px-3 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between">
+          <div className="flex w-0 flex-1 items-center">
+            <span className="flex rounded-lg bg-indigo-800 p-2">
+              <ExclamationCircleIcon
+                className="h-6 w-6 text-white"
+                aria-hidden="true"
+              />
+            </span>
+            <p className="ml-3 truncate font-medium text-white">
+              <span className="hidden md:inline">
+                Welcome! Please setup your business info in setting!
+              </span>
+            </p>
+          </div>
+          <div className="order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto">
+            <Link
+              href="/settings"
+              className="py-2 px-4 rounded-md text-sm font-semibold bg-white">
+              Go to settings
+            </Link>
+          </div>
+          <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-3">
+            <button
+              type="button"
+              className="-mr-1 flex rounded-md p-2 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-white sm:-mr-2">
+              <span className="sr-only">Dismiss</span>
+              <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
