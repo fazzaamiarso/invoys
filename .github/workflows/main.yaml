@@ -82,13 +82,13 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Deps
-        run: pnpm install
+        run: pnpm install cypress
 
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
 
       - name: Cypress run
-        uses: cypress-io/github-action@v4 
+        uses: cypress-io/github-action@v4.2.0
         with:
           build: pnpm run build:ci
           start: pnpm start:ci
