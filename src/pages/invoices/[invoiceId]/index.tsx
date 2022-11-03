@@ -37,6 +37,7 @@ import clsx from 'clsx';
 import Spinner from '@components/Spinner';
 import InvoicePdf from '@components/Invoices/InvoicePdf';
 import toast from 'react-hot-toast';
+import { BASE_DEV_URL } from '@data/global';
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -100,7 +101,7 @@ const InvoiceDetail = () => {
   const sendInvoiceEmail = () => {
     const hostUrl =
       process.env.NODE_ENV === 'development'
-        ? 'http://localhost:3000'
+        ? BASE_DEV_URL
         : window.location.origin;
     if (!invoiceDetail || !settings || sendEmailMutation.isLoading) return;
     sendEmailMutation.mutate({

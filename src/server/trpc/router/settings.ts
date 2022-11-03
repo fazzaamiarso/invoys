@@ -1,9 +1,8 @@
+import { SETTINGS_ID } from '@data/global';
 import { AccessOptions } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { protectedProcedure, t } from '../trpc';
-
-const SETTINGS_ID = 'settings';
 
 export const settingsRouter = t.router({
   get: protectedProcedure.query(async ({ ctx }) => {

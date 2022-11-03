@@ -1,7 +1,6 @@
+import { SETTINGS_ID } from '@data/global';
 import { getRandomGradient } from '@utils/prisma';
 import { prisma } from './client';
-
-const SETTINGS_ID = 'settings';
 
 export const createSettings = async () => {
   const isSettingsExist = (await prisma.settings.count()) > 0;
