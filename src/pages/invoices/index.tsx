@@ -306,7 +306,7 @@ const Invoices = () => {
         </div>
       )}
       {status !== 'loading' &&
-        (table.getRowModel().rows.length === 0 ? (
+        (rows.length === 0 ? (
           <div
             onClick={() => setInvoiceDrawerOpen(true)}
             className="w-full p-8 flex items-center justify-center border-2 border-dashed rounded-md h-[400px] hover:cursor-pointer hover:border-gray-500 transition-all">
@@ -401,13 +401,19 @@ const InvoiceActionsBar = ({
 
   return (
     <>
-      <div className="w-full flex items-center p-4 bg-gray-100 rounded-md text-sm">
-        <div>{selectedRows.length} selected on the page</div>
-        <button
-          className="px-4 py-2"
-          onClick={() => setIsShowDeleteModal(true)}>
-          <TrashIcon className="aspect-square w-4" />
-        </button>
+      <div className="w-full flex items-center rounded-md text-sm gap-4 py-4 ">
+        <p className="whitespace-nowrap">
+          <span className="font-semibold">{selectedRows.length}</span> selected
+          on the page
+        </p>
+        <div className="w-full items-start">
+          <Button
+            Icon={TrashIcon}
+            variant="outline"
+            onClick={() => setIsShowDeleteModal(true)}>
+            Delete batch
+          </Button>
+        </div>
       </div>
       <Modal
         isOpen={isShowDeleteModal}
@@ -461,7 +467,7 @@ const IndeterminateCheckbox = ({
     <input
       type="checkbox"
       ref={ref}
-      className={className + 'cursor-pointer'}
+      className={clsx(className, 'cursor-pointer')}
       {...rest}
     />
   );
