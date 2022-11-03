@@ -82,7 +82,10 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Deps
-        run: CYPRESS_CACHE_FOLDER=~/.cache/Cypress pnpm install
+        run: pnpm install
+
+      - name: Install Cypress
+        run: cypress install
 
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
