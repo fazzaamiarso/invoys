@@ -1,3 +1,5 @@
+import { twGradients } from 'data/gradients';
+
 export const parseSort = (sortObject: Record<string, any>) => {
   for (const key in sortObject) {
     if (!key) continue;
@@ -8,4 +10,11 @@ export const parseSort = (sortObject: Record<string, any>) => {
       ? splitted.reduceRight((acc, k) => ({ [k]: acc }), init)
       : init;
   }
+};
+
+export const getRandomGradient = () => {
+  const gradientKeys = Object.keys(twGradients);
+  const idx = Math.floor(Math.random() * gradientKeys.length);
+  const randomGradient = gradientKeys.at(idx);
+  return randomGradient;
 };

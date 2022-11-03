@@ -84,13 +84,14 @@ jobs:
       - name: Install Deps
         run: pnpm install
 
+      - name: Install Cypress
+        run: pnpm cypress install
+
       - name: 🐳 Docker compose
         run: docker-compose -f docker-compose.yml up -d
-        env:
-          DATABASE_URL: 'mysql://root:test@0.0.0.0:3306/test'
 
       - name: Cypress run
-        uses: cypress-io/github-action@v4 
+        uses: cypress-io/github-action@v4.2.0
         with:
           build: pnpm run build:ci
           start: pnpm start:ci

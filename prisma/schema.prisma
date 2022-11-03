@@ -24,6 +24,11 @@ enum UserRole {
     ADMIN
 }
 
+enum AccessOptions {
+    UNRESTRICTED
+    INVITE
+}
+
 model Invoice {
     id            String        @id @default(cuid())
     createdAt     DateTime      @default(now())
@@ -68,11 +73,21 @@ model Customer {
 }
 
 model Settings {
-    id              String @id @default("settings")
-    businessName    String @default("")
-    businessAddress String @default("")
-    businessPhone   String @default("")
-    businessEmail   String @default("")
+    id              String        @id @default("settings")
+    businessName    String        @default("")
+    businessAddress String        @default("")
+    businessPhone   String        @default("")
+    businessEmail   String        @default("")
+    access          AccessOptions @default(UNRESTRICTED)
+    emails          Email[]
+}
+
+model Email {
+    id         String   @id @default(uuid())
+    isPending  Boolean  @default(false)
+    name       String   @unique
+    Settings   Settings @relation(fields: [settingsId], references: [id])
+    settingsId String   
 }
 
 //NEXT AUTH STUFF

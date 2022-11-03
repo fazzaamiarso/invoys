@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   SortingState,
+  Table,
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
@@ -15,11 +16,14 @@ import Link from 'next/link';
 import {
   CheckIcon,
   DocumentArrowDownIcon,
+  ExclamationTriangleIcon,
   MagnifyingGlassIcon,
+  TrashIcon,
 } from '@heroicons/react/24/solid';
 import {
   FormEvent,
   Fragment,
+  HTMLProps,
   useEffect,
   useMemo,
   useRef,
@@ -39,11 +43,44 @@ import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { invoiceDrawerStateAtom } from '@components/InvoiceDrawer/NewInvoiceDrawer';
 import { LoadingSpinner } from '@components/Spinner';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import {
+  Modal,
+  ModalAction,
+  ModalDescription,
+  ModalTitle,
+} from '@components/Modal';
+import toast from 'react-hot-toast';
 
-type InvoiceGetAllOutput = InferProcedures['invoice']['getAll']['output'];
+type InvoiceGetAllOutput =
+  InferProcedures['invoice']['infiniteInvoices']['output']['invoices'];
 
 const columnHelper = createColumnHelper<InvoiceGetAllOutput[number]>();
 const columns = [
+  columnHelper.display({
+    id: 'row-select',
+    header: ({ table }) => (
+      <IndeterminateCheckbox
+        {...{
+          checked: table.getIsAllRowsSelected(),
+          indeterminate: table.getIsSomeRowsSelected(),
+          onChange: table.getToggleAllRowsSelectedHandler(),
+        }}
+      />
+    ),
+    cell: ({ row }) => (
+      <div className="px-1">
+        <IndeterminateCheckbox
+          {...{
+            'data-cy': 'invoice-checkbox',
+            checked: row.getIsSelected(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+        />
+      </div>
+    ),
+  }),
   columnHelper.accessor('invoiceNumber', {
     header: 'No.',
     cell: props => (
@@ -73,7 +110,9 @@ const columns = [
     header: props => (
       <SortableHeader headerProps={props}>Due Date</SortableHeader>
     ),
-    cell: props => dayjs(props.getValue()).format('LL'),
+    cell: props => (
+      <span data-cy="sort-due">{dayjs(props.getValue()).format('LL')}</span>
+    ),
   }),
   columnHelper.accessor('status', {
     header: 'Status',
@@ -156,6 +195,21 @@ const Invoices = () => {
     filterFns: { fuzzy: fuzzyFilter },
     manualSorting: true,
   });
+  const { rows } = table.getRowModel();
+
+  const { getTotalSize, getVirtualItems } = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableParentRef.current,
+    estimateSize: () => 80,
+    overscan: 5,
+  });
+  const paddingTop =
+    getVirtualItems().length > 0 ? getVirtualItems()?.[0]?.start || 0 : 0;
+  const paddingBottom =
+    getVirtualItems().length > 0
+      ? getTotalSize() -
+        (getVirtualItems()?.[getVirtualItems().length - 1]?.end || 0)
+      : 0;
 
   useEffect(() => {
     refetch();
@@ -176,40 +230,45 @@ const Invoices = () => {
   return (
     <Layout title="Invoices">
       <h2 className="text-lg font-bold pb-6">Invoices</h2>
-      <div className="w-full flex items-center pb-6">
-        <form
-          onSubmit={onSearch}
-          className="relative flex items-center gap-4 w-80">
-          <MagnifyingGlassIcon className="absolute text-gray-500 aspect-square z-20 h-5 left-2" />
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            type="search"
-            id="query"
-            placeholder="search for client, invoice number, or projects"
-            className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full pl-9"
-            required
-            autoComplete="off"
-          />
-        </form>
-        {/* FILTER */}
-        <Listbox onChange={setStatusFilter} value={statusFilter}>
-          <div className="relative ml-8">
-            <Listbox.Button as={Fragment}>
-              <Button variant="outline" Icon={FunnelIcon}>
-                {statusFilter === undefined
-                  ? 'All Status'
-                  : capitalize(statusFilter)}
-              </Button>
-            </Listbox.Button>
-            <Transition
-              as={Fragment}
-              leave="transition ease-in duration-100"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0">
-              <Listbox.Options className="absolute bottom-0 p-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
-                {Object.values({ ALL_STATUS: undefined, ...InvoiceStatus }).map(
-                  status => {
+      {table.getIsAllRowsSelected() || table.getIsSomeRowsSelected() ? (
+        <InvoiceActionsBar table={table} onDeleteSucess={refetch} />
+      ) : (
+        <div className="w-full flex items-center pb-6">
+          <form
+            onSubmit={onSearch}
+            className="relative flex items-center gap-4 w-80">
+            <MagnifyingGlassIcon className="absolute text-gray-500 aspect-square z-20 h-5 left-2" />
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              type="search"
+              id="query"
+              placeholder="search for client, invoice number, or projects"
+              className="rounded-md text-sm border-gray-300 placeholder:text-gray-400 w-full pl-9"
+              required
+              autoComplete="off"
+            />
+          </form>
+          {/* FILTER */}
+          <Listbox onChange={setStatusFilter} value={statusFilter}>
+            <div className="relative ml-8">
+              <Listbox.Button as={Fragment}>
+                <Button variant="outline" Icon={FunnelIcon}>
+                  {statusFilter === undefined
+                    ? 'All Status'
+                    : capitalize(statusFilter)}
+                </Button>
+              </Listbox.Button>
+              <Transition
+                as={Fragment}
+                leave="transition ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0">
+                <Listbox.Options className="absolute bottom-0 p-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
+                  {Object.values({
+                    ALL_STATUS: undefined,
+                    ...InvoiceStatus,
+                  }).map(status => {
                     return (
                       <Listbox.Option
                         as={Fragment}
@@ -231,26 +290,26 @@ const Invoices = () => {
                         }}
                       </Listbox.Option>
                     );
-                  }
-                )}
-              </Listbox.Options>
-            </Transition>
+                  })}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </Listbox>
+          {/* FILTER END */}
+          <div className="ml-auto flex items-center gap-4">
+            <Button Icon={DocumentArrowDownIcon} variant="outline">
+              Download CSV
+            </Button>
           </div>
-        </Listbox>
-        {/* FILTER END */}
-        <div className="ml-auto flex items-center gap-4">
-          <Button Icon={DocumentArrowDownIcon} variant="outline">
-            Download CSV
-          </Button>
         </div>
-      </div>
+      )}
       {status === 'loading' && (
         <div className="w-full flex items-center justify-center pt-28">
           <LoadingSpinner twWidth="w-20" />
         </div>
       )}
       {status !== 'loading' &&
-        (table.getRowModel().rows.length === 0 ? (
+        (rows.length === 0 ? (
           <div
             onClick={() => setInvoiceDrawerOpen(true)}
             className="w-full p-8 flex items-center justify-center border-2 border-dashed rounded-md h-[400px] hover:cursor-pointer hover:border-gray-500 transition-all">
@@ -264,13 +323,13 @@ const Invoices = () => {
             ref={tableParentRef}
             className="w-full h-[550px] overflow-y-scroll rounded-sm">
             <table className="w-full ring-1 ring-gray-300">
-              <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa]">
+              <thead className="border-b-[2px] border-b-gray-300 bg-[#f9fbfa] sticky top-0">
                 <tr className="">
                   {table.getFlatHeaders().map(header => (
                     <th
                       key={header.id}
                       scope="col"
-                      className="text-start px-4 p-3 text-sm first:w-[12%]">
+                      className="text-start px-4 p-3 text-sm">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
@@ -280,21 +339,34 @@ const Invoices = () => {
                 </tr>
               </thead>
               <tbody className="">
-                {table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className="border-t-[1px] border-gray-200">
-                    {row.getVisibleCells().map(cell => {
-                      return (
-                        <td key={cell.id} className="p-4 py-4 text-sm">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} />
                   </tr>
-                ))}
-                <tr ref={ref} className="h-4 w-full "></tr>
+                )}
+                {getVirtualItems().map(virtual => {
+                  const row = rows[virtual.index] as typeof rows[0];
+                  return (
+                    <tr key={row.id} className="border-t-[1px] border-gray-200">
+                      {row.getVisibleCells().map(cell => {
+                        return (
+                          <td key={cell.id} className="p-4 py-4 text-sm">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                <tr ref={ref} className="py-8 w-full "></tr>
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -304,3 +376,102 @@ const Invoices = () => {
 };
 
 export default Invoices;
+
+const InvoiceActionsBar = ({
+  table,
+  onDeleteSucess,
+}: {
+  table: Table<InvoiceGetAllOutput[number]>;
+  onDeleteSucess: () => void;
+}) => {
+  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
+
+  const deleteBatchMutation = trpc.invoice.deleteBatch.useMutation({
+    onSuccess() {
+      setIsShowDeleteModal(false);
+      toast.success('Delete successful!');
+      table.toggleAllRowsSelected(false);
+      onDeleteSucess();
+    },
+  });
+
+  const selectedRows = table.getRowModel().rows.filter(r => r.getIsSelected());
+  const onDelete = () => {
+    deleteBatchMutation.mutate({
+      invoiceIds: selectedRows.map(r => r.original.id),
+    });
+  };
+
+  return (
+    <>
+      <div className="w-full flex items-center rounded-md text-sm gap-4 py-4 ">
+        <p className="whitespace-nowrap">
+          <span className="font-semibold">{selectedRows.length}</span> selected
+          on the page
+        </p>
+        <div className="w-full items-start">
+          <Button
+            Icon={TrashIcon}
+            variant="outline"
+            onClick={() => setIsShowDeleteModal(true)}>
+            Delete batch
+          </Button>
+        </div>
+      </div>
+      <Modal
+        isOpen={isShowDeleteModal}
+        onClose={() => setIsShowDeleteModal(false)}>
+        <div className="flex gap-6">
+          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <ExclamationTriangleIcon
+              className="h-6 w-6 text-red-600"
+              aria-hidden="true"
+            />
+          </div>
+          <div>
+            <ModalTitle>{`Delete ${selectedRows.length} invoices?`}</ModalTitle>
+            <ModalDescription>
+              Are you sure you want to delete all selected invoices? Data will
+              be permanently removed. This action cannot be undone.
+            </ModalDescription>
+          </div>
+        </div>
+        <ModalAction>
+          <Button variant="outline" onClick={() => setIsShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={onDelete}
+            isLoading={deleteBatchMutation.isLoading}
+            loadingContent="deleting...">
+            Confirm
+          </Button>
+        </ModalAction>
+      </Modal>
+    </>
+  );
+};
+
+const IndeterminateCheckbox = ({
+  indeterminate,
+  className = '',
+  ...rest
+}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) => {
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof indeterminate === 'boolean' && ref.current) {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [indeterminate, rest.checked]);
+
+  return (
+    <input
+      type="checkbox"
+      ref={ref}
+      className={clsx(className, 'cursor-pointer')}
+      {...rest}
+    />
+  );
+};

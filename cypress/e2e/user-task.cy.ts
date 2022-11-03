@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker';
+import { convertDateToInputFormat } from './utils';
 
 before(() => {
-  cy.exec('pnpm db:seed-test');
+  cy.exec('pnpm db:test-run');
 });
 
 beforeEach(() => {
@@ -36,9 +37,9 @@ describe('Clients', () => {
       cy.get('span[data-cy="client-name"]')
         .should('have.length', 10)
         .should($items => {
-          expect($items.first().text().charCodeAt(0)).gt(
-            $items.last().text().charCodeAt(0)
-          );
+          const first = $items.first().text().charCodeAt(0);
+          const last = $items.last().text().charCodeAt(0);
+          expect(first).gt(last);
         });
     });
   });
@@ -49,20 +50,27 @@ describe('Clients', () => {
 
     const firstName = faker.name.firstName();
     const lastName = faker.name.lastName();
-    cy.get('input[name="name"]').type(`${firstName} ${lastName}`);
-    cy.get('input[name="email"]').type(
-      faker.internet.email(firstName, lastName)
-    );
-    cy.get('input[name="phoneNumber"]').type(faker.phone.number('###-###-###'));
-    cy.get('input[name="address"]').type(faker.address.streetAddress());
-    cy.get('button')
-      .contains(/new client/i)
-      .click();
+    const fullName = `${firstName} ${lastName}`;
+    const email = faker.internet.email(firstName, lastName);
+    const phoneNumber = faker.phone.number('###-###-###');
+    const address = faker.address.streetAddress();
 
-    cy.get('h2').should('have.text', `${firstName} ${lastName}`);
+    cy.findByRole('dialog').within(() => {
+      cy.selById('input', 'name').type(fullName);
+      cy.selById('input', 'email').type(email);
+      cy.selById('input', 'phoneNumber').type(phoneNumber);
+      cy.selById('input', 'address').type(address);
+      cy.get('button')
+        .contains(/new client/i)
+        .click();
+    });
+
+    cy.get('h2').should('have.text', fullName);
   });
 
   it('can edit a client', () => {
+    cy.intercept('/api/trpc/customer.infinite*').as('loading');
+    cy.wait('@loading');
     cy.get('table').find('a').contains(/view/i).click();
 
     cy.get("div[data-cy='button-group']").contains('button', /edit/i).click();
@@ -71,8 +79,8 @@ describe('Clients', () => {
     const newLastName = faker.name.lastName();
     const newFullName = `${newFirstName} ${newLastName}`;
     const newEmail = faker.internet.email(newFirstName, newLastName);
-    cy.get('input[name="name"]').clear().type(newFullName);
-    cy.get('input[name="email"]').clear().type(newEmail);
+    cy.selById('input', 'name').clear().type(newFullName);
+    cy.selById('input', 'email').clear().type(newEmail);
 
     cy.get('button').contains(/save/i).click();
 
@@ -83,7 +91,9 @@ describe('Clients', () => {
   });
 
   it('can delete a client', () => {
-    cy.get('table').find('a').contains(/view/gi).click();
+    cy.intercept('/api/trpc/customer.infinite*').as('loading');
+    cy.wait('@loading');
+    cy.get('table').find('a').contains(/view/gi).click({ force: true });
     cy.get("div[data-cy='button-group']")
       .contains('button', /delete/i)
       .click();
@@ -104,27 +114,20 @@ describe('Invoices', () => {
       .click();
 
     const projectName = faker.name.jobArea();
+    const productName = faker.commerce.product();
+    const price = faker.commerce.price();
+    const quantity = faker.random.numeric(3);
     const notes = faker.lorem.sentences();
     const dueDate = new Date(faker.date.future());
 
     cy.findByRole('dialog').within(() => {
       cy.intercept('/api/trpc/invoice.create*').as('create-invoice');
       cy.findByLabelText(/project/gi).type(projectName);
-      cy.get("td > input[id='orders.0.name']").type(faker.commerce.product());
-      cy.get("td > input[id='orders.0.quantity']")
-        .clear()
-        .type(faker.commerce.price());
-      cy.get("td > input[id='orders.0.amount']")
-        .clear()
-        .type(faker.random.numeric(3));
+      cy.selById('input', 'orders.0.name').type(productName);
+      cy.selById('input', 'orders.0.quantity').clear().type(quantity);
+      cy.selById('input', 'orders.0.amount').clear().type(price);
 
-      cy.findByLabelText(/due on/i).type(
-        `${dueDate.getFullYear()}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, '0')}-${(dueDate.getDate() + 1)
-          .toString()
-          .padStart(2, '0')}`
-      );
+      cy.findByLabelText(/due on/i).type(convertDateToInputFormat(dueDate));
       cy.findByRole('textbox', { name: /notes/i }).type(notes);
       cy.findByRole('switch', { name: /draft/gi }).click();
       cy.findByRole('button', { name: /create invoice/gi }).click();
@@ -141,18 +144,6 @@ describe('Invoices', () => {
     cy.url().should('include', 'preview');
   });
 
-  it('can delete an invoice', () => {
-    cy.get('table').find('a').contains(/view/gi).click();
-
-    cy.get('div[data-cy="button-group"]')
-      .find('button')
-      .contains(/delete/i)
-      .click();
-
-    cy.findByRole('button', { name: /confirm/gi }).click();
-    cy.findByRole('heading', { name: /invoices/gi, level: 2 });
-  });
-
   it('can edit an invoice', () => {
     cy.intercept('/api/trpc/invoice.getSingle*').as('editing');
     cy.findByRole('table').find('a').contains(/view/i).first().click();
@@ -163,18 +154,15 @@ describe('Invoices', () => {
 
     const newProjectName = faker.name.jobArea();
     const newOrderName = faker.commerce.product();
+    const newPrice = faker.commerce.price();
+    const newQuantity = faker.random.numeric(3);
     cy.findByRole('dialog')
       .as('dialog')
       .within(() => {
         cy.findByLabelText(/project/gi).type(newProjectName);
-
-        cy.get("td > input[id='orders.0.name']").clear().type(newOrderName);
-        cy.get("td > input[id='orders.0.quantity']")
-          .clear()
-          .type(faker.commerce.price());
-        cy.get("td > input[id='orders.0.amount']")
-          .clear()
-          .type(faker.random.numeric(3));
+        cy.selById('input', 'orders.0.name').clear().type(newOrderName);
+        cy.selById('input', 'orders.0.quantity').clear().type(newQuantity);
+        cy.selById('input', 'orders.0.amount').clear().type(newPrice);
 
         cy.findByRole('button', { name: /save/gi }).click();
       });
@@ -200,8 +188,64 @@ describe('Invoices', () => {
     });
   });
 
-  it('can sort correctly');
+  it('can sort correctly', () => {
+    cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+    cy.wait('@invoices');
+    cy.findByRole('table').within(() => {
+      cy.findByRole('columnheader', { name: /due/i })
+        .findByRole('button')
+        .as('sort-date')
+        .click();
+    });
+    cy.wait('@invoices');
+    cy.get('span[data-cy="sort-due"]')
+      .should('have.length', 10)
+      .should($items => {
+        const first = new Date($items.first().text()).getTime();
+        const last = new Date($items.last().text()).getTime();
+        expect(first).gt(last);
+      });
+  });
+  describe('delete', () => {
+    it('can delete an invoice', () => {
+      cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+      cy.wait('@invoices');
+      cy.get('table').find('a').contains(/view/gi).click({ force: true });
 
+      cy.get('div[data-cy="button-group"]')
+        .find('button')
+        .contains(/delete/i)
+        .click();
+
+      cy.findByRole('button', { name: /confirm/gi }).click();
+      cy.findByRole('heading', { name: /invoices/gi, level: 2 });
+    });
+
+    it('can batch delete invoices', () => {
+      cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+      cy.intercept('/api/trpc/invoice.deleteBatch*').as('deleting');
+      cy.wait('@invoices');
+      cy.findByRole('table').within(() => {
+        cy.get("input[data-cy='invoice-checkbox']").as('checkboxes');
+        cy.get('@checkboxes').first().check().as('check1');
+
+        cy.get('@checkboxes').eq(2).check().as('check2');
+
+        cy.get('@checkboxes').eq(6).check().as('check3');
+      });
+
+      cy.findByRole('button', { name: /delete/i }).click();
+      cy.findByRole('dialog')
+        .findByRole('button', { name: /confirm/i })
+        .click();
+
+      cy.wait('@deleting');
+      cy.wait('@invoices');
+      cy.get('@check1').should('not.be.checked');
+      cy.get('@check2').should('not.be.checked');
+      cy.get('@check3').should('not.be.checked');
+    });
+  });
   it.skip('can download a pdf', () => {
     cy.findByRole('table').find('a').contains(/view/i).first().click();
     cy.findByRole('heading', { level: 2 }).invoke('text').as('invoice');
@@ -209,3 +253,4 @@ describe('Invoices', () => {
     cy.findByRole('button', { name: /download pdf/i });
   });
 });
+

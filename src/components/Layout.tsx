@@ -44,7 +44,7 @@ const navigations = [
 const NavigationPane = () => {
   const router = useRouter();
   return (
-    <div className="py-4 space-y-6 h-screen border-r-gray-300 border-r-[1px] grow">
+    <div className="py-4 space-y-6 h-screen border-r-gray-300 border-r-[1px] grow sticky top-px z-20">
       <div className="w-20">
         <Image src={logo} alt="logo" />
       </div>
@@ -69,17 +69,17 @@ const NavigationPane = () => {
                 )}>
                 <Link
                   href={nav.href}
-                  className={clsx('flex gap-4 items-center p-4 ')}>
+                  className={clsx('flex gap-4 items-center p-4')}>
                   <nav.Icon
                     className={clsx(
-                      isActive && 'text-primary',
-                      'h-5 aspect-square text-gray-600'
+                      isActive ? 'text-primary' : 'text-gray-600',
+                      'h-5 aspect-square '
                     )}
                   />
                   <span
                     className={clsx(
-                      isActive && 'text-primary',
-                      'text-sm  text-gray-600'
+                      isActive ? 'text-primary' : 'text-gray-600',
+                      'text-sm'
                     )}>
                     {nav.name}
                   </span>
@@ -125,8 +125,8 @@ const Layout = ({
       <NextSeo title={title} />
       <main className="w-screen min-h-screen flex">
         <NavigationPane />
-        <section className="basis-[85%] relative ">
-          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300">
+        <section className="basis-[85%]">
+          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300 sticky top-px bg-white z-20">
             <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
               New Invoice
             </Button>

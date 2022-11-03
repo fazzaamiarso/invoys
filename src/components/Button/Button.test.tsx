@@ -3,8 +3,12 @@ import Button from '.';
 
 describe('Button', () => {
   test.skip('Button with href renders link', async () => {
-    // I think it is broken because this app use experimental newlink behaviour.
-    render(<Button href="/">Should be a link</Button>);
+    // somehow doesn't want to render the link
+    render(
+      <div>
+        <Button href="/home">Should be a link</Button>
+      </div>
+    );
     await screen.findByRole('link', { name: /should be a link/i });
   });
 

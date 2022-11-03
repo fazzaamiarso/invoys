@@ -1,6 +1,5 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { UserRole } from '@prisma/client';
-import { twGradients } from 'data/gradients';
 import NextAuth, {
   DefaultSession,
   NextAuthOptions,
@@ -8,11 +7,20 @@ import NextAuth, {
 } from 'next-auth';
 import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from '../../../server/db/client';
+import { prisma } from '@lib/prisma/client';
+import {
+  checkEmailExist,
+  checkInviteOnly,
+  createSettings,
+  insertAdditionalUserData,
+  unPendingUserEmail,
+} from '@lib/prisma/next-auth';
+
+const __TEST__ = process.env.APP_ENV === 'test';
 
 export const authOptions: NextAuthOptions = {
-  secret: 'verysecretthing',
-  session: { strategy: process.env.APP_ENV === 'test' ? 'jwt' : 'database' },
+  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: __TEST__ ? 'jwt' : 'database' },
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -28,10 +36,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: process.env.APP_ENV === 'test' ? undefined : '/auth/login',
+    signIn: __TEST__ ? undefined : '/auth/login',
     verifyRequest: '/auth/verify',
+    error: '/auth/error',
   },
   callbacks: {
+    async signIn({ user }) {
+      if (__TEST__ || user.emailVerified) return true;
+      if (!user.email) return false;
+      const isInviteOnly = await checkInviteOnly();
+      const isEmailExist = await checkEmailExist(user.email);
+      if (isInviteOnly && !isEmailExist) return false;
+      return true;
+    },
     async jwt({ token, account, profile }) {
       if (account) {
         token.email = profile?.email;
@@ -39,14 +56,14 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ user, session, token }) => {
-      if (process.env.APP_ENV === 'test') {
+      if (__TEST__) {
         return {
           ...session,
           user: {
             ...session.user,
             email: token.email,
             gradient: 'flamingo',
-            role: 'admin',
+            role: 'ADMIN',
           },
         };
       }
@@ -58,27 +75,16 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     signIn: async () => {
-      const isSettingsExist = (await prisma.settings.count()) > 0;
-      if (!isSettingsExist) await prisma.settings.create({ data: {} });
+      await createSettings();
     },
     createUser: async message => {
-      const isFirstUser = (await prisma.user.count()) < 1;
-      const gradientKeys = Object.keys(twGradients);
-      const randomGradient = gradientKeys.at(
-        Math.floor(Math.random() * gradientKeys.length)
-      );
-      await prisma.user.update({
-        where: { id: message.user.id },
-        data: {
-          gradient: randomGradient,
-          role: isFirstUser ? 'SUPER_ADMIN' : 'ADMIN',
-        },
-      });
+      await insertAdditionalUserData({ userId: message.user.id });
+      await unPendingUserEmail(message.user.email!);
     },
   },
 };
 
-if (process.env.APP_ENV === 'test') {
+if (__TEST__) {
   authOptions.providers.push(
     CredentialsProvider({
       name: 'credentials',
@@ -94,7 +100,6 @@ if (process.env.APP_ENV === 'test') {
           email: credentials?.email,
           role: 'ADMIN',
           id: 'anything',
-          gradient: 'flamingo',
         };
       },
     })
@@ -110,6 +115,7 @@ declare module 'next-auth' {
     };
   }
   interface User extends DefaultUser {
+    emailVerified?: Date | null;
     gradient?: string;
     role: UserRole;
   }

@@ -173,7 +173,11 @@ const ClientDetails: NextPage = () => {
               <Button variant="outline" onClick={hideDeleteModal}>
                 Cancel
               </Button>
-              <Button variant="danger" onClick={confirmDelete}>
+              <Button
+                variant="danger"
+                onClick={confirmDelete}
+                isLoading={deleteMutation.isLoading}
+                loadingContent="deleting...">
                 Confirm
               </Button>
             </ModalAction>
