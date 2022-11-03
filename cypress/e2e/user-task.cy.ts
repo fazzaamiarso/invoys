@@ -69,6 +69,8 @@ describe('Clients', () => {
   });
 
   it('can edit a client', () => {
+    cy.intercept('/api/trpc/customer.infinite*').as('loading');
+    cy.wait('@loading');
     cy.get('table').find('a').contains(/view/i).click();
 
     cy.get("div[data-cy='button-group']").contains('button', /edit/i).click();
@@ -89,7 +91,9 @@ describe('Clients', () => {
   });
 
   it('can delete a client', () => {
-    cy.get('table').find('a').contains(/view/gi).click();
+    cy.intercept('/api/trpc/customer.infinite*').as('loading');
+    cy.wait('@loading');
+    cy.get('table').find('a').contains(/view/gi).click({ force: true });
     cy.get("div[data-cy='button-group']")
       .contains('button', /delete/i)
       .click();
@@ -206,7 +210,7 @@ describe('Invoices', () => {
     it('can delete an invoice', () => {
       cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
       cy.wait('@invoices');
-      cy.get('table').find('a').contains(/view/gi).click();
+      cy.get('table').find('a').contains(/view/gi).click({ force: true });
 
       cy.get('div[data-cy="button-group"]')
         .find('button')
