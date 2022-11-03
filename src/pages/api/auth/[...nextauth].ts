@@ -74,8 +74,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    createUser: async message => {
+    signIn: async () => {
       await createSettings();
+    },
+    createUser: async message => {
       await insertAdditionalUserData({ userId: message.user.id });
       await unPendingUserEmail(message.user.email!);
     },

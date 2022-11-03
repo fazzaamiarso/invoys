@@ -42,8 +42,12 @@ export const checkInviteOnly = async () => {
 };
 
 export const unPendingUserEmail = async (email: string) => {
-  return await prisma.email.update({
-    where: { name: email },
-    data: { isPending: false },
-  });
+  try {
+    await prisma.email.update({
+      where: { name: email },
+      data: { isPending: false },
+    });
+  } catch {
+    console.log('OOps');
+  }
 };

@@ -44,7 +44,7 @@ const navigations = [
 const NavigationPane = () => {
   const router = useRouter();
   return (
-    <div className="py-4 space-y-6 h-screen border-r-gray-300 border-r-[1px] grow sticky top-px">
+    <div className="py-4 space-y-6 h-screen border-r-gray-300 border-r-[1px] grow sticky top-px z-20">
       <div className="w-20">
         <Image src={logo} alt="logo" />
       </div>
@@ -125,8 +125,8 @@ const Layout = ({
       <NextSeo title={title} />
       <main className="w-screen min-h-screen flex">
         <NavigationPane />
-        <section className="basis-[85%] relative ">
-          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300 sticky top-px bg-white">
+        <section className="basis-[85%]">
+          <header className="flex w-full px-12 py-4 border-b-[1px] border-b-gray-300 sticky top-px bg-white z-20">
             <Button Icon={PlusIcon} onClick={() => setDrawerOpen(true)}>
               New Invoice
             </Button>
