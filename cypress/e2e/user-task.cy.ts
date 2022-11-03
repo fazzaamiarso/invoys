@@ -37,9 +37,9 @@ describe('Clients', () => {
       cy.get('span[data-cy="client-name"]')
         .should('have.length', 10)
         .should($items => {
-          expect($items.first().text().charCodeAt(0)).gt(
-            $items.last().text().charCodeAt(0)
-          );
+          const first = $items.first().text().charCodeAt(0);
+          const last = $items.last().text().charCodeAt(0);
+          expect(first).gt(last);
         });
     });
   });
@@ -184,6 +184,24 @@ describe('Invoices', () => {
     });
   });
 
+  it('can sort correctly', () => {
+    cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+    cy.wait('@invoices');
+    cy.findByRole('table').within(() => {
+      cy.findByRole('columnheader', { name: /due/i })
+        .findByRole('button')
+        .as('sort-date')
+        .click();
+    });
+    cy.wait('@invoices');
+    cy.get('span[data-cy="sort-due"]')
+      .should('have.length', 10)
+      .should($items => {
+        const first = new Date($items.first().text()).getTime();
+        const last = new Date($items.last().text()).getTime();
+        expect(first).gt(last);
+      });
+  });
   describe('delete', () => {
     it('can delete an invoice', () => {
       cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
@@ -201,12 +219,29 @@ describe('Invoices', () => {
 
     it('can batch delete invoices', () => {
       cy.intercept('/api/trpc/invoice.infinite*').as('invoices');
+      cy.intercept('/api/trpc/invoice.deleteBatch*').as('deleting');
       cy.wait('@invoices');
+      cy.findByRole('table').within(() => {
+        cy.get("input[data-cy='invoice-checkbox']").as('checkboxes');
+        cy.get('@checkboxes').first().check().as('check1');
+
+        cy.get('@checkboxes').eq(2).check().as('check2');
+
+        cy.get('@checkboxes').eq(6).check().as('check3');
+      });
+
+      cy.findByRole('button', { name: /delete/i }).click();
+      cy.findByRole('dialog')
+        .findByRole('button', { name: /confirm/i })
+        .click();
+
+      cy.wait('@deleting');
+      cy.wait('@invoices');
+      cy.get('@check1').should('not.be.checked');
+      cy.get('@check2').should('not.be.checked');
+      cy.get('@check3').should('not.be.checked');
     });
   });
-
-  it('can sort correctly');
-
   it.skip('can download a pdf', () => {
     cy.findByRole('table').find('a').contains(/view/i).first().click();
     cy.findByRole('heading', { level: 2 }).invoke('text').as('invoice');
@@ -214,3 +249,4 @@ describe('Invoices', () => {
     cy.findByRole('button', { name: /download pdf/i });
   });
 });
+

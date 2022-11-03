@@ -72,6 +72,7 @@ const columns = [
       <div className="px-1">
         <IndeterminateCheckbox
           {...{
+            'data-cy': 'invoice-checkbox',
             checked: row.getIsSelected(),
             indeterminate: row.getIsSomeSelected(),
             onChange: row.getToggleSelectedHandler(),
@@ -109,7 +110,9 @@ const columns = [
     header: props => (
       <SortableHeader headerProps={props}>Due Date</SortableHeader>
     ),
-    cell: props => dayjs(props.getValue()).format('LL'),
+    cell: props => (
+      <span data-cy="sort-due">{dayjs(props.getValue()).format('LL')}</span>
+    ),
   }),
   columnHelper.accessor('status', {
     header: 'Status',
