@@ -210,4 +210,15 @@ export const invoiceRouter = t.router({
       const requestId = await sendInvoice(input);
       return requestId;
     }),
+  deleteBatch: protectedProcedure
+    .input(
+      z.object({
+        invoiceIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.invoice.deleteMany({
+        where: { id: { in: input.invoiceIds } },
+      });
+    }),
 });
