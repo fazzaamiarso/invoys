@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 before(() => {
-  cy.exec('pnpm db:seed-test');
+  cy.exec('pnpm db:test-run');
 });
 
 beforeEach(() => {
