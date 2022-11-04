@@ -1,3 +1,5 @@
+![invoys](https://i.imgur.com/S2cqkro.png)
+
 # Invoys
 Open source and self-hostable invoice management app built with Next.js. 
 Made to be free of cost.
@@ -8,8 +10,15 @@ Made to be free of cost.
 - Send Invoice link to email.
 - Download invoice to PDF.
 - Invite team members.
-- Download datas to CSV. (WIP)
+- Download datas to CSV.
 
+## Try the Demo App
+> For demo app, as it's a public dashboard, the Database will be resetted once in a while.
+1. Go to [https://invoys.fzworld.xyz](https://invoys.fzworld.xyz)
+2. Use any email to login, but must be able to receive verification email (recommended to use [temp mail](https://temp-mail.org/en/))
+3. You are logged-in
+
+## Project Gallery
 |||
 |:----------------------------------------:|:-----------------------------------------:|
 | ![Imgur](https://i.imgur.com/ujWxXj5.png) | ![Imgur](https://i.imgur.com/fVusKr7.png) |
@@ -17,10 +26,11 @@ Made to be free of cost.
 | ![Imgur](https://i.imgur.com/1CZnXF3.png) | ![Imgur](https://i.imgur.com/x1TjQOP.png) |
 | ![Imgur](https://i.imgur.com/rpDor0M.gif) | 
 
-## Tech Stack
+## Overview
+### Tech Stack
 - Next.js + Typescript
 - TRPC
-- Next-auth (Email Magic Link)
+- Next-auth (Email Magic Link) with Nodemailer
 - Prisma
 - Planetscale (MySQL)
 - Tailwind CSS
@@ -28,7 +38,6 @@ Made to be free of cost.
 - Docker
 - Cypress + Vitest
 
-## Overview
 ### Folder Structure
 - `/cypress` E2E + Integration testing files in Cypress.
 - `/scripts` SQL files that used in docker.
