@@ -1,8 +1,11 @@
 ![invoys](https://i.imgur.com/S2cqkro.png)
 
 # Invoys
-Open source and self-hostable invoice management app built with Next.js. 
-Made to be free of cost.
+I am Happy you're here!
+
+Invoys is an Open source and self-hostable invoice management app built with Next.js. Made to be free of cost.
+
+Want to know more about the motivation of building Invoys? Read [my blog post on Invoys](https://fazzaamiarso.me/projects/invoys).
 
 ## Features
 - Freely customize and use the code.
