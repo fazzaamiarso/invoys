@@ -9,7 +9,7 @@
     "dev": "next dev",
     "dev:test": "cross-env APP_ENV=test NODE_ENV=test next dev -p 8080",
     "postinstall": "prisma generate",
-    "lint": "next lint",
+    "lint": "next lint ./src",
     "start": "next start",
     "start:ci": "next start -p 8080",
     "prepare": "husky install",
