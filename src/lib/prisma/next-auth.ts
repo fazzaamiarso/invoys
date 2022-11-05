@@ -1,8 +1,10 @@
 import { SETTINGS_ID } from '@data/global';
+import { getErrorMessage } from '@utils/getErrorMessage';
 import { getRandomGradient } from '@utils/prisma';
 import { prisma } from './client';
 
 export const createSettings = async () => {
+  // Make sure the settings only created once.
   const isSettingsExist = (await prisma.settings.count()) > 0;
   if (!isSettingsExist) await prisma.settings.create({ data: {} });
 };
@@ -46,7 +48,8 @@ export const unPendingUserEmail = async (email: string) => {
       where: { name: email },
       data: { isPending: false },
     });
-  } catch {
-    console.log('OOps');
+  } catch (error) {
+    //TODO: handle this error better
+    console.log(getErrorMessage(error));
   }
 };

@@ -1,4 +1,5 @@
 import { CourierClient } from '@trycourier/courier';
+import { getErrorMessage } from '@utils/getErrorMessage';
 
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
 const authToken = process.env.COURIER_AUTH_TOKEN;
@@ -7,27 +8,32 @@ const courierClient = CourierClient({
   authorizationToken: authToken,
 });
 
+type CourierInvoiceDatas = {
+  customerName: string;
+  invoiceNumber: string;
+  invoiceViewUrl: string;
+  businessName: string;
+  emailTo: string;
+};
+/**
+ * Send an Invoice with email template defined in Courier Dashboard
+ */
 export const sendInvoice = async ({
   customerName,
   invoiceNumber,
   invoiceViewUrl,
   businessName,
   emailTo,
-}: {
-  customerName: string;
-  invoiceNumber: string;
-  invoiceViewUrl: string;
-  businessName: string;
-  emailTo: string;
-}) => {
+}: CourierInvoiceDatas) => {
+  const recipientEmail =
+    process.env.NODE_ENV === 'production'
+      ? emailTo
+      : process.env.COURIER_TEST_EMAIL;
   try {
     const { requestId } = await courierClient.send({
       message: {
         to: {
-          email:
-            process.env.NODE_ENV === 'production'
-              ? emailTo
-              : process.env.COURIER_TEST_EMAIL,
+          email: recipientEmail,
         },
         template: INVOICE_TEMPLATE_ID,
         // Data is needed for courier email desginer
@@ -40,8 +46,7 @@ export const sendInvoice = async ({
       },
     });
     return requestId;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
-    throw new Error(e);
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
 };
