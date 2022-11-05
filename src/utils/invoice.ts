@@ -21,6 +21,9 @@ export const generatePrefix = (value?: string) => {
   return `${first.charAt(0)}${second.charAt(0)}${third.charAt(0)}`;
 };
 
+/**
+ * Calculate an invoice total orders
+ */
 export const calculateOrderAmount = <
   T extends { amount: number; quantity: number }
 >(
@@ -29,6 +32,9 @@ export const calculateOrderAmount = <
   return orders.reduce((acc, curr) => acc + curr.amount * curr.quantity, 0);
 };
 
+/**
+ * Trigger browser download action from the ref given
+ */
 export const downloadPdf = async <T extends HTMLElement>(
   pdfContainer: RefObject<T>,
   filename: string

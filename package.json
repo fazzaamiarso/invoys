@@ -9,7 +9,7 @@
     "dev": "next dev",
     "dev:test": "cross-env APP_ENV=test NODE_ENV=test next dev -p 8080",
     "postinstall": "prisma generate",
-    "lint": "next lint",
+    "lint": "next lint ./src",
     "start": "next start",
     "start:ci": "next start -p 8080",
     "prepare": "husky install",
@@ -24,7 +24,8 @@
     "cy:run": "cypress run",
     "cy:test": "start-server-and-test dev:test 8080 cy:open",
     "cy:test-run": "start-server-and-test dev:test 8080 cy:run",
-    "test:unit": "vitest"
+    "test:unit": "vitest run",
+    "test:unit-watch": "vitest"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.3",

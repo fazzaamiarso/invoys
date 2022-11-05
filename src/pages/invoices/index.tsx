@@ -23,7 +23,6 @@ import {
 import {
   FormEvent,
   Fragment,
-  HTMLProps,
   useEffect,
   useMemo,
   useRef,
@@ -51,6 +50,7 @@ import {
   ModalTitle,
 } from '@components/Modal';
 import toast from 'react-hot-toast';
+import IndeterminateCheckbox from '@components/Table/IndeterminateCheckbox';
 
 type InvoiceGetAllOutput =
   InferProcedures['invoice']['infiniteInvoices']['output']['invoices'];
@@ -450,28 +450,5 @@ const InvoiceActionsBar = ({
         </ModalAction>
       </Modal>
     </>
-  );
-};
-
-const IndeterminateCheckbox = ({
-  indeterminate,
-  className = '',
-  ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) => {
-  const ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (typeof indeterminate === 'boolean' && ref.current) {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [indeterminate, rest.checked]);
-
-  return (
-    <input
-      type="checkbox"
-      ref={ref}
-      className={clsx(className, 'cursor-pointer')}
-      {...rest}
-    />
   );
 };

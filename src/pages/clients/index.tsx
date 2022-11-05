@@ -1,6 +1,6 @@
 import Button from '@components/Button';
 import Layout from '@components/Layout';
-import NewClientDrawer from '@components/NewClientDrawer';
+import { NewClientDrawer } from '@components/ClientDrawer';
 import { LoadingSpinner } from '@components/Spinner';
 import SortableHeader from '@components/Table/SortableHeader';
 import { UserPlusIcon } from '@heroicons/react/24/outline';

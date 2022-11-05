@@ -1,5 +1,5 @@
 import Button from '@components/Button';
-import EditClientDrawer from '@components/EditClientDrawer';
+import { EditClientDrawer } from '@components/ClientDrawer';
 import Layout from '@components/Layout';
 import {
   ArrowLeftIcon,

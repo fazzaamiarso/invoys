@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { parseSort } from '@utils/prisma';
+import { test, expect } from 'vitest';
 
 describe('parseSort', () => {
   test('parse correctly', () => {

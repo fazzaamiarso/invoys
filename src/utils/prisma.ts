@@ -1,6 +1,9 @@
 import { twGradients } from 'data/gradients';
 
-export const parseSort = (sortObject: Record<string, any>) => {
+/**
+ * Parse a record to prisma's sort input format
+ */
+export const parseSort = (sortObject: Record<string, unknown>) => {
   for (const key in sortObject) {
     if (!key) continue;
     const splitted = key.split('_');
@@ -12,6 +15,9 @@ export const parseSort = (sortObject: Record<string, any>) => {
   }
 };
 
+/**
+ * Get a random gradient in tailwind class format
+ */
 export const getRandomGradient = () => {
   const gradientKeys = Object.keys(twGradients);
   const idx = Math.floor(Math.random() * gradientKeys.length);
