@@ -2,9 +2,9 @@ import { generatePrefix } from '@utils/invoice';
 import { trpc } from '@utils/trpc';
 import { useRouter } from 'next/router';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import Button from './Button';
-import Drawer from './Drawer';
-import TextInput from './Form/TextInput';
+import Button from '../Button';
+import Drawer from '../Drawer';
+import TextInput from '../Form/TextInput';
 
 type Props = {
   onClose: () => void;
