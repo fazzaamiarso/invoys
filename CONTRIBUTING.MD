@@ -4,7 +4,7 @@ Thank you for your interest in contributing! Here are some guide on how to contr
 
 ## Setup
 
-Before contributing to Invoys, you will have to fork the Repo. If you want to spin up your own app, you can simply download the code and continue to the setup.
+Before contributing to Invoys, you will have to fork the repo. If you want to spin up your own app, you can simply download the code and continue to the setup.
 
 ### System Requirements
 
@@ -29,7 +29,7 @@ docker compose up -d
 
 pnpm db:seed
 
-pnpm test:unit && cy:test-run
+pnpm test:unit && pnpm cy:test-run
 ```
 
 If you have all the requirements, the steps should do, if not, please read more below.
@@ -75,8 +75,11 @@ pnpm db:studio
 Testing uses different environment variables, which is set in .env.test
 
 ```bash
-# Run unit test with Vitest
+# Run unit test with Vitest once
 pnpm test:unit
+
+# Run unit test with Vitest in watch mode
+pnpm test:unit-watch
 
 # Will start a server and run Cypress tests headless.
 pnpm cy:test-run

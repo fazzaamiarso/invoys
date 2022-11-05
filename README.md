@@ -1,4 +1,4 @@
-![invoys](https://i.imgur.com/S2cqkro.png)
+ <p align="center"><img src="https://i.imgur.com/S2cqkro.png" align="center" alt="invoys logo" /></p>
 
 # Invoys
 
@@ -7,6 +7,17 @@ I am Happy you're here!
 Invoys is an Open source and self-hostable invoice management app built with Next.js. Made to be free of cost.
 
 Want to know more about the motivation of building Invoys? Read [my blog post on Invoys](https://fazzaamiarso.me/projects/invoys).
+
+## Table of Contents
+- [Features](#features)
+- [Try it out](#try-the-demo-app)
+- [Project Gallery](#project-gallery)
+- [Overview](#overview)
+  - [Tech Stack](#tech-stack)
+  - [Folder Structure](#folder-structure)
+- [Host your own app](#spin-up-your-own-app)
+- [Contributing](#contributing)
+- [Improvements](#improvements)
 
 ## Features
 
@@ -29,10 +40,10 @@ Want to know more about the motivation of building Invoys? Read [my blog post on
 
 |                                           |                                           |
 | :---------------------------------------: | :---------------------------------------: |
-| ![Imgur](https://i.imgur.com/ujWxXj5.png) | ![Imgur](https://i.imgur.com/fVusKr7.png) |
+| ![Imgur](https://i.imgur.com/rpDor0M.gif) |  ![Imgur](https://i.imgur.com/ujWxXj5.png)|
 | ![Imgur](https://i.imgur.com/KehNO4f.png) | ![Imgur](https://i.imgur.com/x4Xxw5w.png) |
 | ![Imgur](https://i.imgur.com/1CZnXF3.png) | ![Imgur](https://i.imgur.com/x1TjQOP.png) |
-| ![Imgur](https://i.imgur.com/rpDor0M.gif) |
+| ![Imgur](https://i.imgur.com/fVusKr7.png) |
 
 ## Overview
 
@@ -76,8 +87,8 @@ Any contributions is welcomed and encouraged. If you are interested, see the [co
 - [ ] Dashboard analytics.
 - [ ] Recurring and scheduled invoice sending.
 - [ ] Invoice due date reminder.
-- [x] Setup CI workflow for testing.
-- [ ] Table virtualization with @tanstack-virtual.
 - [ ] UI/UX.
+- [x] Setup CI workflow for testing.
+- [x] Table virtualization with @tanstack-virtual.
 - [x] E2E testing with Cypress.
 - [x] Setup Docker for development database and test?
