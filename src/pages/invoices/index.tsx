@@ -21,8 +21,10 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/solid';
 import {
+  Dispatch,
   FormEvent,
   Fragment,
+  SetStateAction,
   useEffect,
   useMemo,
   useRef,
@@ -54,6 +56,8 @@ import IndeterminateCheckbox from '@components/Table/IndeterminateCheckbox';
 
 type InvoiceGetAllOutput =
   InferProcedures['invoice']['infiniteInvoices']['output']['invoices'];
+
+type TableSortValue = { [colId: string]: 'asc' | 'desc' } | undefined;
 
 const columnHelper = createColumnHelper<InvoiceGetAllOutput[number]>();
 const columns = [
@@ -151,7 +155,7 @@ const Invoices = () => {
   const prevQuery = usePrevious(debouncedQuery);
   const prevStatus = usePrevious(statusFilter);
 
-  const sortValue: { [colId: string]: 'asc' | 'desc' } | undefined =
+  const sortValue: TableSortValue =
     sorting.length && sorting[0]
       ? {
           [sorting[0].id]: sorting[0].desc ? 'desc' : 'asc',
@@ -249,53 +253,10 @@ const Invoices = () => {
               autoComplete="off"
             />
           </form>
-          {/* FILTER */}
-          <Listbox onChange={setStatusFilter} value={statusFilter}>
-            <div className="relative ml-8">
-              <Listbox.Button as={Fragment}>
-                <Button variant="outline" Icon={FunnelIcon}>
-                  {statusFilter === undefined
-                    ? 'All Status'
-                    : capitalize(statusFilter)}
-                </Button>
-              </Listbox.Button>
-              <Transition
-                as={Fragment}
-                leave="transition ease-in duration-100"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0">
-                <Listbox.Options className="absolute bottom-0 p-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
-                  {Object.values({
-                    ALL_STATUS: undefined,
-                    ...InvoiceStatus,
-                  }).map(status => {
-                    return (
-                      <Listbox.Option
-                        as={Fragment}
-                        key={status ?? 'all'}
-                        value={status}>
-                        {({ active, selected }) => {
-                          return (
-                            <li
-                              className={clsx(
-                                active && 'bg-[#f5f7f9]',
-                                'p-2 rounded-md text-sm cursor-pointer flex items-center'
-                              )}>
-                              <span>{capitalize(status ?? 'All Status')}</span>
-                              {selected && (
-                                <CheckIcon className="h-4 text-gray-700 aspect-square ml-auto" />
-                              )}
-                            </li>
-                          );
-                        }}
-                      </Listbox.Option>
-                    );
-                  })}
-                </Listbox.Options>
-              </Transition>
-            </div>
-          </Listbox>
-          {/* FILTER END */}
+          <StatusFilter
+            setStatusFilter={setStatusFilter}
+            statusFilter={statusFilter}
+          />
           <div className="ml-auto flex items-center gap-4">
             <Button Icon={DocumentArrowDownIcon} variant="outline">
               Download CSV
@@ -376,6 +337,62 @@ const Invoices = () => {
 };
 
 export default Invoices;
+
+type StatusFilterProps = {
+  setStatusFilter: Dispatch<SetStateAction<InvoiceStatus | undefined>>;
+  statusFilter: InvoiceStatus | undefined;
+};
+const StatusFilter = ({ setStatusFilter, statusFilter }: StatusFilterProps) => {
+  const statusList = Object.values({
+    ALL_STATUS: undefined,
+    ...InvoiceStatus,
+  });
+  const displayedText =
+    statusFilter === undefined ? 'All Status' : capitalize(statusFilter);
+
+  return (
+    <Listbox onChange={setStatusFilter} value={statusFilter}>
+      <div className="relative ml-8">
+        <Listbox.Button as={Fragment}>
+          <Button variant="outline" Icon={FunnelIcon}>
+            {displayedText}
+          </Button>
+        </Listbox.Button>
+        <Transition
+          as={Fragment}
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0">
+          <Listbox.Options className="absolute bottom-0 p-1 w-full translate-y-full bg-white z-20 shadow-lg rounded-md">
+            {statusList.map(status => {
+              return (
+                <Listbox.Option
+                  as={Fragment}
+                  key={status ?? 'all'}
+                  value={status}>
+                  {({ active, selected }) => {
+                    return (
+                      <li
+                        className={clsx(
+                          active && 'bg-[#f5f7f9]',
+                          'p-2 rounded-md text-sm cursor-pointer flex items-center'
+                        )}>
+                        <span>{capitalize(status ?? 'All Status')}</span>
+                        {selected && (
+                          <CheckIcon className="h-4 text-gray-700 aspect-square ml-auto" />
+                        )}
+                      </li>
+                    );
+                  }}
+                </Listbox.Option>
+              );
+            })}
+          </Listbox.Options>
+        </Transition>
+      </div>
+    </Listbox>
+  );
+};
 
 const InvoiceActionsBar = ({
   table,
