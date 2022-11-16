@@ -1,3 +1,4 @@
+import { SECOND_TO_MS } from '@data/global';
 import { CourierClient } from '@trycourier/courier';
 import { getErrorMessage } from '@utils/getErrorMessage';
 
@@ -6,6 +7,8 @@ const __IS_PROD__ = process.env.NODE_ENV === 'production';
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
 const PAYMENT_REMINDER_TEMPLATE_ID = 'B2VWVEF9SAM1QAPX4DC9PHRV8XWF';
 const PAYMENT_OVERDUE_TEMPLATE_ID = '2VEY67G0NZ4KKEKGJ1K7K3JGYD2N';
+
+const testEmail = process.env.COURIER_TEST_EMAIL;
 const authToken = __IS_PROD__
   ? process.env.COURIER_AUTH_TOKEN
   : process.env.COURIER_AUTH_TEST_TOKEN;
@@ -36,7 +39,7 @@ export const sendInvoice = async ({
   productName,
   dueDate,
 }: SendInvoice) => {
-  const recipientEmail = __IS_PROD__ ? emailTo : process.env.COURIER_TEST_EMAIL;
+  const recipientEmail = __IS_PROD__ ? emailTo : testEmail;
   try {
     const { requestId } = await courierClient.send({
       message: {
@@ -64,7 +67,6 @@ interface ScheduleReminder extends CourierBaseData {
   scheduledDate: Date;
   invoiceId: string;
 }
-
 /**
  * Send a reminder on scheduled date
  */
@@ -78,8 +80,8 @@ export const scheduleReminder = async ({
 }: ScheduleReminder) => {
   const delayUntilDate = __IS_PROD__
     ? scheduledDate
-    : new Date(Date.now() + 1000 * 20);
-  const recipientEmail = __IS_PROD__ ? emailTo : process.env.COURIER_TEST_EMAIL;
+    : new Date(Date.now() + SECOND_TO_MS * 20);
+  const recipientEmail = __IS_PROD__ ? emailTo : testEmail;
 
   try {
     const { runId } = await courierClient.automations.invokeAdHocAutomation({
@@ -123,7 +125,7 @@ export const scheduleOverdueNotice = async ({
   invoiceNumber,
   dueDate,
 }: ScheduleOverdue) => {
-  const recipientEmail = __IS_PROD__ ? emailTo : process.env.COURIER_TEST_EMAIL;
+  const recipientEmail = __IS_PROD__ ? emailTo : testEmail;
 
   try {
     const { runId } = await courierClient.automations.invokeAdHocAutomation({

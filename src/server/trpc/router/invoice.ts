@@ -239,7 +239,7 @@ export const invoiceRouter = t.router({
       const scheduledDate = new Date(input.dueDate.getTime() - DAY_TO_MS * 1);
       const invoiceData = {
         ...input,
-        dueDate: dayjs(input.dueDate).format('D MMMM'),
+        dueDate: dayjs(input.dueDate).format('D MMMM YYYY'),
       };
 
       const requestId = await sendInvoice(invoiceData);
@@ -258,7 +258,7 @@ export const invoiceRouter = t.router({
           gte: now,
         },
       },
-      include: { customer: true },
+      include: { customer: { select: { name: true, email: true } } },
     });
 
     for (const invoice of overdueInvoices) {
