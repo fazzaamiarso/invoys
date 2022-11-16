@@ -3,7 +3,7 @@ import { protectedProcedure, t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
-import { sendInvoice } from '@lib/courier';
+import { scheduleReminder, sendInvoice } from '@lib/courier';
 import { parseSort } from '@utils/prisma';
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
@@ -196,6 +196,17 @@ export const invoiceRouter = t.router({
       });
       return updatedStatus;
     }),
+  deleteBatch: protectedProcedure
+    .input(
+      z.object({
+        invoiceIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.invoice.deleteMany({
+        where: { id: { in: input.invoiceIds } },
+      });
+    }),
   sendEmail: protectedProcedure
     .input(
       z.object({
@@ -207,18 +218,13 @@ export const invoiceRouter = t.router({
       })
     )
     .mutation(async ({ input }) => {
+      const scheduledDate = new Date(Date.now() + 1000 * 20);
       const requestId = await sendInvoice(input);
-      return requestId;
-    }),
-  deleteBatch: protectedProcedure
-    .input(
-      z.object({
-        invoiceIds: z.array(z.string()),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.invoice.deleteMany({
-        where: { id: { in: input.invoiceIds } },
+      await scheduleReminder({
+        emailTo: input.emailTo,
+        invoiceViewUrl: input.invoiceViewUrl,
+        scheduledDate,
       });
+      return requestId;
     }),
 });

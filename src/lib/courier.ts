@@ -2,7 +2,11 @@ import { CourierClient } from '@trycourier/courier';
 import { getErrorMessage } from '@utils/getErrorMessage';
 
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
-const authToken = process.env.COURIER_AUTH_TOKEN;
+const PAYMENT_REMINDER_TEMPLATE_ID = 'B2VWVEF9SAM1QAPX4DC9PHRV8XWF';
+const authToken =
+  process.env.NODE_ENV === 'development'
+    ? process.env.COURIER_AUTH_TEST_TOKEN
+    : process.env.COURIER_AUTH_TOKEN;
 
 const courierClient = CourierClient({
   authorizationToken: authToken,
@@ -36,7 +40,7 @@ export const sendInvoice = async ({
           email: recipientEmail,
         },
         template: INVOICE_TEMPLATE_ID,
-        // Data is needed for courier email desginer
+        // Data is needed for courier template desginer
         data: {
           customerName,
           invoiceNumber,
@@ -47,6 +51,45 @@ export const sendInvoice = async ({
     });
     return requestId;
   } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+type ScheduleReminder = {
+  scheduledDate: Date;
+  emailTo: string;
+  invoiceViewUrl: string;
+};
+export const scheduleReminder = async ({
+  scheduledDate,
+  emailTo,
+  invoiceViewUrl,
+}: ScheduleReminder) => {
+  const dateISO = scheduledDate.toISOString();
+  const recipientEmail =
+    process.env.NODE_ENV === 'production'
+      ? emailTo
+      : process.env.COURIER_TEST_EMAIL;
+
+  try {
+    const { runId } = await courierClient.automations.invokeAdHocAutomation({
+      automation: {
+        steps: [
+          { action: 'delay', until: dateISO },
+          {
+            action: 'send',
+            message: {
+              to: { email: recipientEmail },
+              template: PAYMENT_REMINDER_TEMPLATE_ID,
+              data: { invoiceViewUrl },
+            },
+          },
+        ],
+      },
+    });
+    return runId;
+  } catch (error) {
+    console.log(error);
     throw new Error(getErrorMessage(error));
   }
 };
