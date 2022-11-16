@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
 import {
   cancelAutomationWorkflow,
+  scheduleOverdueNotice,
   scheduleReminder,
   sendInvoice,
 } from '@lib/courier';
@@ -204,7 +205,9 @@ export const invoiceRouter = t.router({
 
       // cancel payment reminder automation workflow
       if (status === 'PAID') {
-        await cancelAutomationWorkflow({ cancelation_token: invoiceId });
+        await cancelAutomationWorkflow({
+          cancelation_token: `${invoiceId}-reminder`,
+        });
       }
 
       return updatedStatus;
@@ -226,19 +229,53 @@ export const invoiceRouter = t.router({
         customerName: z.string(),
         invoiceNumber: z.string(),
         invoiceViewUrl: z.string(),
-        businessName: z.string(),
         emailTo: z.string(),
         invoiceId: z.string(),
+        productName: z.string(),
         dueDate: z.date(),
       })
     )
     .mutation(async ({ input }) => {
       const scheduledDate = new Date(input.dueDate.getTime() - DAY_TO_MS * 1);
-      const requestId = await sendInvoice(input);
-      await scheduleReminder({
+      const invoiceData = {
         ...input,
+        dueDate: dayjs(input.dueDate).format('D MMMM'),
+      };
+
+      const requestId = await sendInvoice(invoiceData);
+      await scheduleReminder({
+        ...invoiceData,
         scheduledDate,
       });
       return requestId;
     }),
+  batchUpdateOverdues: t.procedure.mutation(async ({ ctx }) => {
+    const now = new Date();
+    const overdueInvoices = await ctx.prisma.invoice.findMany({
+      where: {
+        status: 'PENDING',
+        dueDate: {
+          gte: now,
+        },
+      },
+      include: { customer: true },
+    });
+
+    for (const invoice of overdueInvoices) {
+      await ctx.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { status: 'OVERDUE' },
+      });
+
+      // schedule an overdue reminder
+      await scheduleOverdueNotice({
+        invoiceId: invoice.id,
+        invoiceNumber: `#${invoice.invoiceNumber}`,
+        customerName: invoice.customer.name,
+        emailTo: invoice.customer.email,
+        invoiceViewUrl: `${process.env.VERCEL_URL}/invoices/${invoice.id}/preview`,
+        dueDate: dayjs(invoice.dueDate).format('D MMMM'),
+      });
+    }
+  }),
 });

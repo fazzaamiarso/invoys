@@ -1,0 +1,13 @@
+name: Daily CRON job
+on:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hourly cron job
+        run: |
+          curl --request POST \
+          --url ${{ secrets.BASE_URL }}/api/check-overdue \
+          --header 'Authorization: Bearer ${{ secrets.ACTION_KEY }}'

@@ -108,10 +108,10 @@ const InvoiceDetail = () => {
       customerName: invoiceDetail.customer.name,
       invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
       invoiceViewUrl: `${hostUrl}/invoices/${invoiceDetail.id}/preview`,
-      businessName: settings.businessName,
       emailTo: invoiceDetail.customer.email,
       invoiceId: invoiceDetail.id,
       dueDate: invoiceDetail.dueDate,
+      productName: invoiceDetail.name,
     });
   };
 
