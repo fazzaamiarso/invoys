@@ -110,8 +110,15 @@ const InvoiceDetail = () => {
       invoiceViewUrl: `${hostUrl}/invoices/${invoiceDetail.id}/preview`,
       businessName: settings.businessName,
       emailTo: invoiceDetail.customer.email,
+      invoiceId: invoiceDetail.id,
+      dueDate: invoiceDetail.dueDate,
     });
   };
+
+  const isSendingEmailDisabled =
+    invoiceDetail?.isDraft ||
+    invoiceDetail?.status === 'PAID' ||
+    invoiceDetail?.status === 'REJECTED';
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
@@ -219,7 +226,7 @@ const InvoiceDetail = () => {
                   variant="primary"
                   Icon={PaperAirplaneIcon}
                   onClick={sendInvoiceEmail}
-                  disabled={invoiceDetail.isDraft}
+                  disabled={isSendingEmailDisabled}
                   isLoading={sendEmailMutation.isLoading}
                   loadingContent="Sending...">
                   Send to Email

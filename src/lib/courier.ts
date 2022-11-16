@@ -59,11 +59,23 @@ type ScheduleReminder = {
   scheduledDate: Date;
   emailTo: string;
   invoiceViewUrl: string;
+  invoiceId: string;
+  customerName: string;
+  businessName: string;
+  invoiceNumber: string;
 };
+
+/**
+ * Send a reminder 1 day before due date
+ */
 export const scheduleReminder = async ({
   scheduledDate,
   emailTo,
   invoiceViewUrl,
+  invoiceId,
+  customerName,
+  businessName,
+  invoiceNumber,
 }: ScheduleReminder) => {
   const dateISO = scheduledDate.toISOString();
   const recipientEmail =
@@ -74,6 +86,7 @@ export const scheduleReminder = async ({
   try {
     const { runId } = await courierClient.automations.invokeAdHocAutomation({
       automation: {
+        cancelation_token: invoiceId,
         steps: [
           { action: 'delay', until: dateISO },
           {
@@ -81,7 +94,12 @@ export const scheduleReminder = async ({
             message: {
               to: { email: recipientEmail },
               template: PAYMENT_REMINDER_TEMPLATE_ID,
-              data: { invoiceViewUrl },
+              data: {
+                invoiceViewUrl,
+                customerName,
+                businessName,
+                invoiceNumber,
+              },
             },
           },
         ],
@@ -89,7 +107,26 @@ export const scheduleReminder = async ({
     });
     return runId;
   } catch (error) {
-    console.log(error);
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Cancel a running automation workflow specified with it's cancelation_token
+ */
+export const cancelAutomationWorkflow = async ({
+  cancelation_token,
+}: {
+  cancelation_token: string;
+}) => {
+  try {
+    const { runId } = await courierClient.automations.invokeAdHocAutomation({
+      automation: {
+        steps: [{ action: 'cancel', cancelation_token }],
+      },
+    });
+    return runId;
+  } catch (error) {
     throw new Error(getErrorMessage(error));
   }
 };

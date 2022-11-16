@@ -3,7 +3,11 @@ import { protectedProcedure, t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
-import { scheduleReminder, sendInvoice } from '@lib/courier';
+import {
+  cancelAutomationWorkflow,
+  scheduleReminder,
+  sendInvoice,
+} from '@lib/courier';
 import { parseSort } from '@utils/prisma';
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
@@ -190,10 +194,18 @@ export const invoiceRouter = t.router({
       z.object({ invoiceId: z.string(), status: z.nativeEnum(InvoiceStatus) })
     )
     .mutation(async ({ ctx, input }) => {
+      const { invoiceId, status } = input;
+
       const updatedStatus = await ctx.prisma.invoice.update({
-        where: { id: input.invoiceId },
-        data: { status: input.status },
+        where: { id: invoiceId },
+        data: { status },
       });
+
+      // cancel payment reminder automation workflow
+      if (status === 'PAID') {
+        await cancelAutomationWorkflow({ cancelation_token: invoiceId });
+      }
+
       return updatedStatus;
     }),
   deleteBatch: protectedProcedure
@@ -215,14 +227,16 @@ export const invoiceRouter = t.router({
         invoiceViewUrl: z.string(),
         businessName: z.string(),
         emailTo: z.string(),
+        invoiceId: z.string(),
+        dueDate: z.date(),
       })
     )
     .mutation(async ({ input }) => {
+      // const due = input.dueDate.getTime() - 1000 * 60 * 60 * 24;
       const scheduledDate = new Date(Date.now() + 1000 * 20);
       const requestId = await sendInvoice(input);
       await scheduleReminder({
-        emailTo: input.emailTo,
-        invoiceViewUrl: input.invoiceViewUrl,
+        ...input,
         scheduledDate,
       });
       return requestId;
