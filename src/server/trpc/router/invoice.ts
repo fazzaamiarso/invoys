@@ -11,6 +11,7 @@ import {
 import { parseSort } from '@utils/prisma';
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
+import { DAY_TO_MS } from '@data/global';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -232,8 +233,7 @@ export const invoiceRouter = t.router({
       })
     )
     .mutation(async ({ input }) => {
-      // const due = input.dueDate.getTime() - 1000 * 60 * 60 * 24;
-      const scheduledDate = new Date(Date.now() + 1000 * 20);
+      const scheduledDate = new Date(input.dueDate.getTime() - DAY_TO_MS * 1);
       const requestId = await sendInvoice(input);
       await scheduleReminder({
         ...input,

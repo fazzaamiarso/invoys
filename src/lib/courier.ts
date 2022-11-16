@@ -1,24 +1,26 @@
 import { CourierClient } from '@trycourier/courier';
 import { getErrorMessage } from '@utils/getErrorMessage';
 
+const __IS_PROD__ = process.env.NODE_ENV === 'production';
+
 const INVOICE_TEMPLATE_ID = '357GQPPVGDMYWZJJ3P8EDNR9VAF4';
 const PAYMENT_REMINDER_TEMPLATE_ID = 'B2VWVEF9SAM1QAPX4DC9PHRV8XWF';
-const authToken =
-  process.env.NODE_ENV === 'development'
-    ? process.env.COURIER_AUTH_TEST_TOKEN
-    : process.env.COURIER_AUTH_TOKEN;
+const authToken = __IS_PROD__
+  ? process.env.COURIER_AUTH_TOKEN
+  : process.env.COURIER_AUTH_TEST_TOKEN;
 
 const courierClient = CourierClient({
   authorizationToken: authToken,
 });
 
-type CourierInvoiceDatas = {
+interface CourierBaseData {
   customerName: string;
   invoiceNumber: string;
   invoiceViewUrl: string;
   businessName: string;
   emailTo: string;
-};
+}
+
 /**
  * Send an Invoice with email template defined in Courier Dashboard
  */
@@ -28,11 +30,8 @@ export const sendInvoice = async ({
   invoiceViewUrl,
   businessName,
   emailTo,
-}: CourierInvoiceDatas) => {
-  const recipientEmail =
-    process.env.NODE_ENV === 'production'
-      ? emailTo
-      : process.env.COURIER_TEST_EMAIL;
+}: CourierBaseData) => {
+  const recipientEmail = __IS_PROD__ ? emailTo : process.env.COURIER_TEST_EMAIL;
   try {
     const { requestId } = await courierClient.send({
       message: {
@@ -55,18 +54,13 @@ export const sendInvoice = async ({
   }
 };
 
-type ScheduleReminder = {
+interface ScheduleReminder extends CourierBaseData {
   scheduledDate: Date;
-  emailTo: string;
-  invoiceViewUrl: string;
   invoiceId: string;
-  customerName: string;
-  businessName: string;
-  invoiceNumber: string;
-};
+}
 
 /**
- * Send a reminder 1 day before due date
+ * Send a reminder on scheduled date
  */
 export const scheduleReminder = async ({
   scheduledDate,
@@ -77,18 +71,17 @@ export const scheduleReminder = async ({
   businessName,
   invoiceNumber,
 }: ScheduleReminder) => {
-  const dateISO = scheduledDate.toISOString();
-  const recipientEmail =
-    process.env.NODE_ENV === 'production'
-      ? emailTo
-      : process.env.COURIER_TEST_EMAIL;
+  const delayUntilDate = __IS_PROD__
+    ? scheduledDate
+    : new Date(Date.now() + 1000 * 20);
+  const recipientEmail = __IS_PROD__ ? emailTo : process.env.COURIER_TEST_EMAIL;
 
   try {
     const { runId } = await courierClient.automations.invokeAdHocAutomation({
       automation: {
         cancelation_token: invoiceId,
         steps: [
-          { action: 'delay', until: dateISO },
+          { action: 'delay', until: delayUntilDate.toISOString() },
           {
             action: 'send',
             message: {
