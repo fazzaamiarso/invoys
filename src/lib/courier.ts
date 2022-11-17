@@ -1,5 +1,5 @@
 import { SECOND_TO_MS } from '@data/global';
-import { CourierClient } from '@trycourier/courier';
+import { CourierClient, CourierHttpClientError } from '@trycourier/courier';
 import { getErrorMessage } from '@utils/getErrorMessage';
 
 const __IS_PROD__ = process.env.NODE_ENV === 'production';
@@ -57,9 +57,13 @@ export const sendInvoice = async ({
         },
       },
     });
-    return requestId;
+    return { data: requestId, error: null };
   } catch (error) {
-    throw new Error(getErrorMessage(error));
+    if (error instanceof CourierHttpClientError) {
+      return { data: error.data, error: error.message };
+    } else {
+      return { data: null, error: getErrorMessage(error) };
+    }
   }
 };
 
@@ -104,9 +108,13 @@ export const scheduleReminder = async ({
         ],
       },
     });
-    return runId;
+    return { data: runId, error: null };
   } catch (error) {
-    throw new Error(getErrorMessage(error));
+    if (error instanceof CourierHttpClientError) {
+      return { data: error.data, error: error.message };
+    } else {
+      return { data: null, error: getErrorMessage(error) };
+    }
   }
 };
 
@@ -149,9 +157,13 @@ export const scheduleOverdueNotice = async ({
         ],
       },
     });
-    return runId;
+    return { data: runId, error: null };
   } catch (error) {
-    throw new Error(getErrorMessage(error));
+    if (error instanceof CourierHttpClientError) {
+      return { data: error.data, error: error.message };
+    } else {
+      return { data: null, error: getErrorMessage(error) };
+    }
   }
 };
 
@@ -169,8 +181,12 @@ export const cancelAutomationWorkflow = async ({
         steps: [{ action: 'cancel', cancelation_token }],
       },
     });
-    return runId;
+    return { data: runId, error: null };
   } catch (error) {
-    throw new Error(getErrorMessage(error));
+    if (error instanceof CourierHttpClientError) {
+      return { data: error.data, error: error.message };
+    } else {
+      return { data: null, error: getErrorMessage(error) };
+    }
   }
 };

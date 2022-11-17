@@ -91,6 +91,9 @@ const InvoiceDetail = () => {
     onSuccess() {
       toast.success('Email sent!');
     },
+    onError(error) {
+      toast.error(error.message);
+    },
   });
 
   const confirmDelete = () => {

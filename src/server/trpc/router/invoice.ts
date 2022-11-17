@@ -13,6 +13,7 @@ import { parseSort } from '@utils/prisma';
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
 import { DAY_TO_MS } from '@data/global';
+import { TRPCClientError } from '@trpc/client';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -242,12 +243,14 @@ export const invoiceRouter = t.router({
         dueDate: dayjs(input.dueDate).format('D MMMM YYYY'),
       };
 
-      const requestId = await sendInvoice(invoiceData);
-      await scheduleReminder({
+      const { error: sendError } = await sendInvoice(invoiceData);
+      if (sendError) throw new TRPCClientError(sendError);
+
+      const { error: scheduleError } = await scheduleReminder({
         ...invoiceData,
         scheduledDate,
       });
-      return requestId;
+      if (scheduleError) throw new TRPCClientError(scheduleError);
     }),
   batchUpdateOverdues: t.procedure.mutation(async ({ ctx }) => {
     const now = new Date();
@@ -268,7 +271,7 @@ export const invoiceRouter = t.router({
       });
 
       // schedule an overdue reminder
-      await scheduleOverdueNotice({
+      const { error } = await scheduleOverdueNotice({
         invoiceId: invoice.id,
         invoiceNumber: `#${invoice.invoiceNumber}`,
         customerName: invoice.customer.name,
@@ -276,6 +279,7 @@ export const invoiceRouter = t.router({
         invoiceViewUrl: `${process.env.VERCEL_URL}/invoices/${invoice.id}/preview`,
         dueDate: dayjs(invoice.dueDate).format('D MMMM'),
       });
+      if (error) throw new TRPCClientError(error);
     }
   }),
 });
