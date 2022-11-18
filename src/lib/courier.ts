@@ -9,9 +9,7 @@ const PAYMENT_REMINDER_TEMPLATE_ID = 'B2VWVEF9SAM1QAPX4DC9PHRV8XWF';
 const PAYMENT_OVERDUE_TEMPLATE_ID = '2VEY67G0NZ4KKEKGJ1K7K3JGYD2N';
 
 const testEmail = process.env.COURIER_TEST_EMAIL;
-const authToken = __IS_PROD__
-  ? process.env.COURIER_AUTH_TOKEN
-  : process.env.COURIER_AUTH_TEST_TOKEN;
+const authToken = process.env.COURIER_AUTH_TOKEN;
 
 const courierClient = CourierClient({
   authorizationToken: authToken,
