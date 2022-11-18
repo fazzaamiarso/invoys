@@ -91,6 +91,9 @@ const InvoiceDetail = () => {
     onSuccess() {
       toast.success('Email sent!');
     },
+    onError(error) {
+      toast.error(error.message);
+    },
   });
 
   const confirmDelete = () => {
@@ -108,10 +111,17 @@ const InvoiceDetail = () => {
       customerName: invoiceDetail.customer.name,
       invoiceNumber: `#${invoiceDetail.invoiceNumber}`,
       invoiceViewUrl: `${hostUrl}/invoices/${invoiceDetail.id}/preview`,
-      businessName: settings.businessName,
       emailTo: invoiceDetail.customer.email,
+      invoiceId: invoiceDetail.id,
+      dueDate: invoiceDetail.dueDate,
+      productName: invoiceDetail.name,
     });
   };
+
+  const isSendingEmailDisabled =
+    invoiceDetail?.isDraft ||
+    invoiceDetail?.status === 'PAID' ||
+    invoiceDetail?.status === 'REJECTED';
 
   //TODO: handle case when the screen size is not full
   const handleDownloadPdf = async () => {
@@ -219,7 +229,7 @@ const InvoiceDetail = () => {
                   variant="primary"
                   Icon={PaperAirplaneIcon}
                   onClick={sendInvoiceEmail}
-                  disabled={invoiceDetail.isDraft}
+                  disabled={isSendingEmailDisabled}
                   isLoading={sendEmailMutation.isLoading}
                   loadingContent="Sending...">
                   Send to Email

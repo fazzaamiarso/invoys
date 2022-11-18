@@ -3,10 +3,17 @@ import { protectedProcedure, t } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { InvoiceStatus } from '@prisma/client';
-import { sendInvoice } from '@lib/courier';
+import {
+  cancelAutomationWorkflow,
+  scheduleOverdueNotice,
+  scheduleReminder,
+  sendInvoice,
+} from '@lib/courier';
 import { parseSort } from '@utils/prisma';
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
+import { DAY_TO_MS } from '@data/global';
+import { TRPCClientError } from '@trpc/client';
 
 const orderItemSchema = z.object({
   name: z.string(),
@@ -190,25 +197,21 @@ export const invoiceRouter = t.router({
       z.object({ invoiceId: z.string(), status: z.nativeEnum(InvoiceStatus) })
     )
     .mutation(async ({ ctx, input }) => {
+      const { invoiceId, status } = input;
+
       const updatedStatus = await ctx.prisma.invoice.update({
-        where: { id: input.invoiceId },
-        data: { status: input.status },
+        where: { id: invoiceId },
+        data: { status },
       });
+
+      // cancel payment reminder automation workflow
+      if (status === 'PAID') {
+        await cancelAutomationWorkflow({
+          cancelation_token: `${invoiceId}-reminder`,
+        });
+      }
+
       return updatedStatus;
-    }),
-  sendEmail: protectedProcedure
-    .input(
-      z.object({
-        customerName: z.string(),
-        invoiceNumber: z.string(),
-        invoiceViewUrl: z.string(),
-        businessName: z.string(),
-        emailTo: z.string(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      const requestId = await sendInvoice(input);
-      return requestId;
     }),
   deleteBatch: protectedProcedure
     .input(
@@ -221,4 +224,62 @@ export const invoiceRouter = t.router({
         where: { id: { in: input.invoiceIds } },
       });
     }),
+  sendEmail: protectedProcedure
+    .input(
+      z.object({
+        customerName: z.string(),
+        invoiceNumber: z.string(),
+        invoiceViewUrl: z.string(),
+        emailTo: z.string(),
+        invoiceId: z.string(),
+        productName: z.string(),
+        dueDate: z.date(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const scheduledDate = new Date(input.dueDate.getTime() - DAY_TO_MS * 1);
+      const invoiceData = {
+        ...input,
+        dueDate: dayjs(input.dueDate).format('D MMMM YYYY'),
+      };
+
+      const { error: sendError } = await sendInvoice(invoiceData);
+      if (sendError) throw new TRPCClientError(sendError);
+
+      const { error: scheduleError } = await scheduleReminder({
+        ...invoiceData,
+        scheduledDate,
+      });
+      if (scheduleError) throw new TRPCClientError(scheduleError);
+    }),
+  batchUpdateOverdues: t.procedure.mutation(async ({ ctx }) => {
+    const now = new Date();
+    const overdueInvoices = await ctx.prisma.invoice.findMany({
+      where: {
+        status: 'PENDING',
+        dueDate: {
+          gte: now,
+        },
+      },
+      include: { customer: { select: { name: true, email: true } } },
+    });
+
+    for (const invoice of overdueInvoices) {
+      await ctx.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { status: 'OVERDUE' },
+      });
+
+      // schedule an overdue reminder
+      const { error } = await scheduleOverdueNotice({
+        invoiceId: invoice.id,
+        invoiceNumber: `#${invoice.invoiceNumber}`,
+        customerName: invoice.customer.name,
+        emailTo: invoice.customer.email,
+        invoiceViewUrl: `${process.env.VERCEL_URL}/invoices/${invoice.id}/preview`,
+        dueDate: dayjs(invoice.dueDate).format('D MMMM'),
+      });
+      if (error) throw new TRPCClientError(error);
+    }
+  }),
 });
