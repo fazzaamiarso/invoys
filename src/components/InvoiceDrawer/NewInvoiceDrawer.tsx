@@ -3,7 +3,7 @@ import Drawer from '@components/Drawer';
 import TextArea from '@components/Form/TextArea';
 import TextInput from '@components/Form/TextInput';
 import OrderTable from './OrderTable';
-import { InferProcedures, trpc } from '@utils/trpc';
+import { type InferProceduresInput, trpc } from '@utils/trpc';
 import { atom, useAtom } from 'jotai';
 import { useRouter } from 'next/router';
 import {
@@ -22,7 +22,7 @@ import { calculateOrderAmount } from '@utils/invoice';
 import { OrderItem } from '@prisma/client';
 import { dayjs } from '@lib/dayjs';
 
-type NewInvoiceInput = InferProcedures['invoice']['create']['input'];
+type NewInvoiceInput = InferProceduresInput['invoice']['create'];
 
 export const invoiceDrawerStateAtom = atom(false);
 

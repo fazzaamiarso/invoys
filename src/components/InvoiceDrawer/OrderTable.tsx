@@ -8,7 +8,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
-import { InferProcedures } from '@utils/trpc';
+import { type InferProceduresInput } from '@utils/trpc';
 import clsx from 'clsx';
 import {
   Control,
@@ -19,7 +19,7 @@ import {
 import s from './tables.module.css';
 
 export type InvoiceOrderInput =
-  InferProcedures['invoice']['create']['input']['orders'];
+  InferProceduresInput['invoice']['create']['orders'];
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

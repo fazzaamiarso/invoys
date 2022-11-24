@@ -1,10 +1,10 @@
 import { dayjs } from '@lib/dayjs';
 import { calculateOrderAmount } from '@utils/invoice';
-import { InferProcedures } from '@utils/trpc';
+import { type InferProceduresOutput } from '@utils/trpc';
 import { forwardRef } from 'react';
 
-type InvoiceDetailOutput = InferProcedures['invoice']['getSingle']['output'];
-type SettingsOutput = InferProcedures['setting']['get']['output'];
+type InvoiceDetailOutput = InferProceduresOutput['invoice']['getSingle'];
+type SettingsOutput = InferProceduresOutput['setting']['get'];
 
 type Props = {
   invoiceDetail: NonNullable<InvoiceDetailOutput>;
