@@ -3,7 +3,11 @@ import Drawer from '@components/Drawer';
 import TextArea from '@components/Form/TextArea';
 import TextInput from '@components/Form/TextInput';
 import OrderTable from './OrderTable';
-import { InferProcedures, trpc } from '@utils/trpc';
+import {
+  type InferProceduresInput,
+  type InferProceduresOutput,
+  trpc,
+} from '@utils/trpc';
 import dayjs from 'dayjs';
 import {
   Control,
@@ -21,9 +25,9 @@ import clsx from 'clsx';
 import { Fragment } from 'react';
 
 export type InvoiceGetSingleOutput =
-  InferProcedures['invoice']['getSingle']['output'];
+  InferProceduresOutput['invoice']['getSingle'];
 
-type EditInvoiceInput = InferProcedures['invoice']['edit']['input'];
+type EditInvoiceInput = InferProceduresInput['invoice']['edit'];
 
 export const EditInvoiceDrawer = ({
   invoiceDetails,

@@ -2,7 +2,7 @@
 import { httpBatchLink, loggerLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/trpc/router';
-import type { GetInferenceHelpers } from '@trpc/server';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import superjson from 'superjson';
 import { QueryCache } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -46,4 +46,5 @@ export const trpc = createTRPCNext<AppRouter>({
   ssr: false,
 });
 
-export type InferProcedures = GetInferenceHelpers<AppRouter>;
+export type InferProceduresOutput = inferRouterOutputs<AppRouter>;
+export type InferProceduresInput = inferRouterInputs<AppRouter>;

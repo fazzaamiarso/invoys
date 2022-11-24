@@ -1,11 +1,11 @@
-import { InferProcedures, trpc } from '@utils/trpc';
+import { InferProceduresOutput, trpc } from '@utils/trpc';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Button from '../Button';
 import Drawer from '../Drawer';
 import TextInput from '../Form/TextInput';
 
 export type CustomerDetailOutput = NonNullable<
-  InferProcedures['customer']['getSingle']['output']
+  InferProceduresOutput['customer']['getSingle']
 >;
 
 type Props = {

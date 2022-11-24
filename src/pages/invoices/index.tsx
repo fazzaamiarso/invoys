@@ -10,7 +10,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { fuzzyFilter } from '@utils/tableHelper';
-import { InferProcedures, trpc } from '@utils/trpc';
+import { type InferProceduresOutput, trpc } from '@utils/trpc';
 import { dayjs } from '@lib/dayjs';
 import Link from 'next/link';
 import {
@@ -55,7 +55,7 @@ import toast from 'react-hot-toast';
 import IndeterminateCheckbox from '@components/Table/IndeterminateCheckbox';
 
 type InvoiceGetAllOutput =
-  InferProcedures['invoice']['infiniteInvoices']['output']['invoices'];
+  InferProceduresOutput['invoice']['infiniteInvoices']['invoices'];
 
 type TableSortValue = { [colId: string]: 'asc' | 'desc' } | undefined;
 

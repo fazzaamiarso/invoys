@@ -2,7 +2,11 @@ import type { NextPage } from 'next';
 import Layout from '@components/Layout';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Button from '@components/Button';
-import { InferProcedures, trpc } from '@utils/trpc';
+import {
+  type InferProceduresInput,
+  type InferProceduresOutput,
+  trpc,
+} from '@utils/trpc';
 import TextInput from '@components/Form/TextInput';
 import { Fragment, useEffect } from 'react';
 import { PlusIcon } from '@heroicons/react/24/solid';
@@ -12,8 +16,8 @@ import { twGradients } from 'data/gradients';
 import { signIn, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 
-type SettingsUpdateInput = InferProcedures['setting']['update']['input'];
-type SettingsOutput = InferProcedures['setting']['get']['output'];
+type SettingsUpdateInput = InferProceduresInput['setting']['update'];
+type SettingsOutput = InferProceduresOutput['setting']['get'];
 
 const Settings: NextPage = () => {
   const utils = trpc.useContext();
