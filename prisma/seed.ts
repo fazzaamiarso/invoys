@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 const prisma = new PrismaClient();
 
 const getRandomDigit = (min: number, max: number) => {
-  return faker.datatype.number({ max, min });
+  return faker.number.int({ max, min });
 };
 
 const createRandomInvoices = (
@@ -12,7 +12,7 @@ const createRandomInvoices = (
   index: number
 ): Prisma.InvoiceCreateManyCustomerInput => {
   return {
-    name: faker.name.jobArea(),
+    name: faker.commerce.product(),
     issuedOn: faker.date.recent(),
     dueDate: faker.date.future(),
     status: faker.helpers.arrayElement(Object.values(InvoiceStatus)),
@@ -23,23 +23,23 @@ const createRandomInvoices = (
 
 const createRandomClient = (): Prisma.CustomerCreateInput => {
   const companyName = faker.company.name();
-  const prefix = faker.helpers.unique(faker.random.alpha, [
+  const prefix = faker.helpers.unique(faker.string.alpha, [
     {
       casing: 'upper',
-      count: 3,
+      length: 3,
     },
   ]);
   return {
-    id: faker.datatype.uuid(),
+    id: faker.string.uuid(),
     name: companyName,
-    email: faker.helpers.unique(faker.internet.email, [companyName]),
+    email: faker.internet.exampleEmail(),
     phoneNumber: faker.phone.number(),
-    address: faker.address.streetAddress(true),
+    address: faker.location.streetAddress(true),
     invoicePrefix: prefix,
     invoices: {
       createMany: {
-        data: faker.datatype
-          .array(2)
+        data: faker.helpers
+          .uniqueArray(['0'], 2)
           .map((_, idx) => createRandomInvoices(prefix, idx + 1)),
       },
     },
