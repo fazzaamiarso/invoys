@@ -48,8 +48,8 @@ describe('Clients', () => {
       .contains(/add client/gi)
       .click();
 
-    const firstName = faker.name.firstName();
-    const lastName = faker.name.lastName();
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
     const fullName = `${firstName} ${lastName}`;
     const email = faker.internet.email(firstName, lastName);
     const phoneNumber = faker.phone.number('###-###-###');
@@ -75,10 +75,13 @@ describe('Clients', () => {
 
     cy.get("div[data-cy='button-group']").contains('button', /edit/i).click();
 
-    const newFirstName = faker.name.firstName();
-    const newLastName = faker.name.lastName();
+    const newFirstName = faker.person.firstName();
+    const newLastName = faker.person.lastName();
     const newFullName = `${newFirstName} ${newLastName}`;
-    const newEmail = faker.internet.email(newFirstName, newLastName);
+    const newEmail = faker.internet.email({
+      firstName: newFirstName,
+      lastName: newLastName,
+    });
     cy.selById('input', 'name').clear().type(newFullName);
     cy.selById('input', 'email').clear().type(newEmail);
 
@@ -113,10 +116,10 @@ describe('Invoices', () => {
       .findByRole('button', { name: /new invoice/gi })
       .click();
 
-    const projectName = faker.name.jobArea();
+    const projectName = faker.person.jobArea();
     const productName = faker.commerce.product();
     const price = faker.commerce.price();
-    const quantity = faker.random.numeric(3);
+    const quantity = faker.number.int(3).toString();
     const notes = faker.lorem.sentences();
     const dueDate = new Date(faker.date.future());
 
@@ -152,10 +155,10 @@ describe('Invoices', () => {
       .contains(/edit/i)
       .click();
 
-    const newProjectName = faker.name.jobArea();
+    const newProjectName = faker.person.jobArea();
     const newOrderName = faker.commerce.product();
     const newPrice = faker.commerce.price();
-    const newQuantity = faker.random.numeric(3);
+    const newQuantity = faker.number.int(3).toString();
     cy.findByRole('dialog')
       .as('dialog')
       .within(() => {
@@ -253,4 +256,3 @@ describe('Invoices', () => {
     cy.findByRole('button', { name: /download pdf/i });
   });
 });
-

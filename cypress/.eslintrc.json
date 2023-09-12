@@ -3,5 +3,6 @@
   "env": {
     "cypress/globals": true
   },
-  "extends": ["plugin:cypress/recommended"]
+  "extends": ["plugin:cypress/recommended"],
+  "files": ["./**/*.{ts,tsx}"]
 }

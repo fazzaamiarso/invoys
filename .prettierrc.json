@@ -4,5 +4,7 @@
   "arrowParens": "avoid",
   "singleQuote": true,
   "bracketSameLine": true,
-  "semi": true
+  "semi": true,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["clsx"]
 }

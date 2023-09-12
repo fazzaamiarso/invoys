@@ -63,7 +63,7 @@ const InvoiceDetail = () => {
     keepPreviousData: true,
     staleTime: Infinity,
   });
-  const { data: invoiceDetail, status } = trpc.invoice.getSingle.useQuery(
+  const { data: invoiceDetail, isLoading } = trpc.invoice.getSingle.useQuery(
     {
       invoiceId: invoiceId as string,
     },
@@ -131,7 +131,7 @@ const InvoiceDetail = () => {
 
   return (
     <Layout title={invoiceDetail?.invoiceNumber}>
-      {status === 'loading' && (
+      {isLoading && (
         <div className="w-full flex items-center justify-center pt-40">
           <Spinner />
         </div>
