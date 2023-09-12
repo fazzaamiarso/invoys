@@ -3,13 +3,13 @@
 
 generator client {
     provider        = "prisma-client-js"
-    previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
+    previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
-    provider             = "mysql"
-    url                  = env("DATABASE_URL")
-    referentialIntegrity = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 enum InvoiceStatus {
@@ -44,6 +44,7 @@ model Invoice {
     customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
     customerId String
 
+    @@index([customerId])
     @@fulltext([name, invoiceNumber])
 }
 
@@ -56,6 +57,8 @@ model OrderItem {
 
     invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
     invoiceId String
+
+    @@index([invoiceId])
 }
 
 model Customer {
@@ -87,7 +90,9 @@ model Email {
     isPending  Boolean  @default(false)
     name       String   @unique
     Settings   Settings @relation(fields: [settingsId], references: [id])
-    settingsId String   
+    settingsId String
+
+    @@index([settingsId])
 }
 
 //NEXT AUTH STUFF
@@ -108,6 +113,7 @@ model Account {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -116,6 +122,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {

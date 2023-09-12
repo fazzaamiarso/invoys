@@ -4,12 +4,12 @@ import v from './variant.module.css';
 import Link, { LinkProps } from 'next/link';
 import { LoadingSpinner } from '@components/Spinner';
 
-type HeroIconProps = (
-  props: React.ComponentProps<'svg'> & {
+type HeroIconProps = React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<React.SVGProps<SVGSVGElement>> & {
     title?: string;
     titleId?: string;
-  }
-) => JSX.Element;
+  } & React.RefAttributes<SVGSVGElement>
+>;
 
 type CommonProps = {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
