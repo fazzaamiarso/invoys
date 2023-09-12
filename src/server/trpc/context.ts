@@ -2,19 +2,19 @@
 import * as trpc from '@trpc/server';
 import * as trpcNext from '@trpc/server/adapters/next';
 import { prisma } from '@lib/prisma/client';
-import { unstable_getServerSession as getSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
  */
-type CreateContextOptions = Record<string, never>;
+// type CreateContextOptions = Record<string, never>;
 
 /** Use this helper for:
  *  - testing, where we dont have to Mock Next.js' req/res
  *  - trpc's `createSSGHelpers` where we don't have req/res
  */
-export const createContextInner = async (opts: CreateContextOptions) => {
+export const createContextInner = async () => {
   return {
     prisma,
   };
@@ -29,9 +29,9 @@ export const createContext = async (
 ) => {
   const req = opts.req;
   const res = opts.res;
-  const session = await getSession(req, res, authOptions);
+  const session = await getServerSession(req, res, authOptions);
 
-  const innerCtx = await createContextInner({});
+  const innerCtx = await createContextInner();
   return { ...innerCtx, session };
 };
 

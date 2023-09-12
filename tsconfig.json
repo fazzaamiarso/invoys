@@ -27,6 +27,13 @@
       "@data/*": ["data/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.mjs",
+    "prettierrc.json"
+  ],
   "exclude": ["node_modules", "./cypress.config.ts", "cypress"]
 }

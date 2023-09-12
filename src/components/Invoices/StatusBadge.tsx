@@ -7,7 +7,7 @@ const StatusBadge = ({ status }: { status: InvoiceStatus }) => {
     <div
       data-cy="invoice-status"
       className={clsx(
-        'text-xs rounded-md py-2 w-max font-semibold',
+        'w-max rounded-md py-2 text-xs font-semibold',
         status === 'PAID' && 'bg-[#dcfde7] text-[#176434]',
         status === 'PENDING' && 'bg-[#fff9c2] text-[#854d0e]',
         status === 'OVERDUE' && 'bg-[#fde6f2] text-[#981a1a]',

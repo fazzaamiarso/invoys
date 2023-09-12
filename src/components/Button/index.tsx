@@ -1,11 +1,16 @@
-import React, { forwardRef, PropsWithChildren, ReactNode } from 'react';
+import React, {
+  forwardRef,
+  PropsWithChildren,
+  ReactNode,
+  PropsWithoutRef,
+} from 'react';
 import clsx from 'clsx';
 import v from './variant.module.css';
 import Link, { LinkProps } from 'next/link';
 import { LoadingSpinner } from '@components/Spinner';
 
 type HeroIconProps = React.ForwardRefExoticComponent<
-  React.PropsWithoutRef<React.SVGProps<SVGSVGElement>> & {
+  PropsWithoutRef<React.SVGProps<SVGSVGElement>> & {
     title?: string;
     titleId?: string;
   } & React.RefAttributes<SVGSVGElement>
@@ -41,7 +46,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
           href={props.href}
           onClick={props.onClick}
           className={clsx(
-            'px-4 py-2 rounded-md font-semibold text-sm',
+            'rounded-md px-4 py-2 text-sm font-semibold',
             props.Icon ? 'flex items-center gap-2' : '',
             props.variant ? v[props.variant] : v.primary,
             props.className
@@ -72,7 +77,7 @@ const Button = forwardRef<RefEl, PropsWithChildren<ButtonProps | AnchorProps>>(
         onClick={onClick}
         disabled={disabled}
         className={clsx(
-          'px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2',
+          'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold',
           variant ? v[variant] : v.primary,
           className
         )}>
