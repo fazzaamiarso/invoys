@@ -6,9 +6,10 @@ I am Happy you're here!
 
 Invoys is an Open source and self-hostable invoice management app built with Next.js. Made to be free of cost.
 
-Want to know more about the motivation of building Invoys? Read [my blog post on Invoys](https://fazzaamiarso.me/projects/invoys).
+Want to know more about the motivation of building Invoys? Read [my blog post on Invoys](https://dev.to/fazzaamiarso/how-to-send-invoice-and-add-payment-reminder-in-nextjs-with-courier-api-2ejd).
 
 ## Table of Contents
+
 - [Features](#features)
 - [Try it out](#try-the-demo-app)
 - [Project Gallery](#project-gallery)
@@ -32,7 +33,7 @@ Want to know more about the motivation of building Invoys? Read [my blog post on
 
 > For demo app, as it's a public dashboard, the Database will be resetted once in a while.
 
-1. Go to [https://invoys.fzworld.xyz](https://invoys.fzworld.xyz)
+1. Go to [https://invoys.fzworld.xyz](https://invoys-fazzaamiarso.vercel.app/)
 2. Use any email to login, but must be able to receive verification email (recommended to use [temp mail](https://temp-mail.org/en/))
 3. You are logged-in
 
@@ -40,7 +41,7 @@ Want to know more about the motivation of building Invoys? Read [my blog post on
 
 |                                           |                                           |
 | :---------------------------------------: | :---------------------------------------: |
-| ![Imgur](https://i.imgur.com/rpDor0M.gif) |  ![Imgur](https://i.imgur.com/ujWxXj5.png)|
+| ![Imgur](https://i.imgur.com/rpDor0M.gif) | ![Imgur](https://i.imgur.com/ujWxXj5.png) |
 | ![Imgur](https://i.imgur.com/KehNO4f.png) | ![Imgur](https://i.imgur.com/x4Xxw5w.png) |
 | ![Imgur](https://i.imgur.com/1CZnXF3.png) | ![Imgur](https://i.imgur.com/x1TjQOP.png) |
 | ![Imgur](https://i.imgur.com/fVusKr7.png) |
