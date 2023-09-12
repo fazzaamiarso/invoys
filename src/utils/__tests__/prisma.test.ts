@@ -4,9 +4,9 @@ import { test, expect } from 'vitest';
 
 describe('parseSort', () => {
   test('parse correctly', () => {
-    const city = faker.address.cityName();
-    const name = faker.name.firstName();
-    const zipCode = faker.address.zipCode();
+    const city = faker.location.city();
+    const name = faker.person.firstName();
+    const zipCode = faker.location.zipCode();
 
     expect(parseSort({ city })).toStrictEqual({ city });
     expect(parseSort({ customer_name: name })).toStrictEqual({
