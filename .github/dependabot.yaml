@@ -11,7 +11,8 @@ updates:
       interval: 'daily'
     groups:
       versioning:
-        patterns: '*'
+        patterns: 
+          - '*'
         update-types:
           - 'minor'
           - 'patch'
