@@ -91,7 +91,7 @@ jobs:
         run: docker-compose -f docker-compose.yml up -d
 
       - name: Cypress run
-        uses: cypress-io/github-action@v4.2.0
+        uses: cypress-io/github-action@v6.5.0
         with:
           build: pnpm run build:ci
           start: pnpm start:ci
