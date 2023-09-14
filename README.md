@@ -8,6 +8,8 @@ Invoys is an Open source and self-hostable invoice management app built with Nex
 
 Want to know more about the motivation of building Invoys? Read [my blog post on Invoys](https://dev.to/fazzaamiarso/how-to-send-invoice-and-add-payment-reminder-in-nextjs-with-courier-api-2ejd).
 
+> Invoys has been selected as a winner for **Courier Hacks:Opens Source Hackathon**. See on [Devpost](https://devpost.com/software/invoys)
+
 ## Table of Contents
 
 - [Features](#features)
@@ -33,7 +35,7 @@ Want to know more about the motivation of building Invoys? Read [my blog post on
 
 > For demo app, as it's a public dashboard, the Database will be resetted once in a while.
 
-1. Go to [https://invoys.fzworld.xyz](https://invoys-fazzaamiarso.vercel.app/)
+1. Go to [https://invoys-fazzaamiarso.vercel.app/](https://invoys-fazzaamiarso.vercel.app/)
 2. Use any email to login, but must be able to receive verification email (recommended to use [temp mail](https://temp-mail.org/en/))
 3. You are logged-in
 
