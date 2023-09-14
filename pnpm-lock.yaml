@@ -90,8 +90,8 @@ dependencies:
     specifier: ^18.2.0
     version: 18.2.0
   react-chartjs-2:
-    specifier: ^4.3.1
-    version: 4.3.1(chart.js@3.9.1)(react@18.2.0)
+    specifier: ^5.0.0
+    version: 5.0.0(chart.js@3.9.1)(react@18.2.0)
   react-csv:
     specifier: ^2.2.2
     version: 2.2.2
@@ -6038,10 +6038,10 @@ packages:
       strip-json-comments: 2.0.1
     dev: false
 
-  /react-chartjs-2@4.3.1(chart.js@3.9.1)(react@18.2.0):
-    resolution: {integrity: sha512-5i3mjP6tU7QSn0jvb8I4hudTzHJqS8l00ORJnVwI2sYu0ihpj83Lv2YzfxunfxTZkscKvZu2F2w9LkwNBhj6xA==}
+  /react-chartjs-2@5.0.0(chart.js@3.9.1)(react@18.2.0):
+    resolution: {integrity: sha512-cA9dd1P4hHOfb4lpxaT6ghmfk3ZW0JgL94BpEf5sTTWFeeykNw3HgddcnTjFOikva9tLSnYTPE2b43cAUKZx5Q==}
     peerDependencies:
-      chart.js: ^3.5.0
+      chart.js: ^3.5.0 || ^4.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       chart.js: 3.9.1
