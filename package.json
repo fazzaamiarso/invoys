@@ -43,7 +43,7 @@
     "@trpc/next": "^10.38.3",
     "@trpc/react-query": "^10.38.3",
     "@trpc/server": "^10.38.3",
-    "@trycourier/courier": "^4.9.0",
+    "@trycourier/courier": "^5.1.0",
     "chart.js": "^3.9.1",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.9",
