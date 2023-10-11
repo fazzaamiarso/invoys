@@ -48,8 +48,8 @@ dependencies:
     specifier: ^10.38.3
     version: 10.38.3
   '@trycourier/courier':
-    specifier: ^4.9.0
-    version: 4.9.0
+    specifier: ^5.5.0
+    version: 5.5.0
   chart.js:
     specifier: ^3.9.1
     version: 3.9.1
@@ -1425,8 +1425,8 @@ packages:
     resolution: {integrity: sha512-9s8/kwo2IDB5hwB2SKZZrfevRhdb1f9fdXtIYd3lbQuf2jQaC/LyQuHaIQjDQoUx9updBfsHXcFFPiCP1DL6pg==}
     dev: false
 
-  /@trycourier/courier@4.9.0:
-    resolution: {integrity: sha512-bWbKvGCJrEKk7YiFDw71gjgNUdsCH8Cr1KS/ro+p3R7Wki0J0T9oK4vFRVwpUPJlbTcew/ponLMhQ45T4Vkezw==}
+  /@trycourier/courier@5.5.0:
+    resolution: {integrity: sha512-tj9Nkt4S59nt8DzO+XGgBEF7YvF+sXc2A/YZQW/o9hH43f3XbCbM8yz7hiDg3iBmcbLPZPRlIotgHguyxzBvWA==}
     dependencies:
       cross-fetch: 3.1.8
     transitivePeerDependencies:
